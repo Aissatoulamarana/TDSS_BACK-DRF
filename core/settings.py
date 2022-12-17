@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'apps.authentication', # Enable the authentication app
     'apps.home',  # Enable the inner home (home)
+    'apps.paiement',
 ]
 
 MIDDLEWARE = [
@@ -45,8 +46,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'core.urls'
-LOGIN_REDIRECT_URL = "apps/home"  # Route defined in home/urls.py
-LOGOUT_REDIRECT_URL = "apps/home"  # Route defined in home/urls.py
+LOGIN_REDIRECT_URL = "apps/paiement"  # Route defined in home/urls.py
+LOGOUT_REDIRECT_URL = "apps/paiement"  # Route defined in home/urls.py
 TEMPLATE_DIR = os.path.join(CORE_DIR, "apps/templates")  # ROOT dir for templates
 
 TEMPLATES = [

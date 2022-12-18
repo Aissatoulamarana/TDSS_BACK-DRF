@@ -7,6 +7,7 @@ Copyright (c) 2022 - OD
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from .forms import LoginForm, SignUpForm
+from .models import CustomUser, ProfileType, Profile
 
 
 def login_view(request):
@@ -29,6 +30,25 @@ def login_view(request):
             msg = 'Error validating the form'
 
     return render(request, "accounts/login.html", {"form": form, "msg": msg})
+
+
+def users_view(request):
+    users = CustomUser.objects.all()
+
+    return render(request, "accounts/users.html", {
+        'users': users,
+        'segment': 'administration'
+    })
+
+
+def profiles_view(request):
+    profiles = Profile.objects.all()
+
+    return render(request, "accounts/profiles.html", {
+        #  To edit
+        'profiles': profiles,
+        'segment': 'administration'
+    })
 
 
 def register_user(request):

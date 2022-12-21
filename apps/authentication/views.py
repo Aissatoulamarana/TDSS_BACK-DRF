@@ -6,7 +6,7 @@ Copyright (c) 2022 - OD
 # Create your views here.
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
-from .forms import LoginForm, SignUpForm
+from .forms import LoginForm, SignUpForm, ProfileForm, CustomUserForm
 from .models import CustomUser, ProfileType, Profile
 
 
@@ -43,10 +43,31 @@ def users_view(request):
 
 def profiles_view(request):
     profiles = Profile.objects.all()
+    form = ProfileForm()
+    userform = CustomUserForm()
 
     return render(request, "accounts/profiles.html", {
         #  To edit
+        'form': form,
+        'userform': userform,
         'profiles': profiles,
+        'segment': 'administration'
+    })
+
+
+def add_profile_view(request):
+
+    if request.method == "POST":
+        
+        print("Form submitted successfully!")
+        print(request.POST["name"], request.FILES["picture"])
+
+        
+
+    return render(request, "accounts/add-profile.html", {
+        #  To edit
+        'profileform': ProfileForm(),
+        'userform': CustomUserForm(),
         'segment': 'administration'
     })
 

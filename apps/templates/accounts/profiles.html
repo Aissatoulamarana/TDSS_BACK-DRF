@@ -45,7 +45,7 @@
               <!-- Card header -->
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des profils du système</em>
-                  <a href="#" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
+                  <a href="{% url 'authentication:add_profile' %}" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
                 </h3>
               </div>
               <!-- Light table -->
@@ -101,10 +101,7 @@
                           </div>
                         </td>
                       </tr>
-                    {% empty %}
-                      <tr>
-                        <p>- Aucun profil enregistré.</p>
-                      </tr>
+                    
                     {% endfor %}
                     
                   </tbody>

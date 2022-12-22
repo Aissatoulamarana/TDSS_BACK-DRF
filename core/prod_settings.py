@@ -16,6 +16,8 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-#4$gu+*w)!tnyja2bb-#1
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
+
+# Regarding security redirection
 SECURE_SSL_REDIRECT = False
 
 # load production server from .env

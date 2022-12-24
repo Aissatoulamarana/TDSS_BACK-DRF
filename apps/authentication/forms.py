@@ -28,6 +28,21 @@ class LoginForm(forms.Form):
         ))
 
 
+class ResetPwdForm(forms.Form):
+    old_password = forms.CharField(widget=forms.PasswordInput(attrs={
+        'class': "form-control",
+        'placeholder': "Ancien"
+    }))
+    new_password = forms.CharField(widget=forms.PasswordInput(attrs={
+        'class': "form-control",
+        'placeholder': "Nouveau"
+    }))
+    confirmation_pwd = forms.CharField(widget=forms.PasswordInput(attrs={
+        'class': "form-control",
+        'placeholder': "Confirmation"
+    }))
+
+
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile

@@ -68,15 +68,15 @@
                               <!-- <img alt="Image placeholder" src="/static/assets/img/theme/bootstrap.jpg"> -->
                             </a>
                             <div class="media-body">
-                              <span class="name mb-0 text-sm"> {{profil.uuid}} </span>
+                              <span class="name mb-0 text-sm"> {{profile.uuid}} </span>
                             </div>
                           </div>
                         </th>
                         <td class="nom">
-                          {{profil.name}}
+                          {{profile.name}}
                         </td>
                         <td>
-                            {% if profil.status %} 
+                            {% if profile.status == "ON" %} 
                                 <span class="badge badge-dot mr-4">
                                 <i class="bg-success"></i>
                                 <span class="statut"> Actif </span>

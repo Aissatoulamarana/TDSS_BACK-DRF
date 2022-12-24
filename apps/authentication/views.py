@@ -5,7 +5,7 @@ Copyright (c) 2022 - OD
 
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
-from .forms import LoginForm, SignUpForm, ProfileForm, CustomUserForm
+from .forms import LoginForm, SignUpForm, ProfileForm, CustomUserForm, ResetPwdForm
 from .models import CustomUser, ProfileType, Profile
 import secrets, string
 from django.db import IntegrityError
@@ -26,13 +26,45 @@ def login_view(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect("/")
+                if user.reset_pwd == True:
+                    return redirect("authentication:reset_password")
+                else:
+                    return redirect("/")
             else:
-                msg = 'Invalid credentials'
+                msg = 'Email/Mot de passe incorrect.'
         else:
-            msg = 'Error validating the form'
+            msg = 'Formulaire invalid soumit.'
 
     return render(request, "accounts/login.html", {"form": form, "msg": msg})
+
+
+def reset_password_view(request):
+    msg = None
+    form = ResetPwdForm(request.POST or None)
+
+    if request.method == "POST":
+        
+        if form.is_valid():
+            oldpwd = form.cleaned_data.get("old_password")
+            newpwd = form.cleaned_data.get("new_password")
+            confpwd = form.cleaned_data.get("confirmation_pwd")
+            if newpwd != confpwd:
+                msg = "Les mots de passe sont différents."
+                
+            else:
+                user = authenticate(username=request.user.username, password=oldpwd)
+                if user is not None:
+                    user.set_password(newpwd)
+                    user.reset_pwd = False
+                    user.save()
+                    return redirect("/")
+                else:
+                    msg = "Ancien mot de passe incorrect."
+
+        else:
+            msg = "Formulaire invalid soumit."
+    
+    return render(request, "accounts/reset-password.html", {"form": form, "msg": msg})
 
 
 def users_view(request):
@@ -40,7 +72,7 @@ def users_view(request):
 
     return render(request, "accounts/users.html", {
         'users': users,
-        'segment': 'administration'
+        'segment': "administration"
     })
 
 
@@ -79,7 +111,7 @@ def add_profile_view(request):
                 "Creation de nouveau compte",
                 f"Bonjour, un compe a été créer pour vous sur le site de paiement. MDP: {random_pwd}",
                 "noreply.odiallo@gmail.com",
-                ["omatest80@gmail.com"],
+                [new_user.email],
                 fail_silently=False
             )
         except IntegrityError:
@@ -100,7 +132,7 @@ def add_profile_view(request):
         new_profile.created_by = request.user
         new_profile.save()
 
-        print("Form submitted successfully!")
+        return redirect("authentication:profiles")
         
 
         

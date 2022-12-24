@@ -4,16 +4,17 @@ Copyright (c) 2022 - OD
 """
 
 from django.urls import path
-from .views import login_view, register_user, users_view, profiles_view, add_profile_view
+from . import views
 from django.contrib.auth.views import LogoutView
 
 app_name = 'authentication'
 
 urlpatterns = [
-    path('login/', login_view, name="login"),
-    path('register/', register_user, name="register"),
+    path('login/', views.login_view, name="login"),
+    path('reset_password/', views.reset_password_view, name="reset_password"),
+    path('register/', views.register_user, name="register"),
     path("logout/", LogoutView.as_view(), name="logout"),
-    path("users/", users_view, name="users"),
-    path("profiles/", profiles_view, name="profiles"),
-    path("profiles/add/", add_profile_view, name="add_profile")
+    path("users/", views.users_view, name="users"),
+    path("profiles/", views.profiles_view, name="profiles"),
+    path("profiles/add/", views.add_profile_view, name="add_profile")
 ]

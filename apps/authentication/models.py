@@ -13,6 +13,7 @@ class CustomUser(AbstractUser):
     email = models.EmailField(verbose_name="email address", max_length=100, unique=True)
     phone = models.IntegerField(unique=True)
     job = models.TextField(max_length=50, blank=True, null=True, verbose_name="poste")
+    reset_pwd = models.BooleanField(default=True)
 
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
@@ -48,5 +49,5 @@ class Profile(models.Model):
     modified_on = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.uid} | {self.type}"
+        return f"{self.uuid} | {self.type}"
 

@@ -31,14 +31,13 @@ class LoginForm(forms.Form):
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ('name', 'type', 'description', 'location', 'contact', 'account', 'status', 'picture')
-        # Omitted fields: uuid, created_by, created_on, modified_on
+        fields = ('name', 'type', 'description', 'location', 'contact', 'status', 'picture')
+        # Omitted fields: uuid, account, created_by, created_on, modified_on
         widgets = {
             'name': TextInput(attrs={'class': "form-control", 'placeholder': "Nom du profil", 'autofocus': "True"}),
             'type': Select(attrs={'class': "form-control", 'placeholder': "Type du profil"}),
             'description': Textarea(attrs={'rows':3, 'placeholder': "Description du profil...", 'class': "form-control" }),
             'location': TextInput(attrs={'class': "form-control", 'placeholder': "Emplacement"}),
-            'account': Select(attrs={'class': "form-control"}),
             'contact': NumberInput(attrs={'class': "form-control", 'placeholder': "N° de contact", 'type': "number", 'min': 0}),
             'picture': ClearableFileInput(attrs={'class': "form-control"})
         }

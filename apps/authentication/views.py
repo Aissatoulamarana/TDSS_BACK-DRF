@@ -3,12 +3,15 @@
 Copyright (c) 2022 - OD
 """
 
-# Create your views here.
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from .forms import LoginForm, SignUpForm, ProfileForm, CustomUserForm
 from .models import CustomUser, ProfileType, Profile
+import secrets, string
+from django.db import IntegrityError
+from django.core.mail import send_mail
 
+# Create your views here.
 
 def login_view(request):
     form = LoginForm(request.POST or None)
@@ -51,25 +54,58 @@ def profiles_view(request):
         'form': form,
         'userform': userform,
         'profiles': profiles,
-        'segment': 'administration'
+        'segment': "administration"
     })
 
 
 def add_profile_view(request):
+    context_empty = {'profileform': ProfileForm(), 'userform': CustomUserForm(), 'segment': 'administration'}
 
     if request.method == "POST":
+        # user_form = CustomUserForm(post_data['first_name'], post_data['last_name'], post_data['email'], 
+        #                             post_data['phone'], post_data['job'])
+        first = request.POST["first_name"]
+        last = request.POST["last_name"]
+        email = request.POST["email"]
+        phone = request.POST["phone"]
+        job = request.POST["job"]
+        random_pwd = ''.join((secrets.choice(string.ascii_letters + string.digits + string.punctuation) for i in range(8)))
+        # Attemp to create a new user for the profile
+        try:
+            new_user = CustomUser.objects.create_user(email, email, random_pwd, first_name=first, last_name=last, phone=phone, job=job)
+            new_user.save()
+
+            send_mail(
+                "Creation de nouveau compte",
+                f"Bonjour, un compe a été créer pour vous sur le site de paiement. MDP: {random_pwd}",
+                "noreply.odiallo@gmail.com",
+                ["omatest80@gmail.com"],
+                fail_silently=False
+            )
+        except IntegrityError:
+            context = context_empty
+            context['ErrorMessage'] = "Cet email existe déjà. "
+            return render(request, "accounts/add-profile.html", context)
         
+        # profileform = ProfileForm(request.POST, request.FILES)
+        name = request.POST["name"]
+        type = ProfileType.objects.get(pk=request.POST["type"])
+        descrip = request.POST["description"]
+        location = request.POST["location"]
+        contact = request.POST["contact"]
+        picture = request.FILES["picture"]
+
+        new_profile = Profile(name=name, type=type, description=descrip, location=location, contact=contact, picture=picture)
+        new_profile.account = new_user
+        new_profile.created_by = request.user
+        new_profile.save()
+
         print("Form submitted successfully!")
-        print(request.POST["name"], request.FILES["picture"])
+        
 
         
 
-    return render(request, "accounts/add-profile.html", {
-        #  To edit
-        'profileform': ProfileForm(),
-        'userform': CustomUserForm(),
-        'segment': 'administration'
-    })
+    return render(request, "accounts/add-profile.html", context_empty)
 
 
 def register_user(request):

@@ -50,6 +50,9 @@
                     </h3>
                   </div>
                   <!-- Card body -->
+                  {% if ErrorMessage %}
+                    <div class="row"> {{ErrorMessage}} </div>
+                  {% endif %}
                   <div class="card-body">
                     <form role="form" action="{% url 'authentication:add_profile' %}" method="post" enctype="multipart/form-data">
                         {% csrf_token %}

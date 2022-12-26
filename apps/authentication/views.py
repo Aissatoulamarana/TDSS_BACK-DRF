@@ -10,6 +10,7 @@ from .models import CustomUser, ProfileType, Profile
 import secrets, string
 from django.db import IntegrityError
 from django.core.mail import send_mail
+from django.contrib import messages
 
 # Create your views here.
 
@@ -125,19 +126,28 @@ def add_profile_view(request):
         descrip = request.POST["description"]
         location = request.POST["location"]
         contact = request.POST["contact"]
-        picture = request.FILES["picture"]
+        if 'picture' in request.FILES:
+            picture = request.FILES["picture"]
+        else:
+            picture = ""
+        print (picture)
 
         new_profile = Profile(name=name, type=type, description=descrip, location=location, contact=contact, picture=picture)
         new_profile.account = new_user
         new_profile.created_by = request.user
         new_profile.save()
 
+        messages.success(request, "Nouveau profil ajouté. <br> Un compte utilisateur a été crée pour le responsable.")
         return redirect("authentication:profiles")
-        
 
         
 
     return render(request, "accounts/add-profile.html", context_empty)
+
+
+def add_user_view(request):
+    context_empty = {'userform': CustomUserForm(), 'segment': 'administration'}
+    return render(request, "accounts/add-user.html", context_empty)
 
 
 def register_user(request):

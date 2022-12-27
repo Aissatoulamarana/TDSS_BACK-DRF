@@ -5,7 +5,7 @@ Copyright (c) 2022 - OD
 
 from django.contrib import admin
 from django.contrib.auth.models import Group
-from .models import CustomUser, ProfileType, Profile
+from .models import CustomUser, ProfileType, Profile, Region, Agency
 
 # Register your models here.
 
@@ -18,8 +18,16 @@ class ProfileTypeAdmin(admin.ModelAdmin):
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('uuid', 'name', 'type', 'account', 'status', 'picture', 'created_by', 'created_on', 'modified_on')
 
+class RegionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'code', 'name')
+
+class AgencyAdmin(admin.ModelAdmin):
+    list_display = ('id', 'code', 'name')
+
 admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(ProfileType, ProfileTypeAdmin)
 admin.site.register(Profile, ProfileAdmin)
+admin.site.register(Region, RegionAdmin)
+admin.site.register(Agency, AgencyAdmin)
 
 admin.site.unregister(Group)

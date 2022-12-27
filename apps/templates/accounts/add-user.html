@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} Ajout Profil {% endblock %}
+{% block title %} Ajout Utilisateur {% endblock %}
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}{% endblock stylesheets %}
@@ -13,12 +13,12 @@
       <div class="header-body">
         <div class="row align-items-center py-4">
           <div class="col-lg-6 col-7">
-            <h6 class="h2 text-white d-inline-block mb-0">Profils</h6>
+            <h6 class="h2 text-white d-inline-block mb-0">Utilisateurs</h6>
             <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
               <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
                 <li class="breadcrumb-item"><a href="#"><i class="fas fa-home"></i></a></li>
                 <li class="breadcrumb-item"><a href="#">Administration</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Profils</li>
+                <li class="breadcrumb-item active" aria-current="page">Utilisateurs</li>
                 <li class="breadcrumb-item active" aria-current="page">Ajout</li>
               </ol>
             </nav>
@@ -45,89 +45,37 @@
                 <div class="card">
                   <!-- Card header -->
                   <div class="card-header">
-                    <h3 class="mb-0"><a href="{% url 'authentication:profiles' %}">
-                        <i class="ni ni-bold-left"></i></a> <span class="ml-4">Nouveau Profil</span>
+                    <h3 class="mb-0"><a href="{% url 'authentication:users' %}">
+                        <i class="ni ni-bold-left"></i></a> <span class="ml-4">Nouveau Utilisateur</span>
                     </h3>
                   </div>
                   <!-- Card body -->
                   {% if ErrorMessage %}
-                    <div class="row"> {{ErrorMessage}} </div>
+                    <!-- Alerts -->
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <span class="alert-icon"><i class="ni ni-like-2"></i></span>
+                        <span class="alert-text">
+                            <strong>Erreur!</strong> {{ErrorMessage}}
+                            <br>
+                            <ul>
+                                {% for field in userform %}
+                                    {% if field.errors %}
+                                        <li> {{field.errors | striptags}} </li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </span>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
                   {% endif %}
                   <div class="card-body">
-                    <form role="form" action="{% url 'authentication:add_profile' %}" method="post" enctype="multipart/form-data">
+                    <form role="form" action="{% url 'authentication:add_user' %}" method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                       <!-- Input groups with icon -->
                       <fieldset class="fieldset">
-                        <div class="row">
-                          <div class="col-md-6">
-                            <div class="form-group">
-                              <div class="input-group input-group-merge">
-                                <div class="input-group-prepend">
-                                  <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                </div>
-                                {{ profileform.name }}
-                              </div>
-                            </div>
-                          </div>
-                          <div class="col-md-6">
-                            <div class="form-group">
-                              <div class="input-group input-group-merge">
-                                <div class="input-group-prepend">
-                                  <span class="input-group-text"><i class="fas fa-tag"></i></span>
-                                </div>
-                                {{ profileform.type }}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row">
-                          <div class="col-md-6">
-                            <div class="form-group">
-                              <div class="input-group input-group-merge">
-                                <div class="input-group-prepend">
-                                  <span class="input-group-text"><i class="fas fa-align-left"></i></span>
-                                </div>
-                                {{ profileform.description }}
-                              </div>
-                            </div>
-                          </div>
-                          <div class="col-md-6">
-                            <div class="form-group">
-                              <div class="input-group input-group-merge">
-                                {{ profileform.location }}
-                                <div class="input-group-append">
-                                  <span class="input-group-text"><i class="fas fa-map-marker"></i></span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row">
-                          <div class="col-md-6">
-                            <div class="form-group">
-                              <div class="input-group input-group-merge">
-                                {{ profileform.picture }}
-                                <div class="input-group-append">
-                                  <span class="input-group-text"><i class="fas fa-image"></i></span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="col-md-6">
-                            <div class="form-group">
-                              <div class="input-group input-group-merge">
-                                <div class="input-group-prepend">
-                                  <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                                </div>
-                                {{ profileform.contact }}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </fieldset>
-                      <!-- Input groups with icon -->
-                      <fieldset class="fieldset">
-                        <legend>Responsable</legend>
+                        <legend></legend>
                         <div class="row">
                           <div class="col-md-6">
                             <div class="form-group">
@@ -176,6 +124,28 @@
                           </div>
                         </div>
                         <div class="row">
+                            <div class="col-md-6">
+                              <div class="form-group">
+                                <div class="input-group input-group-merge">
+                                  <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
+                                  </div>
+                                  {{ userform.location }}
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-6">
+                              <div class="form-group">
+                                <div class="input-group input-group-merge">
+                                  <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-globe-americas"></i></span>
+                                  </div>
+                                  {{ userform.agency }}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        <div class="row">
                           <div class="col-md-6">
                             <div class="form-group">
                               <div class="input-group input-group-merge">
@@ -186,12 +156,22 @@
                               </div>
                             </div>
                           </div>
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <div class="input-group input-group-merge">
+                                <div class="input-group-prepend">
+                                  <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
+                                </div>
+                                {{ userform.picture }}
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </fieldset>
                       <div class="card-footer">
                         <div class="row justify-content-center">
                             <input type="reset" class="btn btn-secondary" value="Effacer">
-                            <!-- <input type="submit" class="btn btn-primary" value="Enregistrer"> -->
+                            <input type="submit" class="btn btn-primary" value="Enregistrer">
                         </div>
                       </div>
 
@@ -213,4 +193,10 @@
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
-{% block javascripts %}{% endblock javascripts %}
+{% block javascripts %}
+    <script>
+        setTimeout(function() {
+            $(".alert").alert('close');
+        }, 3000);
+    </script>
+{% endblock javascripts %}

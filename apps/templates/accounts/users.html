@@ -37,15 +37,31 @@
     
     <div class="row">
       <div class="col-xl-12">
+        {% if messages %}
+          <!-- Alerts -->
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <span class="alert-icon"><i class="ni ni-like-2"></i></span>
+            <span class="alert-text">
+              <strong>Success!</strong>
+              {% for message in messages %}
+                {{ message | safe }}
+              {% endfor %}
+            </span>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% endif %}
 
         <!-- Table -->
         <div class="row mt-4">
+
           <div class="col">
             <div class="card">
               <!-- Card header -->
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des utilisateurs du système</em>
-                  <a href="#" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
+                  <a href="{% url 'authentication:add_user' %}" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
                 </h3>
               </div>
               <!-- Light table -->
@@ -149,4 +165,10 @@
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
-{% block javascripts %}{% endblock javascripts %}
+{% block javascripts %}
+  <script>
+    setTimeout(function() {
+        $(".alert").alert('close');
+    }, 3000);
+  </script>
+{% endblock javascripts %}

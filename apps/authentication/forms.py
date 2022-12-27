@@ -8,7 +8,7 @@ from django.forms import TextInput, NumberInput, Select, Textarea, FileInput, Da
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from .models import Profile, CustomUser
+from .models import Profile, CustomUser, ProfileType, UserType
 
 
 class LoginForm(forms.Form):
@@ -46,8 +46,8 @@ class ResetPwdForm(forms.Form):
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ('name', 'type', 'description', 'location', 'contact', 'status', 'picture')
-        # Omitted fields: uuid, account, created_by, created_on, modified_on
+        fields = ('name', 'type', 'description', 'location', 'contact', 'picture')
+        # Omitted fields: uuid, account, created_by, created_on, modified_on, status
         widgets = {
             'name': TextInput(attrs={'class': "form-control", 'placeholder': "Nom du profil", 'autofocus': "True"}),
             'type': Select(attrs={'class': "form-control", 'placeholder': "Type du profil"}),
@@ -56,6 +56,12 @@ class ProfileForm(forms.ModelForm):
             'contact': NumberInput(attrs={'class': "form-control", 'placeholder': "N° de contact", 'type': "number", 'min': 0}),
             'picture': ClearableFileInput(attrs={'class': "form-control"})
         }
+    def __init__(self, *args, **kwargs):
+        super(ProfileForm, self).__init__(*args, **kwargs)
+        self.fields['type'].empty_label = "Sélectionner le type"
+        self.fields['type'].queryset = ProfileType.objects.filter(status='ON').order_by('id')
+        self.fields['location'].empty_label = "Sélectionner l'emplacement"
+  
 
 
 class CustomUserForm(forms.ModelForm):
@@ -73,6 +79,11 @@ class CustomUserForm(forms.ModelForm):
             'job': TextInput(attrs={'class': "form-control", 'placeholder': "Poste"}),
             'picture': FileInput(attrs={'class': "form-control"})
         }
+    def __init__(self, *args, **kwargs):
+        super(CustomUserForm, self).__init__(*args, **kwargs)
+        self.fields['agency'].empty_label = "Sélectionner l'agence"
+        self.fields['agency'].required = False
+        self.fields['location'].empty_label = "Sélectionner l'emplacement"
 
 
 class SignUpForm(UserCreationForm):

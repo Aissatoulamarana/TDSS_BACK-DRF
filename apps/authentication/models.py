@@ -11,13 +11,24 @@ from django.contrib.auth.models import AbstractUser
 
 
 class ProfileType(models.Model):
-    uid = models.SmallIntegerField(verbose_name="profile_uid", unique=True)
+    uid = models.SmallIntegerField(unique=True)
     name = models.CharField(verbose_name="type name", max_length=100)
     status = models.CharField(max_length=30, choices=[('ON', "Actif"), ('OFF', "Inactif")], default="ON")
     comment = models.TextField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return self.name
+
+
+class UserType(models.Model):
+    uid = models.SmallIntegerField(unique=True)
+    name = models.CharField(verbose_name="type name", max_length=100)
+    status = models.CharField(max_length=30, choices=[('ON', "Actif"), ('OFF', "Inactif")], default="ON")
+    comment = models.TextField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
 
 
 class Region(models.Model):

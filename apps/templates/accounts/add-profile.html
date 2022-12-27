@@ -51,7 +51,29 @@
                   </div>
                   <!-- Card body -->
                   {% if ErrorMessage %}
-                    <div class="row"> {{ErrorMessage}} </div>
+                    <!-- Alerts -->
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                      <span class="alert-icon"><i class="ni ni-like-2"></i></span>
+                      <span class="alert-text">
+                          <strong>Erreur!</strong> {{ErrorMessage}}
+                          <br>
+                          <ul>
+                              {% for field in profileform %}
+                                {% if field.errors %}
+                                    <li> {{field.label}}: {{field.errors | striptags}} </li>
+                                {% endif %}
+                              {% endfor %}
+                              {% for field in userform %}
+                                {% if field.errors %}
+                                    <li> {{field.label}}: {{field.errors | striptags}} </li>
+                                {% endif %}
+                              {% endfor %}
+                          </ul>
+                      </span>
+                      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
                   {% endif %}
                   <div class="card-body">
                     <form role="form" action="{% url 'authentication:add_profile' %}" method="post" enctype="multipart/form-data">
@@ -191,7 +213,7 @@
                       <div class="card-footer">
                         <div class="row justify-content-center">
                             <input type="reset" class="btn btn-secondary" value="Effacer">
-                            <!-- <input type="submit" class="btn btn-primary" value="Enregistrer"> -->
+                            <input type="submit" class="btn btn-primary" value="Enregistrer">
                         </div>
                       </div>
 

@@ -96,31 +96,35 @@
                 </h3>
               </div>
               <!-- Light table -->
-              <div class="table-responsive" data-toggle="list" data-list-values='["email", "prenons&nom", "statut", "actions"]'>
+              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "nom", "type", "statut", "actions"]'>
                 <table class="table align-items-center table-flush">
                   <thead class="thead-light">
                     <tr>
-                      <th scope="col" class="sort" data-sort="uuid">UUID</th>
+                      <th scope="col" class="sort" data-sort="n°">N°</th>
                       <th scope="col" class="sort" data-sort="nom">Nom</th>
                       <th scope="col" class="sort" data-sort="type">Type</th>
+                      <th scope="col" class="sort" data-sort="statut">Statut</th>
                       <th scope="col" class="sort" data-sort="Actions">Actions</th>
                     </tr>
                   </thead>
                   <tbody class="list">
                     {% for profile in profiles %}
                       <tr>
+                        <td class="nom">
+                          {{forloop.counter}}
+                        </td>
                         <th scope="row">
                           <div class="media align-items-center">
                             <a href="#" class="avatar rounded-circle mr-3">
                               <!-- <img alt="Image placeholder" src="/static/assets/img/theme/bootstrap.jpg"> -->
                             </a>
                             <div class="media-body">
-                              <span class="name mb-0 text-sm"> {{profile.uuid}} </span>
+                              <span class="name mb-0 text-sm"> {{profile.name}} </span>
                             </div>
                           </div>
                         </th>
                         <td class="nom">
-                          {{profile.name}}
+                          {{profile.type}}
                         </td>
                         <td>
                             {% if profile.status == "ON" %} 
@@ -143,7 +147,6 @@
                             <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                               <a class="dropdown-item" href="#">View</a>
                               <a class="dropdown-item" href="#">Edit</a>
-                              <a class="dropdown-item" href="#">Delete</a>
                             </div>
                           </div>
                         </td>

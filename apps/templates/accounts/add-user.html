@@ -60,7 +60,7 @@
                             <ul>
                                 {% for field in userform %}
                                     {% if field.errors %}
-                                        <li> {{field.errors | striptags}} </li>
+                                        <li> {{field.label}}: {{field.errors | striptags}} </li>
                                     {% endif %}
                                 {% endfor %}
                             </ul>
@@ -194,9 +194,9 @@
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
-    <script>
+    <!-- <script>
         setTimeout(function() {
             $(".alert").alert('close');
         }, 3000);
-    </script>
+    </script> -->
 {% endblock javascripts %}

@@ -52,7 +52,7 @@ class ProfileForm(forms.ModelForm):
             'name': TextInput(attrs={'class': "form-control", 'placeholder': "Nom du profil", 'autofocus': "True"}),
             'type': Select(attrs={'class': "form-control", 'placeholder': "Type du profil"}),
             'description': Textarea(attrs={'rows':3, 'placeholder': "Description du profil...", 'class': "form-control" }),
-            'location': TextInput(attrs={'class': "form-control", 'placeholder': "Emplacement"}),
+            'location': Select(attrs={'class': "form-control", 'placeholder': "Emplacement"}),
             'contact': NumberInput(attrs={'class': "form-control", 'placeholder': "N° de contact", 'type': "number", 'min': 0}),
             'picture': ClearableFileInput(attrs={'class': "form-control"})
         }
@@ -61,14 +61,17 @@ class ProfileForm(forms.ModelForm):
 class CustomUserForm(forms.ModelForm):
     class Meta:
         model = CustomUser
-        fields = ('email', 'first_name', 'last_name', 'phone', 'job')
-        # Omitted fields: username
+        fields = ('email', 'first_name', 'last_name', 'phone', 'location', 'agency', 'job', 'picture')
+        # Omitted fields: username, created_by, created_on, modified_on
         widgets = {
             'first_name': TextInput(attrs={'class': "form-control", 'placeholder': "Prenoms"}),
             'last_name': TextInput(attrs={'class': "form-control", 'placeholder': "Nom"}),
             'email': EmailInput(attrs={'class': "form-control", 'placeholder': "example@mail.com"}),
             'phone': NumberInput(attrs={'class': "form-control", 'placeholder': "N° de téléphone", 'type': "number", 'min': 0}),
+            'location': Select(attrs={'class': "form-control", 'placeholder': "Emplacement/Région"}),
+            'agency': Select(attrs={'class': "form-control", 'placeholder': "Agence"}),
             'job': TextInput(attrs={'class': "form-control", 'placeholder': "Poste"}),
+            'picture': FileInput(attrs={'class': "form-control"})
         }
 
 

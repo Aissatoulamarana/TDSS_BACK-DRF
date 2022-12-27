@@ -6,11 +6,12 @@ Copyright (c) 2022 - OD
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from .forms import LoginForm, SignUpForm, ProfileForm, CustomUserForm, ResetPwdForm
-from .models import CustomUser, ProfileType, Profile
+from .models import CustomUser, ProfileType, Profile, Region, Agency
 import secrets, string
 from django.db import IntegrityError
 from django.core.mail import send_mail
 from django.contrib import messages
+from django.forms import ValidationError
 
 # Create your views here.
 
@@ -117,7 +118,7 @@ def add_profile_view(request):
             )
         except IntegrityError:
             context = context_empty
-            context['ErrorMessage'] = "Cet email existe déjà. "
+            context['ErrorMessage'] = "Email/N° téléphone existe déjà."
             return render(request, "accounts/add-profile.html", context)
         
         # profileform = ProfileForm(request.POST, request.FILES)
@@ -146,7 +147,39 @@ def add_profile_view(request):
 
 
 def add_user_view(request):
-    context_empty = {'userform': CustomUserForm(), 'segment': 'administration'}
+    default_region = Region.objects.get(code="GN-C")
+    default_agency = Agency.objects.get(code="001")
+    initial_value = {'location': default_region, 'agency': default_agency}
+    context_empty = {'userform': CustomUserForm(initial= initial_value), 'segment': 'administration'}
+    
+    if request.method == "POST":
+        form = CustomUserForm(request.POST, request.FILES)
+        if form.is_valid():
+            random_pwd = ''.join((secrets.choice(string.ascii_letters + string.digits + string.punctuation) for i in range(8)))
+            new_user = form.save(commit=False)
+            new_user.username = new_user.email
+            new_user.set_password(random_pwd)
+            new_user.created_by = request.user
+            # print(random_pwd)
+
+            new_user.save()
+            print("user created!")
+
+            send_mail(
+                "Creation de nouveau compte",
+                f"Bonjour, un compe a été créer pour vous sur le site de paiement. MDP: {random_pwd}",
+                "noreply.odiallo@gmail.com",
+                [new_user.email],
+                fail_silently=False
+            )
+            print("mail sent!")
+            
+            messages.success(request, "Nouveau compte utilisateur ajouté. <br> Une notification a été envoyé par mail.")
+            return redirect("authentication:users")
+        else:
+            context = {'userform': form, 'ErrorMessage': "Formulaire invalid soumit.", 'segment': 'administration'}
+            return render(request, "accounts/add-user.html", context)
+
     return render(request, "accounts/add-user.html", context_empty)
 
 

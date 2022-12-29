@@ -50,6 +50,7 @@ class Agency(models.Model):
 class CustomUser(AbstractUser):
     email = models.EmailField(verbose_name="email address", max_length=100, unique=True)
     phone = models.IntegerField(unique=True)
+    type = models.ForeignKey(UserType, on_delete=models.PROTECT)
     job = models.TextField(max_length=50, blank=True, null=True, verbose_name="poste")
     location = models.ForeignKey(Region, on_delete=models.PROTECT, related_name="user_location", blank=True, null=True)
     agency = models.ForeignKey(Agency, on_delete=models.PROTECT, related_name="user_agency", blank=True, null=True)

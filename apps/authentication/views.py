@@ -6,7 +6,7 @@ Copyright (c) 2022 - OD
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from .forms import LoginForm, SignUpForm, ProfileForm, CustomUserForm, ResetPwdForm
-from .models import CustomUser, ProfileType, Profile, Region, Agency
+from .models import CustomUser, ProfileType, Profile, Region, Agency, UserType
 import secrets, string
 from django.db import IntegrityError
 from django.core.mail import send_mail
@@ -97,7 +97,7 @@ def add_profile_view(request):
     initial_value = {'location': default_region}
     context_empty = {
         'profileform': ProfileForm(prefix= "profile", initial= initial_value), 
-        'userform': CustomUserForm(prefix= "user"), 
+        'userform': CustomUserForm(prefix= "user"),
         'segment': 'administration'
     }
 
@@ -105,6 +105,8 @@ def add_profile_view(request):
 
         profileform = ProfileForm(request.POST, request.FILES, prefix= "profile")
         userform = CustomUserForm(request.POST, prefix= "user")
+
+        userform.fields["type"].required = False
         
         if profileform.is_valid() and userform.is_valid():
             print("Valid forms submitted!")
@@ -114,6 +116,7 @@ def add_profile_view(request):
             new_user.username = new_user.email
             new_user.set_password(random_pwd)
             new_user.created_by = request.user
+            new_user.type = UserType.objects.first()
 
             new_user.save()
             print("User created!")

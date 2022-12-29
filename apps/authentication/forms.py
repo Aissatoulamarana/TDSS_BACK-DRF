@@ -67,7 +67,7 @@ class ProfileForm(forms.ModelForm):
 class CustomUserForm(forms.ModelForm):
     class Meta:
         model = CustomUser
-        fields = ('email', 'first_name', 'last_name', 'phone', 'location', 'agency', 'job', 'picture')
+        fields = ('email', 'first_name', 'last_name', 'phone', 'location', 'agency', 'type', 'job', 'picture')
         # Omitted fields: username, created_by, created_on, modified_on
         widgets = {
             'first_name': TextInput(attrs={'class': "form-control", 'placeholder': "Prenoms"}),
@@ -76,6 +76,7 @@ class CustomUserForm(forms.ModelForm):
             'phone': NumberInput(attrs={'class': "form-control", 'placeholder': "N° de téléphone", 'type': "number", 'min': 0}),
             'location': Select(attrs={'class': "form-control", 'placeholder': "Emplacement/Région"}),
             'agency': Select(attrs={'class': "form-control", 'placeholder': "Agence"}),
+            'type': Select(attrs={'class': "form-control", 'placeholder': "Type d.utilisateur"}),
             'job': TextInput(attrs={'class': "form-control", 'placeholder': "Poste"}),
             'picture': FileInput(attrs={'class': "form-control"})
         }
@@ -84,6 +85,8 @@ class CustomUserForm(forms.ModelForm):
         self.fields['agency'].empty_label = "Sélectionner l'agence"
         self.fields['agency'].required = False
         self.fields['location'].empty_label = "Sélectionner l'emplacement"
+        self.fields['type'].empty_label = "Sélectionner le type"
+        self.fields['type'].queryset = UserType.objects.filter(status='ON').order_by('id')
 
 
 class SignUpForm(UserCreationForm):

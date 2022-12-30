@@ -210,6 +210,28 @@ def edit_user_view(request, user_id):
     return render(request, "accounts/edit-user.html", context_empty)
 
 
+def edit_profile_view(request, profile_id):
+    profile = Profile.objects.get(pk=profile_id)
+    context_empty = {'profileform': ProfileForm(instance=profile), 'profile_id': profile_id, 'segment': 'administration'}
+
+    if request.method == "POST":
+        
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            print("Profile updated!")
+
+            messages.success(request, "Profil modifié avec succès !")
+            return redirect("authentication:profiles")
+
+        else:
+            context = {'userform': form, 'ErrorMessage': "Formulaire invalid soumit.", 'profile_id': profile_id, 'segment': 'administration'}
+            return render(request, "accounts/edit-profile.html", context)
+
+
+    return render(request, "accounts/edit-profile.html", context_empty)
+
+
 def register_user(request):
     msg = None
     success = False

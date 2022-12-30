@@ -112,41 +112,98 @@
                               </span>
                             {% endif %}
                         </td>
-                        <td class="text-center">
+                        <td class="text-center justify-content-center">
                           <span>
-                            <a class="btn btn-sm btn-icon-only" href="#" role="button" data-toggle="modal" data-target="#modal-default">View</a>
+                            <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-target="#modal-user-{{user.id}}">View</button>
                           </span>
+                            
+                          <div class="modal fade" id="modal-user-{{user.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-user-{{user.id}}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="dialog">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                </div>
+                                <div class="modal-body">
 
-                          <div class="col-md-4">
-                            <!-- <button type="button" class="btn btn-block btn-primary mb-3" data-toggle="modal" data-target="#modal-default">Default</button> -->
-                            <div class="modal fade" id="modal-default" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
-                              <div class="modal-dialog modal- modal-dialog-centered modal-" role="document">
-                                <div class="modal-content">
-                                  <div class="modal-header">
-                                    <h6 class="modal-title" id="modal-title-default">Type your modal title</h6>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                      <span aria-hidden="true">×</span>
-                                    </button>
+                                  <div class="card card-profile mt--4 mb--4">
+                                    <img src="/static/assets/img/theme/img-1-1000x600.jpg" alt="Image placeholder" class="card-img-top">
+                                    <div class="row justify-content-center">
+                                      <div class="col-lg-3 order-lg-2">
+                                        <div class="card-profile-image">
+                                          <a href="#">
+                                            <img src="/static/assets/img/theme/team-4.jpg" class="rounded-circle">
+                                          </a>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div class="card-header text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
+                                      <div class="d-flex justify-content-between">
+                                        <a href="#" class="btn btn-sm btn-info  mr-4 ">{{user.type}}</a>
+                                        <a href="#" class="btn btn-sm btn-default float-right">
+                                          {% if user.poste %}
+                                            {{user.poste}}
+                                          {% else %}
+                                            Inconnu
+                                          {% endif %}
+                                        </a>
+                                      </div>
+                                    </div>
+                                    <div class="card-body pt-0">
+                                      <div class="row">
+                                        <div class="col">
+                                          <div class="card-profile-stats d-flex justify-content-center">
+                                            <div>
+                                              <span class="heading"> {{user.location}} </span>
+                                              <span class="description">Emplacement</span>
+                                            </div>
+                                            <div>
+                                              <span class="heading"> {{user.agency}} </span>
+                                              <span class="description">Agence</span>
+                                            </div>
+                                            <div>
+                                              <span class="heading">
+                                                {% if user.is_active %} 
+                                                  Actif
+                                                  <span class="badge badge-dot">
+                                                    <i class="bg-success"></i> 
+                                                  </span>
+                                                {% else %}
+                                                  Inactif
+                                                  <span class="badge badge-dot">
+                                                    <i class="bg-danger"></i> 
+                                                  </span>
+                                                {% endif %}
+                                              </span>
+                                              <span class="description">Statut</span>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div class="text-center">
+                                        <h2 class="h2">
+                                          {{user.first_name}} {{user.last_name}}
+                                        </h2>
+                                        <div class="h5 mt-2">
+                                          <i class="ni business_briefcase-24 mr-2"></i><strong>Email:</strong> {{user.email}} 
+                                        </div>
+                                        <div>
+                                          <i class="ni education_hat mr-2"></i><strong>Téléphone:</strong> {{user.phone}}
+                                        </div>
+                                      </div>
+                                    </div>
                                   </div>
-                                  <div class="modal-body">
-                                    <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove right at the coast of the Semantics, a large language ocean.</p>
-                                    <p>A small river named Duden flows by their place and supplies it with the necessary regelialia. It is a paradisematic country, in which roasted parts of sentences fly into your mouth.</p>
-                                  </div>
-                                  <div class="modal-footer">
-                                    <button type="button" class="btn btn-primary">Save changes</button>
-                                    <button type="button" class="btn btn-link  ml-auto" data-dismiss="modal">Close</button>
-                                  </div>
+
+                                </div>
+                                <div class="modal-footer justify-content-center">
+                                  <button type="button" class="btn btn-primary" data-dismiss="modal">Fermer</button>
                                 </div>
                               </div>
                             </div>
                           </div>
 
-
-
                           <span>
-                            <a data-href="{% url 'authentication:edit_user' user.id %}" href="#" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</a>
+                            <button data-href="{% url 'authentication:edit_user' user.id %}" href="#" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
                           </span>
-                          <div class="dropdown">
+                          <!-- <div class="dropdown">
                             <a class="btn btn-sm btn-icon-only text-light" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                               <i class="fas fa-ellipsis-v"></i>
                             </a>
@@ -154,7 +211,7 @@
                               <a class="dropdown-item" href="#">View</a>
                               <a class="dropdown-item" href="#">Edit</a>
                             </div>
-                          </div>
+                          </div> -->
                         </td>
                       </tr>
                     {% empty %}

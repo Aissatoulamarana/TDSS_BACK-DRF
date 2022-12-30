@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} Ajout Utilisateur {% endblock %}
+{% block title %} Utilisateur {% endblock %}
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}{% endblock stylesheets %}
@@ -60,7 +60,7 @@
                             <ul>
                                 {% for field in userform %}
                                     {% if field.errors %}
-                                        <li> {{field.errors | striptags}} </li>
+                                        <li> {{field.label}}: {{field.errors | striptags}} </li>
                                     {% endif %}
                                 {% endfor %}
                             </ul>
@@ -124,28 +124,16 @@
                           </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-6">
-                              <div class="form-group">
-                                <div class="input-group input-group-merge">
-                                  <div class="input-group-prepend">
-                                    <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
-                                  </div>
-                                  {{ userform.location }}
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <div class="input-group input-group-merge">
+                                <div class="input-group-prepend">
+                                  <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
                                 </div>
-                              </div>
-                            </div>
-                            <div class="col-md-6">
-                              <div class="form-group">
-                                <div class="input-group input-group-merge">
-                                  <div class="input-group-prepend">
-                                    <span class="input-group-text"><i class="fas fa-globe-americas"></i></span>
-                                  </div>
-                                  {{ userform.agency }}
-                                </div>
+                                {{ userform.type }}
                               </div>
                             </div>
                           </div>
-                        <div class="row">
                           <div class="col-md-6">
                             <div class="form-group">
                               <div class="input-group input-group-merge">
@@ -156,6 +144,30 @@
                               </div>
                             </div>
                           </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <div class="input-group input-group-merge">
+                                <div class="input-group-prepend">
+                                  <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
+                                </div>
+                                {{ userform.location }}
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <div class="input-group input-group-merge">
+                                <div class="input-group-prepend">
+                                  <span class="input-group-text"><i class="fas fa-globe-americas"></i></span>
+                                </div>
+                                {{ userform.agency }}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
                           <div class="col-md-6">
                             <div class="form-group">
                               <div class="input-group input-group-merge">
@@ -194,9 +206,9 @@
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
-    <script>
+    <!-- <script>
         setTimeout(function() {
             $(".alert").alert('close');
         }, 3000);
-    </script>
+    </script> -->
 {% endblock javascripts %}

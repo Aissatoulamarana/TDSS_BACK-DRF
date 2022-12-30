@@ -6,7 +6,7 @@ Copyright (c) 2022 - OD
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from .forms import LoginForm, SignUpForm, ProfileForm, CustomUserForm, ResetPwdForm
-from .models import CustomUser, ProfileType, Profile, Region, Agency
+from .models import CustomUser, ProfileType, Profile, Region, Agency, UserType
 import secrets, string
 from django.db import IntegrityError
 from django.core.mail import send_mail
@@ -93,21 +93,33 @@ def profiles_view(request):
 
 
 def add_profile_view(request):
-    context_empty = {'profileform': ProfileForm(), 'userform': CustomUserForm(), 'segment': 'administration'}
+    default_region = Region.objects.first()
+    initial_value = {'location': default_region}
+    context_empty = {
+        'profileform': ProfileForm(prefix= "profile", initial= initial_value), 
+        'userform': CustomUserForm(prefix= "user"),
+        'segment': 'administration'
+    }
 
     if request.method == "POST":
-        # user_form = CustomUserForm(post_data['first_name'], post_data['last_name'], post_data['email'], 
-        #                             post_data['phone'], post_data['job'])
-        first = request.POST["first_name"]
-        last = request.POST["last_name"]
-        email = request.POST["email"]
-        phone = request.POST["phone"]
-        job = request.POST["job"]
-        random_pwd = ''.join((secrets.choice(string.ascii_letters + string.digits + string.punctuation) for i in range(8)))
-        # Attemp to create a new user for the profile
-        try:
-            new_user = CustomUser.objects.create_user(email, email, random_pwd, first_name=first, last_name=last, phone=phone, job=job)
+
+        profileform = ProfileForm(request.POST, request.FILES, prefix= "profile")
+        userform = CustomUserForm(request.POST, prefix= "user")
+
+        userform.fields["type"].required = False
+        
+        if profileform.is_valid() and userform.is_valid():
+            print("Valid forms submitted!")
+
+            new_user = userform.save(commit=False)
+            random_pwd = ''.join((secrets.choice(string.ascii_letters + string.digits + string.punctuation) for i in range(8)))
+            new_user.username = new_user.email
+            new_user.set_password(random_pwd)
+            new_user.created_by = request.user
+            new_user.type = UserType.objects.first()
+
             new_user.save()
+            print("User created!")
 
             send_mail(
                 "Creation de nouveau compte",
@@ -116,39 +128,32 @@ def add_profile_view(request):
                 [new_user.email],
                 fail_silently=False
             )
-        except IntegrityError:
-            context = context_empty
-            context['ErrorMessage'] = "Email/N° téléphone existe déjà."
+            print("Mail sent!")
+
+            new_profile = profileform.save(commit=False)
+            new_profile.account = new_user
+            new_profile.created_by = request.user
+
+            new_profile.save()
+            print("Profile created!")
+
+            messages.success(request, "Nouveau profil ajouté. <br> Un compte utilisateur a été crée pour le responsable.")
+            return redirect("authentication:profiles")
+        else:
+            context = {
+                'profileform': profileform, 
+                'userform': userform, 
+                'ErrorMessage': "Formulaire invalid soumit",
+                'segment': 'administration'
+            }
             return render(request, "accounts/add-profile.html", context)
         
-        # profileform = ProfileForm(request.POST, request.FILES)
-        name = request.POST["name"]
-        type = ProfileType.objects.get(pk=request.POST["type"])
-        descrip = request.POST["description"]
-        location = request.POST["location"]
-        contact = request.POST["contact"]
-        if 'picture' in request.FILES:
-            picture = request.FILES["picture"]
-        else:
-            picture = ""
-        print (picture)
-
-        new_profile = Profile(name=name, type=type, description=descrip, location=location, contact=contact, picture=picture)
-        new_profile.account = new_user
-        new_profile.created_by = request.user
-        new_profile.save()
-
-        messages.success(request, "Nouveau profil ajouté. <br> Un compte utilisateur a été crée pour le responsable.")
-        return redirect("authentication:profiles")
-
-        
-
     return render(request, "accounts/add-profile.html", context_empty)
 
 
 def add_user_view(request):
-    default_region = Region.objects.get(code="GN-C")
-    default_agency = Agency.objects.get(code="001")
+    default_region = Region.objects.first()
+    default_agency = Agency.objects.first()
     initial_value = {'location': default_region, 'agency': default_agency}
     context_empty = {'userform': CustomUserForm(initial= initial_value), 'segment': 'administration'}
     
@@ -181,6 +186,50 @@ def add_user_view(request):
             return render(request, "accounts/add-user.html", context)
 
     return render(request, "accounts/add-user.html", context_empty)
+
+
+def edit_user_view(request, user_id):
+    user = CustomUser.objects.get(pk=user_id)
+    context_empty = {'userform': CustomUserForm(instance=user), 'user_id': user_id, 'segment': 'administration'}
+
+    if request.method == "POST":
+        
+        form = CustomUserForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+            print("User updated!")
+
+            messages.success(request, "Compte utilisateur modifié avec succès !")
+            return redirect("authentication:users")
+
+        else:
+            context = {'userform': form, 'ErrorMessage': "Formulaire invalid soumit.", 'user_id': user_id, 'segment': 'administration'}
+            return render(request, "accounts/edit-user.html", context)
+
+
+    return render(request, "accounts/edit-user.html", context_empty)
+
+
+def edit_profile_view(request, profile_id):
+    profile = Profile.objects.get(pk=profile_id)
+    context_empty = {'profileform': ProfileForm(instance=profile), 'profile_id': profile_id, 'segment': 'administration'}
+
+    if request.method == "POST":
+        
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            print("Profile updated!")
+
+            messages.success(request, "Profil modifié avec succès !")
+            return redirect("authentication:profiles")
+
+        else:
+            context = {'userform': form, 'ErrorMessage': "Formulaire invalid soumit.", 'profile_id': profile_id, 'segment': 'administration'}
+            return render(request, "accounts/edit-profile.html", context)
+
+
+    return render(request, "accounts/edit-profile.html", context_empty)
 
 
 def register_user(request):

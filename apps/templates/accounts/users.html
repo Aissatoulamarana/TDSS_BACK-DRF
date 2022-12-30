@@ -65,12 +65,14 @@
                 </h3>
               </div>
               <!-- Light table -->
-              <div class="table-responsive" data-toggle="list" data-list-values='["email", "prenons&nom", "statut", "actions"]'>
+              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "email", "prenons&nom", "phone", "statut", "actions"]'>
                 <table class="table align-items-center table-flush">
                   <thead class="thead-light">
                     <tr>
+                      <th scope="col" class="sort" data-sort="row">N°</th>
                       <th scope="col" class="sort" data-sort="email">Email</th>
                       <th scope="col" class="sort" data-sort="prenoms&nom">Prénoms & Nom</th>
+                      <th scope="col" class="sort" data-sort="phone">Téléphone</th>
                       <th scope="col" class="sort" data-sort="statut">Statut</th>
                       <th scope="col" class="sort" data-sort="Actions">Actions</th>
                     </tr>
@@ -78,11 +80,14 @@
                   <tbody class="list">
                     {% for user in users %}
                       <tr>
+                        <td class="n°">
+                          {{forloop.counter}}
+                        </td>
                         <th scope="row">
                           <div class="media align-items-center">
-                            <a href="#" class="avatar rounded-circle mr-3">
-                              <!-- <img alt="Image placeholder" src="/static/assets/img/theme/bootstrap.jpg"> -->
-                            </a>
+                            <!-- <a href="#" class="avatar rounded-circle mr-3">
+                              <img alt="Image placeholder" src="/static/assets/img/theme/bootstrap.jpg">
+                            </a> -->
                             <div class="media-body">
                               <span class="name mb-0 text-sm"> {{user.email}} </span>
                             </div>
@@ -90,6 +95,9 @@
                         </th>
                         <td class="prenoms&nom">
                           {{user.first_name}} {{user.last_name}}
+                        </td>
+                        <td class="phone">
+                          {{user.phone}}
                         </td>
                         <td>
                             {% if user.is_active %} 
@@ -104,17 +112,106 @@
                               </span>
                             {% endif %}
                         </td>
-                        <td class="text-center">
-                          <div class="dropdown">
+                        <td class="text-center justify-content-center">
+                          <span>
+                            <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-target="#modal-user-{{user.id}}">View</button>
+                          </span>
+                            
+                          <div class="modal fade" id="modal-user-{{user.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-user-{{user.id}}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="dialog">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                </div>
+                                <div class="modal-body">
+
+                                  <div class="card card-profile mt--4 mb--4">
+                                    <img src="/static/assets/img/theme/img-1-1000x600.jpg" alt="Image placeholder" class="card-img-top">
+                                    <div class="row justify-content-center">
+                                      <div class="col-lg-3 order-lg-2">
+                                        <div class="card-profile-image">
+                                          <a href="#">
+                                            <img src="/static/assets/img/theme/team-4.jpg" class="rounded-circle">
+                                          </a>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div class="card-header text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
+                                      <div class="d-flex justify-content-between">
+                                        <a href="#" class="btn btn-sm btn-info  mr-4 ">{{user.type}}</a>
+                                        <a href="#" class="btn btn-sm btn-default float-right">
+                                          {% if user.poste %}
+                                            {{user.poste}}
+                                          {% else %}
+                                            Inconnu
+                                          {% endif %}
+                                        </a>
+                                      </div>
+                                    </div>
+                                    <div class="card-body pt-0">
+                                      <div class="row">
+                                        <div class="col">
+                                          <div class="card-profile-stats d-flex justify-content-center">
+                                            <div>
+                                              <span class="heading"> {{user.location}} </span>
+                                              <span class="description">Emplacement</span>
+                                            </div>
+                                            <div>
+                                              <span class="heading"> {{user.agency}} </span>
+                                              <span class="description">Agence</span>
+                                            </div>
+                                            <div>
+                                              <span class="heading">
+                                                {% if user.is_active %} 
+                                                  Actif
+                                                  <span class="badge badge-dot">
+                                                    <i class="bg-success"></i> 
+                                                  </span>
+                                                {% else %}
+                                                  Inactif
+                                                  <span class="badge badge-dot">
+                                                    <i class="bg-danger"></i> 
+                                                  </span>
+                                                {% endif %}
+                                              </span>
+                                              <span class="description">Statut</span>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div class="text-center">
+                                        <h2 class="h2">
+                                          {{user.first_name}} {{user.last_name}}
+                                        </h2>
+                                        <div class="h5 mt-2">
+                                          <i class="ni business_briefcase-24 mr-2"></i><strong>Email:</strong> {{user.email}} 
+                                        </div>
+                                        <div>
+                                          <i class="ni education_hat mr-2"></i><strong>Téléphone:</strong> {{user.phone}}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                </div>
+                                <div class="modal-footer justify-content-center">
+                                  <button type="button" class="btn btn-primary" data-dismiss="modal">Fermer</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <span>
+                            <button data-href="{% url 'authentication:edit_user' user.id %}" href="#" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
+                          </span>
+                          <!-- <div class="dropdown">
                             <a class="btn btn-sm btn-icon-only text-light" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                               <i class="fas fa-ellipsis-v"></i>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                               <a class="dropdown-item" href="#">View</a>
                               <a class="dropdown-item" href="#">Edit</a>
-                              <a class="dropdown-item" href="#">Delete</a>
                             </div>
-                          </div>
+                          </div> -->
                         </td>
                       </tr>
                     {% empty %}
@@ -170,5 +267,9 @@
     setTimeout(function() {
         $(".alert").alert('close');
     }, 3000);
+
+    $(".edit-link").click(function() {
+      window.location = $(this).data("href");
+    })
   </script>
 {% endblock javascripts %}

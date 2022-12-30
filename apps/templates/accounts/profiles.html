@@ -96,31 +96,35 @@
                 </h3>
               </div>
               <!-- Light table -->
-              <div class="table-responsive" data-toggle="list" data-list-values='["email", "prenons&nom", "statut", "actions"]'>
+              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "nom", "type", "statut", "actions"]'>
                 <table class="table align-items-center table-flush">
                   <thead class="thead-light">
                     <tr>
-                      <th scope="col" class="sort" data-sort="uuid">UUID</th>
+                      <th scope="col" class="sort" data-sort="n°">N°</th>
                       <th scope="col" class="sort" data-sort="nom">Nom</th>
                       <th scope="col" class="sort" data-sort="type">Type</th>
+                      <th scope="col" class="sort" data-sort="statut">Statut</th>
                       <th scope="col" class="sort" data-sort="Actions">Actions</th>
                     </tr>
                   </thead>
                   <tbody class="list">
                     {% for profile in profiles %}
                       <tr>
+                        <td class="nom">
+                          {{forloop.counter}}
+                        </td>
                         <th scope="row">
                           <div class="media align-items-center">
                             <a href="#" class="avatar rounded-circle mr-3">
                               <!-- <img alt="Image placeholder" src="/static/assets/img/theme/bootstrap.jpg"> -->
                             </a>
                             <div class="media-body">
-                              <span class="name mb-0 text-sm"> {{profile.uuid}} </span>
+                              <span class="name mb-0 text-sm"> {{profile.name}} </span>
                             </div>
                           </div>
                         </th>
                         <td class="nom">
-                          {{profile.name}}
+                          {{profile.type}}
                         </td>
                         <td>
                             {% if profile.status == "ON" %} 
@@ -135,17 +139,80 @@
                                 </span>
                             {% endif %}
                         </td>
-                        <td class="text-center">
-                          <div class="dropdown">
-                            <a class="btn btn-sm btn-icon-only text-light" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                              <i class="fas fa-ellipsis-v"></i>
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                              <a class="dropdown-item" href="#">View</a>
-                              <a class="dropdown-item" href="#">Edit</a>
-                              <a class="dropdown-item" href="#">Delete</a>
+                        <td class="text-center justify-content-center">
+                          <span>
+                            <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-target="#modal-profile-{{profile.uuid}}">View</button>
+                          </span>
+                            
+                          <div class="modal fade" id="modal-profile-{{profile.uuid}}" tabindex="-1" role="dialog" aria-labelledby="modal-profile-{{profile.uuid}}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="dialog">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                </div>
+                                <div class="modal-body">
+
+                                  <div class="card card-profile mt--4 mb--4">
+                                    <img src="/static/assets/img/theme/img-1-1000x600.jpg" alt="Image placeholder" class="card-img-top">
+                                    
+                                    <div class="card-header text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
+                                      <div class="d-flex justify-content-between">
+                                        <a href="#" class="btn btn-sm btn-info  mr-4 ">{{profile.type}}</a>
+                                        <div>
+                                          <span class="heading">
+                                            {% if profile.status == "ON" %} 
+                                              Actif
+                                              <span class="badge badge-dot">
+                                                <i class="bg-success"></i> 
+                                              </span>
+                                            {% else %}
+                                              Inactif
+                                              <span class="badge badge-dot">
+                                                <i class="bg-danger"></i> 
+                                              </span>
+                                            {% endif %}
+                                          </span>
+                                        </div>
+                                        <a href="#" class="btn btn-sm btn-default float-right">
+                                          {% if profile.location %}
+                                            {{profile.location}}
+                                          {% else %}
+                                            Inconnu
+                                          {% endif %}
+                                        </a>
+                                      </div>
+                                    </div>
+                                    <div class="card-body">
+                                      <div class="row mt--4">
+                                        <div class="col">
+                                          <div>
+                                            <span class="heading"> <h2>{{profile.name}}</h2> </span>
+                                            <!-- <span class="description">Titre</span> -->
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div class="text-center">
+                                        <h4 class="h4">
+                                          {{profile.description}}
+                                        </h4>
+                                        <div>
+                                          <i class="ni education_hat mr-2"></i><strong>Contact:</strong> {{profile.contact}}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                </div>
+                                <div class="modal-footer justify-content-center">
+                                  <button type="button" class="btn btn-primary" data-dismiss="modal">Fermer</button>
+                                </div>
+                              </div>
                             </div>
                           </div>
+
+                          <span>
+                            <button data-href="{% url 'authentication:edit_profile' profile.uuid %}" href="#" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
+                          </span>
+                          
                         </td>
                       </tr>
                     
@@ -202,9 +269,8 @@
       $(".alert").alert('close');
     }, 6000);
 
-    // $('.modal').modal('show')
-    // setTimeout(function() {
-    //   $(".modal").modal('hide');
-    // }, 3000);
+    $(".edit-link").click(function() {
+      window.location = $(this).data("href");
+    })
   </script>
 {% endblock javascripts %}

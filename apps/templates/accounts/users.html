@@ -65,12 +65,14 @@
                 </h3>
               </div>
               <!-- Light table -->
-              <div class="table-responsive" data-toggle="list" data-list-values='["email", "prenons&nom", "statut", "actions"]'>
+              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "email", "prenons&nom", "phone", "statut", "actions"]'>
                 <table class="table align-items-center table-flush">
                   <thead class="thead-light">
                     <tr>
+                      <th scope="col" class="sort" data-sort="row">N°</th>
                       <th scope="col" class="sort" data-sort="email">Email</th>
                       <th scope="col" class="sort" data-sort="prenoms&nom">Prénoms & Nom</th>
+                      <th scope="col" class="sort" data-sort="phone">Téléphone</th>
                       <th scope="col" class="sort" data-sort="statut">Statut</th>
                       <th scope="col" class="sort" data-sort="Actions">Actions</th>
                     </tr>
@@ -78,11 +80,14 @@
                   <tbody class="list">
                     {% for user in users %}
                       <tr>
+                        <td class="n°">
+                          {{forloop.counter}}
+                        </td>
                         <th scope="row">
                           <div class="media align-items-center">
-                            <a href="#" class="avatar rounded-circle mr-3">
-                              <!-- <img alt="Image placeholder" src="/static/assets/img/theme/bootstrap.jpg"> -->
-                            </a>
+                            <!-- <a href="#" class="avatar rounded-circle mr-3">
+                              <img alt="Image placeholder" src="/static/assets/img/theme/bootstrap.jpg">
+                            </a> -->
                             <div class="media-body">
                               <span class="name mb-0 text-sm"> {{user.email}} </span>
                             </div>
@@ -90,6 +95,9 @@
                         </th>
                         <td class="prenoms&nom">
                           {{user.first_name}} {{user.last_name}}
+                        </td>
+                        <td class="phone">
+                          {{user.phone}}
                         </td>
                         <td>
                             {% if user.is_active %} 
@@ -105,6 +113,39 @@
                             {% endif %}
                         </td>
                         <td class="text-center">
+                          <span>
+                            <a class="btn btn-sm btn-icon-only" href="#" role="button" data-toggle="modal" data-target="#modal-default">View</a>
+                          </span>
+
+                          <div class="col-md-4">
+                            <!-- <button type="button" class="btn btn-block btn-primary mb-3" data-toggle="modal" data-target="#modal-default">Default</button> -->
+                            <div class="modal fade" id="modal-default" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
+                              <div class="modal-dialog modal- modal-dialog-centered modal-" role="document">
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <h6 class="modal-title" id="modal-title-default">Type your modal title</h6>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                      <span aria-hidden="true">×</span>
+                                    </button>
+                                  </div>
+                                  <div class="modal-body">
+                                    <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove right at the coast of the Semantics, a large language ocean.</p>
+                                    <p>A small river named Duden flows by their place and supplies it with the necessary regelialia. It is a paradisematic country, in which roasted parts of sentences fly into your mouth.</p>
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary">Save changes</button>
+                                    <button type="button" class="btn btn-link  ml-auto" data-dismiss="modal">Close</button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+
+
+                          <span>
+                            <a data-href="{% url 'authentication:edit_user' user.id %}" href="#" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</a>
+                          </span>
                           <div class="dropdown">
                             <a class="btn btn-sm btn-icon-only text-light" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                               <i class="fas fa-ellipsis-v"></i>
@@ -112,7 +153,6 @@
                             <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                               <a class="dropdown-item" href="#">View</a>
                               <a class="dropdown-item" href="#">Edit</a>
-                              <a class="dropdown-item" href="#">Delete</a>
                             </div>
                           </div>
                         </td>
@@ -170,5 +210,9 @@
     setTimeout(function() {
         $(".alert").alert('close');
     }, 3000);
+
+    $(".edit-link").click(function() {
+      window.location = $(this).data("href");
+    })
   </script>
 {% endblock javascripts %}

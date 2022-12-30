@@ -188,6 +188,28 @@ def add_user_view(request):
     return render(request, "accounts/add-user.html", context_empty)
 
 
+def edit_user_view(request, user_id):
+    user = CustomUser.objects.get(pk=user_id)
+    context_empty = {'userform': CustomUserForm(instance=user), 'user_id': user_id, 'segment': 'administration'}
+
+    if request.method == "POST":
+        
+        form = CustomUserForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+            print("User updated!")
+
+            messages.success(request, "Compte utilisateur modifié avec succès !")
+            return redirect("authentication:users")
+
+        else:
+            context = {'userform': form, 'ErrorMessage': "Formulaire invalid soumit.", 'user_id': user_id, 'segment': 'administration'}
+            return render(request, "accounts/edit-user.html", context)
+
+
+    return render(request, "accounts/edit-user.html", context_empty)
+
+
 def register_user(request):
     msg = None
     success = False

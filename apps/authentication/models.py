@@ -41,7 +41,9 @@ class Region(models.Model):
 
 class Agency(models.Model):
     code = models.CharField(max_length=20, verbose_name="Code_agence", unique=True)
+    region = models.ForeignKey(Region, on_delete=models.PROTECT, related_name="region_agency")
     name = models.CharField(max_length=100)
+    comment = models.TextField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return self.name

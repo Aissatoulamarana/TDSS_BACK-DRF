@@ -20,4 +20,7 @@ urlpatterns = [
     path("profiles/", views.profiles_view, name="profiles"),
     path("profiles/add/", views.add_profile_view, name="add_profile"),
     path("profiles/<uuid:profile_id>/edit", views.edit_profile_view, name="edit_profile"),
+    path("agencies/", views.agencies_view, name="agencies"),
+    path("agencies/add/", views.add_agency_view, name="add_agency"),
+    path("agencies/<int:agency_id>/edit", views.edit_agency_view, name="edit_agency"),
 ]

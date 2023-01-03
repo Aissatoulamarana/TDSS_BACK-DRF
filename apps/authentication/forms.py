@@ -8,7 +8,7 @@ from django.forms import TextInput, NumberInput, Select, Textarea, FileInput, Da
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from .models import Profile, CustomUser, ProfileType, UserType
+from .models import Profile, CustomUser, ProfileType, UserType, Agency, Region
 
 
 class LoginForm(forms.Form):
@@ -87,6 +87,22 @@ class CustomUserForm(forms.ModelForm):
         self.fields['location'].empty_label = "Sélectionner l'emplacement"
         self.fields['type'].empty_label = "Sélectionner le type"
         self.fields['type'].queryset = UserType.objects.filter(status='ON').order_by('id')
+
+
+class AgencyForm(forms.ModelForm):
+    class Meta:
+        model = Agency
+        fields = ('code', 'region', 'name', 'comment')
+        # Omitteed fields: id
+        widgets = {
+            'code': TextInput(attrs={'class': "form-control", 'placeholder': "Code de l'agence", 'autofocus': True}),
+            'region': Select(attrs={'class': "form-control", 'placeholder': "Région"}),
+            'name': TextInput(attrs={'class': "form-control", 'placeholder': "Nom de l'agence"}),
+            'comment': Textarea(attrs={'rows':3, 'placeholder': "Commentaire...", 'class': "form-control" }),
+        }
+    def __init__(self, *args, **kwargs):
+        super(AgencyForm, self).__init__(*args, **kwargs)
+        self.fields['region'].empty_label = "Sélectionner la région"
 
 
 class SignUpForm(UserCreationForm):

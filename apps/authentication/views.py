@@ -5,7 +5,7 @@ Copyright (c) 2022 - OD
 
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
-from .forms import LoginForm, SignUpForm, ProfileForm, CustomUserForm, ResetPwdForm
+from .forms import LoginForm, SignUpForm, ProfileForm, CustomUserForm, ResetPwdForm, AgencyForm
 from .models import CustomUser, ProfileType, Profile, Region, Agency, UserType
 import secrets, string
 from django.db import IntegrityError
@@ -230,6 +230,61 @@ def edit_profile_view(request, profile_id):
 
 
     return render(request, "accounts/edit-profile.html", context_empty)
+
+
+
+def agencies_view(request):
+    agencies = Agency.objects.all()
+    form = AgencyForm()
+
+    return render(request, "accounts/agencies.html", {
+        
+        'form': form,
+        'agencies': agencies,
+        'segment': "administration"
+    })
+
+
+def add_agency_view(request):
+    default_region = Region.objects.first()
+    initial_value = {'region': default_region}
+    context_empty = {'form': AgencyForm(initial= initial_value), 'segment': 'administration'}
+
+    if request.method == "POST":
+        form = AgencyForm(request.POST)
+
+        if form.is_valid():
+            new_agency = form.save()
+            messages.success(request, "Nouvelle agence ajoutée avec succès !")
+            return redirect("authentication:agencies")
+        else:
+            context = {'form': form, 'ErrorMessage': "Formulaire invalid soumit.", 'segment': 'administration'}
+            return render(request, "accounts/add-agency.html", context)
+
+    return render(request, "accounts/add-agency.html", context_empty)
+
+
+def edit_agency_view(request, agency_id):
+    agency = Agency.objects.get(pk=agency_id)
+    context_empty = {'form': AgencyForm(instance=agency), 'agency_id': agency_id, 'segment': 'administration'}
+
+    if request.method == "POST":
+        
+        form = AgencyForm(request.POST, instance=agency)
+        if form.is_valid():
+            form.save()
+            print("Agency updated!")
+
+            messages.success(request, "Agence modifiée avec succès !")
+            return redirect("authentication:agencies")
+
+        else:
+            context = {'form': form, 'ErrorMessage': "Formulaire invalid soumit.", 'agency_id': agency_id, 'segment': 'administration'}
+            return render(request, "accounts/edit-agency.html", context)
+
+
+    return render(request, "accounts/edit-agency.html", context_empty)
+
 
 
 def register_user(request):

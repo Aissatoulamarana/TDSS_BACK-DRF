@@ -46,7 +46,7 @@ class ResetPwdForm(forms.Form):
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ('name', 'type', 'description', 'location', 'contact', 'picture')
+        fields = ('name', 'type', 'description', 'location', 'contact', 'picture', 'adresse', 'email')
         # Omitted fields: uuid, account, created_by, created_on, modified_on, status
         widgets = {
             'name': TextInput(attrs={'class': "form-control", 'placeholder': "Nom du profil", 'autofocus': "True"}),
@@ -54,7 +54,9 @@ class ProfileForm(forms.ModelForm):
             'description': Textarea(attrs={'rows':3, 'placeholder': "Description du profil...", 'class': "form-control" }),
             'location': Select(attrs={'class': "form-control", 'placeholder': "Emplacement"}),
             'contact': NumberInput(attrs={'class': "form-control", 'placeholder': "N° de contact", 'type': "number", 'min': 0}),
-            'picture': ClearableFileInput(attrs={'class': "form-control"})
+            'picture': ClearableFileInput(attrs={'class': "form-control"}),
+            'adresse': Textarea(attrs={'rows':3, 'placeholder': "Adresse, BP...", 'class': "form-control" }),
+            'email': EmailInput(attrs={'class': "form-control", 'placeholder': "example@mail.com"}),
         }
     def __init__(self, *args, **kwargs):
         super(ProfileForm, self).__init__(*args, **kwargs)

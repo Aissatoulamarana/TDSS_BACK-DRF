@@ -135,6 +135,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Authentication purpose
 AUTH_USER_MODEL = 'authentication.CustomUser'
 
+# Allowing non active users to try to log in.
+AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.AllowAllUsersModelBackend']
+
 # Settings for email configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'

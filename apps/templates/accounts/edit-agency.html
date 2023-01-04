@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} Utilisateur {% endblock %}
+{% block title %} Agences {% endblock %}
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}{% endblock stylesheets %}
@@ -13,12 +13,12 @@
       <div class="header-body">
         <div class="row align-items-center py-4">
           <div class="col-lg-6 col-7">
-            <h6 class="h2 text-white d-inline-block mb-0">Utilisateurs</h6>
+            <h6 class="h2 text-white d-inline-block mb-0">Agences</h6>
             <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
               <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
                 <li class="breadcrumb-item"><a href="#"><i class="fas fa-home"></i></a></li>
                 <li class="breadcrumb-item"><a href="#">Administration</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Utilisateurs</li>
+                <li class="breadcrumb-item active" aria-current="page">Agences</li>
                 <li class="breadcrumb-item active" aria-current="page">Modification</li>
               </ol>
             </nav>
@@ -46,7 +46,7 @@
                   <!-- Card header -->
                   <div class="card-header">
                     <h3 class="mb-0"><a href="{% url 'authentication:users' %}">
-                        <i class="ni ni-bold-left"></i></a> <span class="ml-4">Modification d'utilisateur</span>
+                        <i class="ni ni-bold-left"></i></a> <span class="ml-4">Modification d'agence</span>
                     </h3>
                   </div>
                   <!-- Card body -->
@@ -58,7 +58,7 @@
                             <strong>Erreur!</strong> {{ErrorMessage}}
                             <br>
                             <ul>
-                                {% for field in userform %}
+                                {% for field in form %}
                                     {% if field.errors %}
                                         <li> {{field.label}}: {{field.errors | striptags}} </li>
                                     {% endif %}
@@ -71,7 +71,7 @@
                     </div>
                   {% endif %}
                   <div class="card-body">
-                    <form role="form" action="{% url 'authentication:edit_user' user_id %}" method="post" enctype="multipart/form-data">
+                    <form role="form" action="{% url 'authentication:edit_agency' agency_id %}" method="post">
                         {% csrf_token %}
                       <!-- Input groups with icon -->
                       <fieldset class="fieldset">
@@ -83,7 +83,7 @@
                                 <div class="input-group-prepend">
                                   <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
                                 </div>
-                                {{ userform.first_name }}
+                                {{ form.code }}
                               </div>
                             </div>
                           </div>
@@ -93,7 +93,7 @@
                                 <div class="input-group-prepend">
                                   <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
                                 </div>
-                                {{ userform.last_name }}
+                                {{ form.region }}
                               </div>
                             </div>
                           </div>
@@ -105,7 +105,7 @@
                                 <div class="input-group-prepend">
                                   <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
                                 </div>
-                                {{ userform.email }}
+                                {{ form.name }}
                               </div>
                             </div>
                           </div>
@@ -115,7 +115,7 @@
                                 <div class="input-group-prepend">
                                   <span class="input-group-text"><i class="fas fa-globe-americas"></i></span>
                                 </div>
-                                {{ userform.phone }}
+                                {{ form.comment }}
                                 <div class="input-group-append">
                                   <span class="input-group-text"><i class="fas fa-phone"></i></span>
                                 </div>
@@ -123,62 +123,7 @@
                             </div>
                           </div>
                         </div>
-                        <div class="row">
-                          <div class="col-md-6">
-                            <div class="form-group">
-                              <div class="input-group input-group-merge">
-                                <div class="input-group-prepend">
-                                  <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
-                                </div>
-                                {{ userform.type }}
-                              </div>
-                            </div>
-                          </div>
-                          <div class="col-md-6">
-                            <div class="form-group">
-                              <div class="input-group input-group-merge">
-                                <div class="input-group-prepend">
-                                  <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
-                                </div>
-                                {{ userform.job }}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row">
-                          <div class="col-md-6">
-                            <div class="form-group">
-                              <div class="input-group input-group-merge">
-                                <div class="input-group-prepend">
-                                  <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
-                                </div>
-                                {{ userform.location }}
-                              </div>
-                            </div>
-                          </div>
-                          <div class="col-md-6">
-                            <div class="form-group">
-                              <div class="input-group input-group-merge">
-                                <div class="input-group-prepend">
-                                  <span class="input-group-text"><i class="fas fa-globe-americas"></i></span>
-                                </div>
-                                {{ userform.agency }}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row">
-                          <div class="col-md-6">
-                            <div class="form-group">
-                              <div class="input-group input-group-merge">
-                                <div class="input-group-prepend">
-                                  <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
-                                </div>
-                                {{ userform.picture }}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                        
                       </fieldset>
                       <div class="card-footer">
                         <div class="row justify-content-center">

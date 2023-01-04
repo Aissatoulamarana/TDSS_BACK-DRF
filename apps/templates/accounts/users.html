@@ -189,9 +189,17 @@
                                           <i class="ni education_hat mr-2"></i><strong>Téléphone:</strong> {{user.phone}}
                                         </div>
                                       </div>
+                                      <div class="row justify-content-center mt-2">
+                                        {% if user.is_active %} 
+                                          <button data-href="{% url 'authentication:deactivate_user' user.id %}" class="edit-link btn btn-danger btn-sm" role="button">Bloquer</button>
+                                          
+                                        {% else %}
+                                          <button data-href="{% url 'authentication:activate_user' user.id %}" class="edit-link btn btn-success btn-sm" role="button">Activer</button>
+
+                                        {% endif %}
+                                      </div>
                                     </div>
                                   </div>
-
                                 </div>
                                 <div class="modal-footer justify-content-center">
                                   <button type="button" class="btn btn-primary" data-dismiss="modal">Fermer</button>
@@ -199,7 +207,7 @@
                               </div>
                             </div>
                           </div>
-
+                            
                           <span>
                             <button data-href="{% url 'authentication:edit_user' user.id %}" href="#" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
                           </span>

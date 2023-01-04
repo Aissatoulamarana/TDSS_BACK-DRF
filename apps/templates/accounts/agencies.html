@@ -1,0 +1,214 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Agence {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+  <!-- Header -->
+  <div class="header bg-primary pb-6">
+    <div class="container-fluid">
+      <div class="header-body">
+        <div class="row align-items-center py-4">
+          <div class="col-lg-6 col-7">
+            <h6 class="h2 text-white d-inline-block mb-0">Agences</h6>
+            <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+              <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+                <li class="breadcrumb-item"><a href="#"><i class="fas fa-home"></i></a></li>
+                <li class="breadcrumb-item"><a href="#">Administration</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Agences</li>
+              </ol>
+            </nav>
+          </div>
+          <div class="col-lg-6 col-5 text-right">
+            <a href="#" class="btn btn-sm btn-neutral">Filters</a>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Page content -->
+  <div class="container-fluid mt--6">
+    
+    <div class="row">
+      <div class="col-xl-12">
+        {% if messages %}
+          <!-- Alerts -->
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <span class="alert-icon"><i class="ni ni-like-2"></i></span>
+            <span class="alert-text">
+              <strong>Success!</strong>
+              {% for message in messages %}
+                {{ message | safe }}
+              {% endfor %}
+            </span>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% endif %}
+
+        <!-- Table -->
+        <div class="row mt-4">
+
+          <div class="col">
+            <div class="card">
+              <!-- Card header -->
+              <div class="card-header border-0">
+                <h3 class="mb-0"><em>Liste des agences du système</em>
+                  <a href="{% url 'authentication:add_agency' %}" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
+                </h3>
+              </div>
+              <!-- Light table -->
+              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "code", "region", "name", "actions"]'>
+                <table class="table align-items-center table-flush">
+                  <thead class="thead-light">
+                    <tr>
+                      <th scope="col" class="sort" data-sort="row">N°</th>
+                      <th scope="col" class="sort" data-sort="code">Code</th>
+                      <th scope="col" class="sort" data-sort="region">Région</th>
+                      <th scope="col" class="sort" data-sort="name">Nom de l'agence</th>
+                      <th scope="col" class="sort" data-sort="Actions">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody class="list">
+                    {% for agency in agencies %}
+                      <tr>
+                        <td class="n°">
+                          {{forloop.counter}}
+                        </td>
+                        <th scope="row">
+                          <div class="media align-items-center">
+                            <div class="media-body">
+                              <span class="name mb-0 text-sm"> {{agency.code}} </span>
+                            </div>
+                          </div>
+                        </th>
+                        <td class="region">
+                          {{agency.region}}
+                        </td>
+                        <td class="name">
+                          {{agency.name}}
+                        </td>
+                        <td class="text-center justify-content-center">
+                          <span>
+                            <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-target="#modal-agency-{{agency.id}}">View</button>
+                          </span>
+                            
+                          <div class="modal fade" id="modal-agency-{{agency.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-agency-{{agency.id}}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="dialog">
+                              <div class="modal-content">
+                                <div class="modal-header justify-content-center">
+                                    <h2>Informations de l'agence</h2>
+                                </div>
+                                <div class="modal-body">
+
+                                    <div class="card card-agency mt--4 mb--4">
+                                        <div class="card-header text-center">
+                                            <div class="row text-center">
+                                                <div class="col">
+                                                    <i class="ni education_hat mr-2"></i><strong>Code:</strong> {{agency.code}}
+                                                </div>
+                                                <div class="col">
+                                                    <i class="ni education_hat mr-2"></i><strong>Région:</strong> {{agency.region}}
+                                                </div>
+                                            </div>
+                                            
+                                        </div>
+                                        <div class="card-body">
+                                            
+                                          <div class="row">
+                                            <div class="col">
+                                              <div>
+                                                <span class="heading"> <h2>{{agency.name}}</h2> </span>
+                                                <!-- <span class="description">Titre</span> -->
+                                              </div>
+                                            </div>
+                                          </div>
+                                          <div class="text-center">
+                                            <h4 class="h4">
+                                                <span class="text-muted">Commentaire</span><br>
+                                              {{agency.comment}}
+                                            </h4>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                </div>
+                                <div class="modal-footer justify-content-center">
+                                  <button type="button" class="btn btn-primary" data-dismiss="modal">Fermer</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <span>
+                            <button data-href="{% url 'authentication:edit_agency' agency.id %}" href="#" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
+                          </span>
+                          
+                        </td>
+                      </tr>
+                    {% empty %}
+                      <tr>
+                        <p>- Aucun agence enregistré.</p>
+                      </tr>
+                    {% endfor %}
+                    
+                  </tbody>
+                </table>
+              </div>
+              <!-- Card footer -->
+              <div class="card-footer py-4">
+                <nav aria-label="...">
+                  <ul class="pagination justify-content-end mb-0">
+                    <li class="page-item disabled">
+                      <a class="page-link" href="#" tabindex="-1">
+                        <i class="fas fa-angle-left"></i>
+                        <span class="sr-only">Previous</span>
+                      </a>
+                    </li>
+                    <li class="page-item active">
+                      <a class="page-link" href="#">1</a>
+                    </li>
+                    <li class="page-item">
+                      <a class="page-link" href="#">2 <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                      <a class="page-link" href="#">
+                        <i class="fas fa-angle-right"></i>
+                        <span class="sr-only">Next</span>
+                      </a>
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% include 'includes/footer.html' %}
+
+  </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+  <script>
+    setTimeout(function() {
+        $(".alert").alert('close');
+    }, 3000);
+
+    $(".edit-link").click(function() {
+      window.location = $(this).data("href");
+    })
+  </script>
+{% endblock javascripts %}

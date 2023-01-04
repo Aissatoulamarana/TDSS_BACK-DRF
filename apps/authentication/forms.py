@@ -8,7 +8,7 @@ from django.forms import TextInput, NumberInput, Select, Textarea, FileInput, Da
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from .models import Profile, CustomUser, ProfileType, UserType
+from .models import Profile, CustomUser, ProfileType, UserType, Agency, Region
 
 
 class LoginForm(forms.Form):
@@ -46,7 +46,7 @@ class ResetPwdForm(forms.Form):
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ('name', 'type', 'description', 'location', 'contact', 'picture')
+        fields = ('name', 'type', 'description', 'location', 'contact', 'picture', 'adresse', 'email')
         # Omitted fields: uuid, account, created_by, created_on, modified_on, status
         widgets = {
             'name': TextInput(attrs={'class': "form-control", 'placeholder': "Nom du profil", 'autofocus': "True"}),
@@ -54,7 +54,9 @@ class ProfileForm(forms.ModelForm):
             'description': Textarea(attrs={'rows':3, 'placeholder': "Description du profil...", 'class': "form-control" }),
             'location': Select(attrs={'class': "form-control", 'placeholder': "Emplacement"}),
             'contact': NumberInput(attrs={'class': "form-control", 'placeholder': "N° de contact", 'type': "number", 'min': 0}),
-            'picture': ClearableFileInput(attrs={'class': "form-control"})
+            'picture': ClearableFileInput(attrs={'class': "form-control"}),
+            'adresse': Textarea(attrs={'rows':3, 'placeholder': "Adresse, BP...", 'class': "form-control" }),
+            'email': EmailInput(attrs={'class': "form-control", 'placeholder': "example@mail.com"}),
         }
     def __init__(self, *args, **kwargs):
         super(ProfileForm, self).__init__(*args, **kwargs)
@@ -87,6 +89,22 @@ class CustomUserForm(forms.ModelForm):
         self.fields['location'].empty_label = "Sélectionner l'emplacement"
         self.fields['type'].empty_label = "Sélectionner le type"
         self.fields['type'].queryset = UserType.objects.filter(status='ON').order_by('id')
+
+
+class AgencyForm(forms.ModelForm):
+    class Meta:
+        model = Agency
+        fields = ('code', 'region', 'name', 'comment')
+        # Omitteed fields: id
+        widgets = {
+            'code': TextInput(attrs={'class': "form-control", 'placeholder': "Code de l'agence", 'autofocus': True}),
+            'region': Select(attrs={'class': "form-control", 'placeholder': "Région"}),
+            'name': TextInput(attrs={'class': "form-control", 'placeholder': "Nom de l'agence"}),
+            'comment': Textarea(attrs={'rows':3, 'placeholder': "Commentaire...", 'class': "form-control" }),
+        }
+    def __init__(self, *args, **kwargs):
+        super(AgencyForm, self).__init__(*args, **kwargs)
+        self.fields['region'].empty_label = "Sélectionner la région"
 
 
 class SignUpForm(UserCreationForm):

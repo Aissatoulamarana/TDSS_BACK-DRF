@@ -30,12 +30,14 @@ def login_view(request):
                 login(request, user)
                 if user.reset_pwd == True:
                     return redirect("authentication:reset_password")
+                elif user.is_active == False:
+                    msg = "Votre compte est désactivé. Contactez l'Admin"
                 else:
                     return redirect("/")
             else:
-                msg = 'Email/Mot de passe incorrect.'
+                msg = "Email/Mot de passe incorrect."
         else:
-            msg = 'Formulaire invalid soumit.'
+            msg = "Formulaire invalid soumit."
 
     return render(request, "accounts/login.html", {"form": form, "msg": msg})
 
@@ -76,6 +78,24 @@ def users_view(request):
         'users': users,
         'segment': "administration"
     })
+
+
+def activate_user_view(request, user_id):
+    user = CustomUser.objects.get(pk=user_id)
+    
+    user.is_active = True
+    print(user.is_active)
+    user.save()
+    messages.success(request, "Compte utilisateur activé.")
+    return redirect("authentication:users")
+
+
+def deactivate_user_view(request, user_id):
+    user = CustomUser.objects.get(pk=user_id)
+    user.is_active = False
+    user.save()
+    messages.success(request, "Compte utilisateur Bloqué.")
+    return redirect("authentication:users")
 
 
 def profiles_view(request):

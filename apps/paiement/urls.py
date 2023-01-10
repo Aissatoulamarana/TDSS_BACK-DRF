@@ -11,6 +11,7 @@ app_name = 'paiement'
 urlpatterns = [
 
     path("payments/", views.payments_view, name="payments"),
+    path("payments/add/", views.add_payment_view, name="add_payment"),
     path("devises/", views.devises_view, name="devises"),
 
 ]

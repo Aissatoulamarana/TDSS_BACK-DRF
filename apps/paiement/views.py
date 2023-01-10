@@ -4,41 +4,37 @@ Copyright (c) 2022 - OD
 """
 
 from django import template
+from django.shortcuts import render, redirect
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
 
-
-@login_required(login_url="/login/")
-def index(request):
-    context = {'segment': 'index'}
-
-    html_template = loader.get_template('paiement/index.html')
-    return HttpResponse(html_template.render(context, request))
+from .models import Devise, Facture, Payer, Payment
+from .forms import DeviseForm, FactureForm, PayerForm, PaymentForm
 
 
 @login_required(login_url="/login/")
-def pages(request):
-    context = {}
-    # All resource paths end in .html.
-    # Pick out the html file name from the url. And load that template.
-    try:
+def payments_view(request):
+    payments = Payment.objects.all()
+    form = PaymentForm()
+    payerform = PayerForm()
 
-        load_template = request.path.split('/')[-1]
+    return render(request, "paiements/payments.html", {
+        #  To edit
+        'form': form,
+        'payerform': payerform,
+        'payments': payments,
+        'segment': "paiements"
+    })
 
-        if load_template == 'admin':
-            return HttpResponseRedirect(reverse('admin:index'))
-        context['segment'] = load_template
 
-        html_template = loader.get_template('home/' + load_template)
-        return HttpResponse(html_template.render(context, request))
+@login_required(login_url="/login/")
+def devises_view(request):
+    devises = Devise.objects.all()
 
-    except template.TemplateDoesNotExist:
-
-        html_template = loader.get_template('home/page-404.html')
-        return HttpResponse(html_template.render(context, request))
-
-    except:
-        html_template = loader.get_template('home/page-500.html')
-        return HttpResponse(html_template.render(context, request))
+    return render(request, "paiements/devises.html", {
+        'devises': devises,
+        'segment': "paiements"
+    })

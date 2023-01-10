@@ -20,7 +20,7 @@ class Devise(models.Model):
 
 class Facture(models.Model):
     ref = models.DateTimeField(auto_now_add=True, editable=False)
-    date = models.DateField(auto_now=True)
+    date = models.DateField()
     amount = models.DecimalField(max_digits=9, decimal_places=2)
     devise = models.ForeignKey(Devise, on_delete=models.PROTECT, related_name="facture_devises")
     comment = models.TextField(max_length=255, blank=True, null=True)
@@ -50,7 +50,7 @@ class Payment(models.Model):
     facture_ref = models.ForeignKey(Facture, on_delete=models.PROTECT, blank=True, null=True)
     type = models.CharField(max_length=50)
     payer = models.ForeignKey(Payer, on_delete=models.PROTECT, related_name="payment_payers")
-    date = models.DateField(auto_now=True)
+    date = models.DateField()
     amount = models.DecimalField(max_digits=9, decimal_places=2)
     devise = models.ForeignKey(Devise, on_delete=models.PROTECT, related_name="payment_devises")
     comment = models.TextField(max_length=255, blank=True, null=True)

@@ -80,8 +80,38 @@ def add_payment_view(request):
 @login_required(login_url="/login/")
 def devises_view(request):
     devises = Devise.objects.all()
+    guinean_franc = Devise.objects.first()
+    dollar = Devise.objects.get(pk=2)
+    euro = Devise.objects.get(pk=3)
 
     return render(request, "paiements/devises.html", {
+        'guinean_franc': guinean_franc,
+        'dollar': dollar,
+        'euro': euro,
         'devises': devises,
         'segment': "paiements"
     })
+
+
+@login_required(login_url="/login/")
+def devises_update_view(request):
+    if request.method == "POST":
+        new_gnf = request.POST["guinean_franc"]
+        new_dollar = request.POST["dollar"]
+        new_euro = request.POST["euro"]
+
+        Devise.objects.filter(pk=1).update(value=new_gnf)
+        Devise.objects.filter(pk=2).update(value=new_dollar)
+        Devise.objects.filter(pk=3).update(value=new_euro)
+
+        messages.success(request, "Dévises actualisé.")
+        devises = Devise.objects.all()
+        return render(request, "paiements/devises.html", {
+            'guinean_franc': Devise.objects.first(),
+            'dollar': Devise.objects.get(pk=2),
+            'euro': Devise.objects.get(pk=3),
+            'devises': devises,
+            'segment': "paiements"
+        })
+    else:
+        return redirect("paiement:payments")

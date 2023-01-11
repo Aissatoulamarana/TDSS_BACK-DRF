@@ -63,8 +63,70 @@
               <!-- Card header -->
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des dévises</em>
-                  <a href="#" class="btn btn-sm btn-neutral float-right">Actualiser</a>
+                  <a href="#" class="btn btn-sm btn-neutral float-right" role="button" data-toggle="modal" data-target="#modal-devise-update">Actualiser</a>
                 </h3>
+                
+                <div class="modal fade" id="modal-devise-update" tabindex="-1" role="dialog" aria-labelledby="modal-devise-update" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered " role="dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h6 class="modal-title" id="modal-devise-update">Taux du jour</h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">×</span>
+                        </button>
+                      </div>
+                      <hr>
+                      <div class="modal-body mt--6">
+                        <form action="{% url 'paiement:update_devises' %}" method="post" id="form-devise-update">
+                          {% csrf_token %}
+                          <fieldset>
+                            <legend></legend>
+                            <div class="row">
+                              <div class="col">
+                                <div class="form-group">
+                                  <div class="input-group input-group-merge">
+                                    <div class="input-group-prepend">
+                                      <span class="input-group-text"><strong>GNF</strong></span>
+                                    </div>
+                                    <input class="form-control" type="number" min="0" step="any" id="guinean_franc" name="guinean_franc" placeholder="0.00" value="{{guinean_franc.value}}">
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="row">
+                              <div class="col">
+                                <div class="form-group">
+                                  <div class="input-group input-group-merge">
+                                    <div class="input-group-prepend">
+                                      <span class="input-group-text"><strong>$</strong></span>
+                                    </div>
+                                    <input class="form-control" type="number" min="0" step="any" id="dollar" name="dollar" placeholder="0.00" value="{{dollar.value}}">
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="row">
+                              <div class="col">
+                                <div class="form-group">
+                                  <div class="input-group input-group-merge">
+                                    <div class="input-group-prepend">
+                                      <span class="input-group-text"><strong>€</strong></span>
+                                    </div>
+                                    <input class="form-control" type="number" min="0" step="any" id="euro" name="euro" placeholder="0.00" value="{{euro.value}}">
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </fieldset>
+                          <div class="modal-footer justify-content-center">
+                            <button type="submit" class="btn btn-primary">Enregistrer</button>
+                          </div>
+                        </form>
+                      </div>
+                      
+                    </div>
+                  </div>
+                </div>
               </div>
               <!-- Light table -->
               <div class="table-responsive" data-toggle="list" data-list-values='["n°", "name", "sign", "value", "comment", "actions"]'>

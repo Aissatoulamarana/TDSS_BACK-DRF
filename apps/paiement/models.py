@@ -18,14 +18,42 @@ class Devise(models.Model):
         return self.name
 
 
+class Permit(models.Model):
+    name = models.CharField(max_length=50)
+    type = models.CharField(max_length=30, choices=[('A', "A"), ('B', "B"), ('C', "C")], default="A")
+    price = models.DecimalField(max_digits=9, decimal_places=2)
+    devise = models.ForeignKey(Devise, on_delete=models.PROTECT)
+    comment = models.TextField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Job(models.Model):
+    name = models.CharField(max_length=50)
+    status = models.CharField(max_length=30, choices=[('ON', "Actif"), ('OFF', "Inactif")], default="ON")
+    comment = models.TextField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Country(models.Model):
+    code = models.CharField(max_length=10, blank=True, null=True)
+    name = models.CharField(max_length=50)
+    comment = models.TextField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Facture(models.Model):
     ref = models.DateTimeField(auto_now_add=True, editable=False)
-    date = models.DateField()
     amount = models.DecimalField(max_digits=9, decimal_places=2)
     devise = models.ForeignKey(Devise, on_delete=models.PROTECT, related_name="facture_devises")
     comment = models.TextField(max_length=255, blank=True, null=True)
     created_by = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
-    created_on = models.DateField(auto_now_add=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -37,9 +65,10 @@ class Payer(models.Model):
     last = models.CharField(max_length=50, verbose_name="last_name")
     email = models.EmailField(max_length=100, blank=True, null=True)
     phone = models.IntegerField()
-    country_origin = models.CharField(max_length=100, blank=True, null=True)
+    country_origin = models.ForeignKey(Country, on_delete=models.PROTECT, blank=True, null=True, related_name="payer_countries")
     employer = models.ForeignKey(Profile, on_delete=models.PROTECT, blank=True, null=True)
-    job = models.CharField(max_length=50, blank=True, null=True)
+    job = models.ForeignKey(Job, on_delete=models.PROTECT, blank=True, null=True, related_name="payer_jobs")
+    address = models.TextField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return f"{self.first} {self.last}"
@@ -48,14 +77,13 @@ class Payer(models.Model):
 class Payment(models.Model):
     ref = models.DateTimeField(auto_now_add=True, editable=False)
     facture_ref = models.ForeignKey(Facture, on_delete=models.PROTECT, blank=True, null=True)
-    type = models.CharField(max_length=50)
+    type = models.ForeignKey(Permit, on_delete=models.PROTECT, related_name="payment_permits_types")
     payer = models.ForeignKey(Payer, on_delete=models.PROTECT, related_name="payment_payers")
-    date = models.DateField()
     amount = models.DecimalField(max_digits=9, decimal_places=2)
     devise = models.ForeignKey(Devise, on_delete=models.PROTECT, related_name="payment_devises")
     comment = models.TextField(max_length=255, blank=True, null=True)
     created_by = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
-    created_on = models.DateField(auto_now_add=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
 
     def __str__(self):

@@ -88,7 +88,7 @@
                                 <div class="input-group-prepend">
                                   <span class="input-group-text"><i class="fas fa-user"></i></span>
                                 </div>
-                                {{ paymentform.facture_ref }}
+                                {{ paymentform.type }}
                               </div>
                             </div>
                           </div>
@@ -98,23 +98,13 @@
                                 <div class="input-group-prepend">
                                   <span class="input-group-text"><i class="fas fa-tag"></i></span>
                                 </div>
-                                {{ paymentform.type }}
+                                {{ paymentform.devise }}
                               </div>
                             </div>
                           </div>
                         </div>
-                        <div class="row">
-                          <div class="col-md-6">
-                            <div class="form-group">
-                              <div class="input-group input-group-merge">
-                                <div class="input-group-prepend">
-                                  <span class="input-group-text"><i class="fas fa-align-left"></i></span>
-                                </div>
-                                {{ paymentform.date }}
-                              </div>
-                            </div>
-                          </div>
-                          <div class="col-md-6">
+                        <div class="row justify-content-center">
+                          <div class="col">
                             <div class="form-group">
                               <div class="input-group input-group-merge">
                                 {{ paymentform.amount }}
@@ -125,19 +115,7 @@
                             </div>
                           </div>
                         </div>
-                        <div class="row">
-                          <div class="col-md-6">
-                            <div class="form-group">
-                              <div class="input-group input-group-merge">
-                                {{ paymentform.comment }}
-                                <div class="input-group-append">
-                                  <span class="input-group-text"><i class="fas fa-image"></i></span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          
-                        </div>
+                        
                       </fieldset>
                       <!-- Input groups with icon -->
                       <fieldset class="fieldset">
@@ -219,6 +197,16 @@
                                   <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
                                 </div>
                                 {{payerform.job}}
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <div class="input-group input-group-merge">
+                                <div class="input-group-prepend">
+                                  <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
+                                </div>
+                                {{payerform.address}}
                               </div>
                             </div>
                           </div>

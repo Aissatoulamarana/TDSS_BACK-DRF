@@ -85,5 +85,5 @@ class Profile(models.Model):
     modified_on = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.uuid} | {self.type}"
+        return f"{self.name}"
 

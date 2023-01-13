@@ -104,12 +104,12 @@
                           </div>
                         </div>
                         <div class="row justify-content-center">
-                          <div class="col">
+                          <div class="col-md-6">
                             <div class="form-group">
                               <div class="input-group input-group-merge">
                                 {{ paymentform.amount }}
                                 <div class="input-group-append">
-                                  <span class="input-group-text">GNF</span>
+                                  <span id="input-devise" class="input-group-text font-weight-bold"></span>
                                 </div>
                               </div>
                             </div>
@@ -237,4 +237,65 @@
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
-{% block javascripts %}{% endblock javascripts %}
+{% block javascripts %}
+  <script>
+    $(function(){
+      // Get devise corresponding symbol
+      function get_devise_symbol() {
+        var symbol;
+        var devise = $('#id_payment-devise').val()
+        switch (devise) {
+          case '1':
+            symbol = "GNF";
+            break;
+          case '2':
+            symbol = "$";
+            break;
+          case '3':
+            symbol = "€";
+            break;
+        
+          default:
+            symbol = "GNF";
+            break;
+        }
+        return symbol;
+      };
+      // Setting default devise input value
+      $('#input-devise').text(get_devise_symbol());
+
+      // Update devise in amount field
+      $('#id_payment-devise').change(function(){
+        $('#input-devise').text(get_devise_symbol());
+      });
+
+      // Update payment amout in view
+      $('.amount-param').change(function(){
+        var permit_id = parseInt($('#id_payment-type').val());
+        var devise_id = parseInt($('#id_payment-devise').val());
+        // alert(permit_id + "Devise:" + devise_id);
+
+        fetch(`/devises/${permit_id}/${devise_id}/value`, {
+          method: "GET",
+          // body: JSON.stringify({
+          //   permit: parseInt(permit_id),
+          // })
+        })
+        .then (response => response.json())
+        .then (result => {
+          if (result.error) {
+            alert(result.error);
+          } else {
+            // alert(result.permit_price + "Devise: " + result.devise_value);
+            $('#id_payment-amount').val(parseFloat(result.permit_price * result.devise_value).toFixed(2))
+          }
+        })
+        return false;
+
+
+      });
+
+      
+    });
+  </script>
+{% endblock javascripts %}

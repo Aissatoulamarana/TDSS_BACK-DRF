@@ -67,13 +67,13 @@
                 </h3>
               </div>
               <!-- Light table -->
-              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "date", "ref", "type", "amount", "actions"]'>
+              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "ref", "payer",  "type", "amount", "actions"]'>
                 <table class="table align-items-center table-flush">
                   <thead class="thead-light">
                     <tr>
                       <th scope="col" class="sort" data-sort="n°">N°</th>
-                      <th scope="col" class="sort" data-sort="date">Date</th>
                       <th scope="col" class="sort" data-sort="ref">Référence</th>
+                      <th scope="col" class="sort" data-sort="payer">Payeur</th>
                       <th scope="col" class="sort" data-sort="type">Type</th>
                       <th scope="col" class="sort" data-sort="amount">Montant</th>
                       <th scope="col" class="sort" data-sort="Actions">Actions</th>
@@ -85,17 +85,17 @@
                         <td class="n°">
                           {{forloop.counter}}
                         </td>
-                        <td class="date">
-                            {{payment.date}}
-                          </td>
                         <th scope="ref">
-                          {{payment.ref}}
+                          {{payment.reference}}
                         </th>
+                        <td class="payer">
+                          {{payment.payer}}
+                        </td>
                         <td class="type">
                           {{payment.type}}
                         </td>
                         <td>
-                            {{payment.amount}} {{payment.devise}}
+                            {{payment.amount}} {{payment.devise.sign}}
                         </td>
                         <td class="text-center justify-content-center">
                           <span>

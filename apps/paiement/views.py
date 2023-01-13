@@ -7,11 +7,12 @@ from django import template
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.template import loader
 from django.urls import reverse
+import json
 
-from .models import Devise, Facture, Payer, Payment
+from .models import Devise, Facture, Payer, Payment, Permit
 from .forms import DeviseForm, FactureForm, PayerForm, PaymentForm
 
 
@@ -45,7 +46,7 @@ def add_payment_view(request):
         paymentform = PaymentForm(request.POST, prefix= "payment")
         payerform = PayerForm(request.POST, prefix= "payer")
 
-        paymentform.fields["payer"].required = False
+        # paymentform.fields["payer"].required = False
         
         if paymentform.is_valid() and payerform.is_valid():
             print("Valid forms submitted!")
@@ -115,3 +116,24 @@ def devises_update_view(request):
         })
     else:
         return redirect("paiement:payments")
+
+
+def get_devise_value(request, permit_id, devise_id):
+    if request.method == "GET":
+        
+        # data = json.loads(request.body)
+        # permit_id = data["permit"]
+        # Get permit price
+        try:
+            permit = Permit.objects.get(pk=permit_id)
+        except Permit.DoesNotExist:
+            return JsonResponse({'error': "Type de permis inexistant."})
+
+        try:
+            devise = Devise.objects.get(pk=devise_id)
+        except Devise.DoesNotExist:
+            return JsonResponse({'error': "Devise inexistante."})
+        
+        return JsonResponse({'permit_price': permit.price, 'devise_value': devise.value})
+    else:
+        return JsonResponse({"error": "Erreur requête. COntactez l'admin."})

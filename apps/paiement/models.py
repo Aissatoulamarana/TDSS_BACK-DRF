@@ -3,6 +3,7 @@
 Copyright (c) 2022 - OD
 """
 
+import uuid
 from django.db import models
 from apps.authentication.models import CustomUser, Profile
 
@@ -48,7 +49,7 @@ class Country(models.Model):
 
 
 class Facture(models.Model):
-    ref = models.DateTimeField(auto_now_add=True, editable=False)
+    reference = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     amount = models.DecimalField(max_digits=9, decimal_places=2)
     devise = models.ForeignKey(Devise, on_delete=models.PROTECT, related_name="facture_devises")
     comment = models.TextField(max_length=255, blank=True, null=True)
@@ -75,7 +76,7 @@ class Payer(models.Model):
 
 
 class Payment(models.Model):
-    ref = models.DateTimeField(auto_now_add=True, editable=False)
+    reference = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     facture_ref = models.ForeignKey(Facture, on_delete=models.PROTECT, blank=True, null=True)
     type = models.ForeignKey(Permit, on_delete=models.PROTECT, related_name="payment_permits_types")
     payer = models.ForeignKey(Payer, on_delete=models.PROTECT, related_name="payment_payers")

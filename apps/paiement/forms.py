@@ -62,13 +62,14 @@ class PaymentForm(forms.ModelForm):
         fields = ('type', 'amount', 'devise', 'comment')
         # Omitted fields: id, facture_ref, ref, payer, created_by, created_on, modified_on
         widgets = {
-            'type': Select(attrs={'class': "form-control", 'placeholder': "Type de document"}),
-            'amount': NumberInput(attrs={'class': "form-control", 'placeholder': "0.00", 'min': 0, 'type': "number"}),
-            'devise': Select(attrs={'class': "form-control"}),
+            'type': Select(attrs={'class': "form-control amount-param", 'placeholder': "Type de document"}),
+            'amount': NumberInput(attrs={'class': "form-control", 'placeholder': "0.00", 'min': 0, 'type': "number", 'readonly': True}),
+            'devise': Select(attrs={'class': "form-control amount-param"}),
             'comment': Textarea(attrs={'rows':3, 'placeholder': "Commentaire...", 'class': "form-control" })
         }
     def __init__(self, *args, **kwargs):
         super(PaymentForm, self).__init__(*args, **kwargs)
         self.fields['type'].empty_label = "Sélectionner le type de permis"
-        self.fields['devise'].empty_label = "Sélectionner la devise"
+        self.fields['devise'].empty_label = None
+        # self.fields['amount'].required = False
         

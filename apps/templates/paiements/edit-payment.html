@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} Ajout {% endblock %}
+{% block title %} Modification {% endblock %}
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}{% endblock stylesheets %}
@@ -19,7 +19,7 @@
                 <li class="breadcrumb-item"><a href="#"><i class="fas fa-home"></i></a></li>
                 <li class="breadcrumb-item"><a href="#">Paiements</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Liste</li>
-                <li class="breadcrumb-item active" aria-current="page">Ajout</li>
+                <li class="breadcrumb-item active" aria-current="page">Modification</li>
               </ol>
             </nav>
           </div>
@@ -46,7 +46,7 @@
                   <!-- Card header -->
                   <div class="card-header">
                     <h3 class="mb-0"><a href="{% url 'paiement:payments' %}">
-                        <i class="ni ni-bold-left"></i></a> <span class="ml-4">Nouveau Paiement</span>
+                        <i class="ni ni-bold-left"></i></a> <span class="ml-4">Modification de paiement</span>
                     </h3>
                   </div>
                   <!-- Card body -->
@@ -76,7 +76,7 @@
                     </div>
                   {% endif %}
                   <div class="card-body">
-                    <form role="form" action="{% url 'paiement:add_payment' %}" method="post">
+                    <form role="form" action="{% url 'paiement:edit_payment' payment_id %}" method="post">
                         {% csrf_token %}
                       <!-- Input groups with icon -->
                       <fieldset class="fieldset">
@@ -214,7 +214,7 @@
                       </fieldset>
                       <div class="card-footer">
                         <div class="row justify-content-center">
-                            <input type="reset" class="btn btn-secondary" value="Effacer">
+                            <input type="button" onclick="location.href='/payments/'" class="btn btn-secondary" value="Annuler">
                             <input type="submit" class="btn btn-primary" value="Enregistrer">
                         </div>
                       </div>

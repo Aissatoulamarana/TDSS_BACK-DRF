@@ -105,11 +105,56 @@
                           <div class="modal fade" id="modal-payment-{{payment.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-payment-{{payment.id}}" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="dialog">
                               <div class="modal-content">
-                                <div class="modal-header">
+                                <div class="modal-header justify-content-center">
+                                  <h2>Détails du paiement</h2>
                                 </div>
                                 <div class="modal-body">
 
-                                  {{payment.ref}}<br>{{payment.comment}}
+                                  <div class="card card-agency mt--4 mb--4">
+                                    <div class="card-header text-center">
+                                      <div class="row text-center">
+                                        <div class="col">
+                                          <i class="ni education_hat mr-2"></i><strong>Référence:</strong> {{payment.reference}}
+                                        </div>
+                                      </div>
+                                        
+                                    </div>
+                                    <div class="card-body">
+                                      <div class="row">
+                                        <div class="col">
+                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Type:</span> 
+                                          <strong>{{payment.type}}</strong>
+                                        </div>
+                                        <div class="col">
+                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Montant:</span>
+                                          <strong>{{payment.amount}} {{payment.devise.sign}}</strong>
+                                        </div>
+                                      </div>
+                                        
+                                      <div class="row mt-3 mb-3">
+                                        <div class="col">
+                                          <div>
+                                            <i class="ni ni-education_hat mr-2"></i><span class="text-muted">Payeur:</span>
+                                            <span class="heading"> <h3>{{payment.payer.first}} {{payment.payer.last}}</h3> </span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div class="row">
+                                        <div class="col">
+                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Nationalité:</span><br> 
+                                          <strong>{{payment.payer.country_origin}}</strong>
+                                        </div>
+                                        <div class="col">
+                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Employeur:</span><br> 
+                                          <strong>{{payment.payer.employer}}</strong>
+                                        </div>
+                                        <div class="col">
+                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Fonction:</span><br> 
+                                          <strong>{{payment.payer.job}}</strong>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
 
                                 </div>
                                 <div class="modal-footer justify-content-center">
@@ -120,7 +165,7 @@
                           </div>
 
                           <span>
-                            <button data-href="#" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
+                            <button data-href="{% url 'paiement:edit_payment' payment.id %}" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
                           </span>
                           
                         </td>

@@ -45,23 +45,21 @@ def add_payment_view(request):
 
         paymentform = PaymentForm(request.POST, prefix= "payment")
         payerform = PayerForm(request.POST, prefix= "payer")
-
-        # paymentform.fields["payer"].required = False
         
         if paymentform.is_valid() and payerform.is_valid():
-            print("Valid forms submitted!")
+            # print("Valid forms submitted!")
 
             new_payer = payerform.save(commit=False)
 
             new_payer.save()
-            print("Payer created!")
+            # print("Payer created!")
 
             new_payment = paymentform.save(commit=False)
             new_payment.payer = new_payer
             new_payment.created_by = request.user
 
             new_payment.save()
-            print("Payment created!")
+            # print("Payment created!")
 
             messages.success(request, "Nouveau paiement ajouté.")
             return redirect("paiement:payments")
@@ -75,6 +73,46 @@ def add_payment_view(request):
             return render(request, "paiements/add-payment.html", context)
         
     return render(request, "paiements/add-payment.html", context_empty)
+
+
+@login_required(login_url="/login/")
+def edit_payment_view(request, payment_id):
+    payment = Payment.objects.get(pk=payment_id)
+    payer = Payer.objects.get(pk=payment.payer.id)
+    context_empty = {
+        'paymentform': PaymentForm(instance=payment, prefix= "payment"),
+        'payerform': PayerForm(instance=payer, prefix= "payer"),
+        'payment_id': payment_id, 
+        'segment': 'paiements'
+    }
+
+    if request.method == "POST":
+        
+        paymentform = PaymentForm(request.POST, instance=payment, prefix= "payment")
+        payerform = PayerForm(request.POST, instance=payer, prefix= "payer")
+        if paymentform.is_valid() and payerform.is_valid():
+            
+            # print("Update form submited !")
+            payer_updated = payerform.save()
+            payer_updated.save()
+            payment_updated = paymentform.save(commit=False)
+            payment_updated.payer = payer_updated
+            payment_updated.save()
+
+            messages.success(request, "Payment modifié avec succès.")
+            return redirect("paiement:payments")
+        else:
+            context = {
+                'paymentform': PaymentForm(instance=payment, prefix= "payment"),
+                'payerform': PayerForm(instance=payer, prefix= "payer"),
+                'ErrorMessage': "Formulaire invalid soumit.",
+                'payment_id': payment_id, 
+                'segment': 'paiements'
+            }
+            return render(request, "paiements/edit-payment.html", context)
+
+
+    return render(request, "paiements/edit-payment.html", context_empty)
 
 
 

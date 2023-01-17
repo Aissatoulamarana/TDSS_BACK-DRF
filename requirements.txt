@@ -13,3 +13,4 @@ whitenoise==5.3.0
 pillow
 mysqlclient
 psycopg2-binary
+reportlab

@@ -7,10 +7,14 @@ from django import template
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, FileResponse
 from django.template import loader
 from django.urls import reverse
 import json
+import io
+from reportlab.pdfgen import canvas
+from reportlab.platypus import Table
+
 
 from .models import Devise, Facture, Payer, Payment, Permit
 from .forms import DeviseForm, FactureForm, PayerForm, PaymentForm
@@ -114,6 +118,45 @@ def edit_payment_view(request, payment_id):
 
     return render(request, "paiements/edit-payment.html", context_empty)
 
+
+@login_required(login_url="/login/")
+def payment_receipt_view(request, payment_id):
+    # Getting the payment
+    payment = Payment.objects.get(pk=payment_id)
+
+    # Creating a buffer for the pdf
+    buffer = io.BytesIO()
+
+    pdf = canvas.Canvas(buffer)
+
+    pdf.line(50,800, 550, 800)
+    pdf.drawString(200, 780, f"RECU DE PAIEMENT N° 00{payment.id}/2023")
+    pdf.line(50,770, 550, 770)
+    pdf.setFontSize(8, leading=None)
+    pdf.drawString(55, 750, f"Référence: {payment.reference}")
+    pdf.drawString(400, 750, f"Date: {payment.created_on}")
+    # pdf.drawString(60, 730, f"- Informations du payeur -")
+    pdf.drawString(55, 720, f"Prénom & Nom:  {payment.payer.first} {payment.payer.last}")
+    pdf.drawString(55, 710, f"Nationalité: {payment.payer.country_origin}")
+    pdf.drawString(55, 700, f"Employeur: {payment.payer.employer}")
+    pdf.drawString(55, 690, f"Fonction: {payment.payer.job}")
+    pdf.drawString(55, 680, f"Téléphone: {payment.payer.phone}")
+
+    data = [
+        ['Description', 'Type de permis', 'Quantité', 'Montant'],
+        ['Frais d\'acquisition', payment.type, '01', payment.amount]
+    ]
+    table = Table(data, colWidths=150)
+
+    table.wrapOn(pdf, 55, 600)
+    table.drawOn(pdf, 55, 600)
+
+    pdf.showPage()
+    pdf.save()
+
+    buffer.seek(0)
+
+    return FileResponse(buffer, filename="hello.pdf")
 
 
 @login_required(login_url="/login/")

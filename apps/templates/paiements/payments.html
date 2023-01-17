@@ -167,6 +167,10 @@
                           <span>
                             <button data-href="{% url 'paiement:edit_payment' payment.id %}" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
                           </span>
+
+                          <span>
+                            <button data-href="{% url 'paiement:payment_receipt' payment.id %}" onclick="window.open($(this).data('href'), '_blank')" class="btn btn-sm btn-icon-only" role="button">Print</button>
+                          </span>
                           
                         </td>
                       </tr>

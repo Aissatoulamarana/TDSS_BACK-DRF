@@ -14,6 +14,7 @@ import json
 import io
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Table
+import qrcode
 
 
 from .models import Devise, Facture, Payer, Payment, Permit
@@ -129,6 +130,7 @@ def payment_receipt_view(request, payment_id):
 
     pdf = canvas.Canvas(buffer)
 
+    pdf.setTitle("Paiements")
     pdf.line(50,800, 550, 800)
     pdf.drawString(200, 780, f"RECU DE PAIEMENT N° 00{payment.id}/2023")
     pdf.line(50,770, 550, 770)
@@ -151,12 +153,27 @@ def payment_receipt_view(request, payment_id):
     table.wrapOn(pdf, 55, 600)
     table.drawOn(pdf, 55, 600)
 
+    # Creating the QR Code
+    qr_data = {
+        'ID': payment.id, 
+        'REF': payment.reference, 
+        'Payeur': f"{payment.payer.first} {payment.payer.last}", 
+        'Montant': f"{payment.amount} {payment.devise.sign}"
+    }
+    qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L, border=4)
+    qr.add_data(qr_data)
+    qr.make(fit=True)
+    img = qr.make_image()
+    img.save('staticfiles/payment_qr.png')
+    
+    pdf.drawImage('staticfiles/payment_qr.png', 60, 500, 100, 100, showBoundary=False)
+
     pdf.showPage()
     pdf.save()
 
     buffer.seek(0)
 
-    return FileResponse(buffer, filename="hello.pdf")
+    return FileResponse(buffer, filename="recu_paiement.pdf")
 
 
 @login_required(login_url="/login/")

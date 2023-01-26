@@ -14,3 +14,4 @@ pillow
 mysqlclient
 psycopg2-binary
 reportlab
+qrcode

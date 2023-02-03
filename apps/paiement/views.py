@@ -235,3 +235,54 @@ def get_devise_value(request, permit_id, devise_id):
         return JsonResponse({'permit_price': permit.price, 'devise_value': devise.value})
     else:
         return JsonResponse({"error": "Erreur requête. COntactez l'admin."})
+
+
+@login_required(login_url="/login/")
+def factures_view(request):
+    factures = Facture.objects.all()
+    form = FactureForm()
+
+    return render(request, "paiements/factures.html", {
+        #  To edit
+        'form': form,
+        'factures': factures,
+        'segment': "facturation"
+    })
+
+
+@login_required(login_url="/login/")
+def add_facture_view(request):
+    default_devise = Devise.objects.first()
+    initial_value = {'devise': default_devise}
+    context_empty = {
+        'factureform': FactureForm(initial= initial_value),
+        'permits': Permit.objects.all(),
+        'segment': 'facturation'
+    }
+
+    if request.method == "POST":
+
+        factureform = FactureForm(request.POST)
+        
+        if factureform.is_valid():
+            # print("Valid forms submitted!")
+
+            new_facture = factureform.save(commit=False)
+
+            new_facture.created_by = request.user
+
+            new_facture.save()
+            # print("Facture created!")
+
+            messages.success(request, "Nouvelle facture ajoutée.")
+            return redirect("paiement:factures")
+        else:
+            context = {
+                'factureform': factureform,
+                'ErrorMessage': "Formulaire invalid soumit",
+                'segment': 'Facturation'
+            }
+            return render(request, "paiements/add-facture.html", context)
+        
+    return render(request, "paiements/add-facture.html", context_empty)
+

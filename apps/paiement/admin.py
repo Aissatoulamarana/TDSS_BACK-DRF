@@ -8,7 +8,7 @@ class DeviseAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'sign', 'value', 'comment')
 
 class FactureAdmin(admin.ModelAdmin):
-    list_display = ('id', 'reference', 'amount', 'devise')
+    list_display = ('id', 'reference', 'client', 'amount', 'devise')
 
 class PayerAdmin(admin.ModelAdmin):
     list_display = ('id', 'first', 'last', 'phone', 'employer', 'job')

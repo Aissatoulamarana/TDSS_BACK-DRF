@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} Ajout {% endblock %}
+{% block title %} Factures - Ajout {% endblock %}
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}{% endblock stylesheets %}
@@ -17,7 +17,7 @@
             <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
               <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
                 <li class="breadcrumb-item"><a href="#"><i class="fas fa-home"></i></a></li>
-                <li class="breadcrumb-item"><a href="#">Paiements</a></li>
+                <li class="breadcrumb-item"><a href="#">Facturation</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Liste</li>
                 <li class="breadcrumb-item active" aria-current="page">Ajout</li>
               </ol>
@@ -45,8 +45,8 @@
                 <div class="card">
                   <!-- Card header -->
                   <div class="card-header">
-                    <h3 class="mb-0"><a href="{% url 'paiement:payments' %}">
-                        <i class="ni ni-bold-left"></i></a> <span class="ml-4">Nouveau Paiement</span>
+                    <h3 class="mb-0"><a href="{% url 'paiement:factures' %}">
+                        <i class="ni ni-bold-left"></i></a> <span class="ml-4">Nouvelle Facture</span>
                     </h3>
                   </div>
                   <!-- Card body -->
@@ -58,12 +58,7 @@
                           <strong>Erreur!</strong> {{ErrorMessage}}
                           <br>
                           <ul>
-                              {% for field in paymentform %}
-                                {% if field.errors %}
-                                    <li> {{field.label}}: {{field.errors | striptags}} </li>
-                                {% endif %}
-                              {% endfor %}
-                              {% for field in payerform %}
+                              {% for field in factureform %}
                                 {% if field.errors %}
                                     <li> {{field.label}}: {{field.errors | striptags}} </li>
                                 {% endif %}
@@ -76,7 +71,7 @@
                     </div>
                   {% endif %}
                   <div class="card-body">
-                    <form role="form" action="{% url 'paiement:add_payment' %}" method="post">
+                    <form role="form" action="{% url 'paiement:add_facture' %}" method="post">
                         {% csrf_token %}
                       <!-- Input groups with icon -->
                       <fieldset class="fieldset">
@@ -88,7 +83,7 @@
                                 <div class="input-group-prepend">
                                   <span class="input-group-text"><i class="fas fa-user"></i></span>
                                 </div>
-                                {{ paymentform.type }}
+                                {{ factureform.client }}
                               </div>
                             </div>
                           </div>
@@ -98,16 +93,40 @@
                                 <div class="input-group-prepend">
                                   <span class="input-group-text"><i class="fas fa-tag"></i></span>
                                 </div>
-                                {{ paymentform.devise }}
+                                {{ factureform.devise }}
                               </div>
                             </div>
                           </div>
                         </div>
+                        {% for permit in permits %}
+                          <div class="row justify-content-center">
+                            <div class="col-md-4">
+                              <div class="form-group">
+                                <span class="border p-2">
+                                    <input type="checkbox" aria-label="Permis type checkbox">
+                                </span>
+                                <label>{{ permit.name }}</label>
+                                
+                              </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                  <div class="input-group input-group-merge">
+                                    <div class="input-group-prepend">
+                                      <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                    </div>
+                                    <input type="number" name="quantity" id="quantity" placeholder="0">
+                                  </div>
+                                  
+                                </div>
+                              </div>
+                          </div>
+                        {% endfor %}
                         <div class="row justify-content-center">
                           <div class="col-md-6">
                             <div class="form-group">
                               <div class="input-group input-group-merge">
-                                {{ paymentform.amount }}
+                                {{ factureform.amount }}
                                 <div class="input-group-append">
                                   <span id="input-devise" class="input-group-text font-weight-bold"></span>
                                 </div>
@@ -118,100 +137,7 @@
                         
                       </fieldset>
                       <!-- Input groups with icon -->
-                      <fieldset class="fieldset">
-                        <legend>Payeur</legend>
-                        <div class="row">
-                          <div class="col-md-6">
-                            <div class="form-group">
-                              <div class="input-group input-group-merge">
-                                <div class="input-group-prepend">
-                                  <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
-                                </div>
-                                {{ payerform.first }}
-                              </div>
-                            </div>
-                          </div>
-                          <div class="col-md-6">
-                            <div class="form-group">
-                              <div class="input-group input-group-merge">
-                                <div class="input-group-prepend">
-                                  <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
-                                </div>
-                                {{ payerform.last }}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row">
-                          <div class="col-md-6">
-                            <div class="form-group">
-                              <div class="input-group input-group-merge">
-                                <div class="input-group-prepend">
-                                  <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
-                                </div>
-                                {{ payerform.email }}
-                              </div>
-                            </div>
-                          </div>
-                          <div class="col-md-6">
-                            <div class="form-group">
-                              <div class="input-group input-group-merge">
-                                <div class="input-group-prepend">
-                                  <span class="input-group-text"><i class="fas fa-globe-americas"></i></span>
-                                </div>
-                                {{ payerform.phone }}
-                                <div class="input-group-append">
-                                  <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                              <div class="form-group">
-                                <div class="input-group input-group-merge">
-                                  <div class="input-group-prepend">
-                                    <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
-                                  </div>
-                                  {{payerform.country_origin}}
-                                </div>
-                              </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                  <div class="input-group input-group-merge">
-                                    <div class="input-group-prepend">
-                                      <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
-                                    </div>
-                                    {{payerform.employer}}
-                                  </div>
-                                </div>
-                              </div>
-                          </div>
-                        <div class="row">
-                          <div class="col-md-6">
-                            <div class="form-group">
-                              <div class="input-group input-group-merge">
-                                <div class="input-group-prepend">
-                                  <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
-                                </div>
-                                {{payerform.job}}
-                              </div>
-                            </div>
-                          </div>
-                          <div class="col-md-6">
-                            <div class="form-group">
-                              <div class="input-group input-group-merge">
-                                <div class="input-group-prepend">
-                                  <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
-                                </div>
-                                {{payerform.address}}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </fieldset>
+
                       <div class="card-footer">
                         <div class="row justify-content-center">
                             <input type="reset" class="btn btn-secondary" value="Effacer">

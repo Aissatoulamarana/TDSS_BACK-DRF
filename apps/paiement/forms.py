@@ -25,13 +25,17 @@ class DeviseForm(forms.ModelForm):
 class FactureForm(forms.ModelForm):
     class Meta:
         model = Facture
-        fields = ('amount', 'devise', 'comment')
+        fields = ('client', 'amount', 'devise', 'comment')
         # Omitted fields: id, ref, created_by, created_on, modified_on
         widgets = {
+            'client': Select(attrs={'class': "form-control"}),
             'amount': NumberInput(attrs={'class': "form-control", 'placeholder': "0.00", 'min': 0, 'type': "number"}),
             'devise': Select(attrs={'class': "form-control"}),
             'comment': Textarea(attrs={'rows':3, 'placeholder': "Commentaire...", 'class': "form-control" })
         }
+    def __init__(self, *args, **kwargs):
+        super(FactureForm, self).__init__(*args, **kwargs)
+        self.fields['client'].empty_label = "Sélectionner la société"
 
 
 class PayerForm(forms.ModelForm):

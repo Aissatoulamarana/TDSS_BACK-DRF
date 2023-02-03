@@ -50,6 +50,7 @@ class Country(models.Model):
 
 class Facture(models.Model):
     reference = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    client = models.ForeignKey(Profile, on_delete=models.PROTECT)
     amount = models.DecimalField(max_digits=9, decimal_places=2)
     devise = models.ForeignKey(Devise, on_delete=models.PROTECT, related_name="facture_devises")
     comment = models.TextField(max_length=255, blank=True, null=True)

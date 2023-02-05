@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} Factures {% endblock %}
+{% block title %} Déclarations {% endblock %}
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}{% endblock stylesheets %}
@@ -13,12 +13,12 @@
       <div class="header-body">
         <div class="row align-items-center py-4">
           <div class="col-lg-6 col-7">
-            <h6 class="h2 text-white d-inline-block mb-0">Factures</h6>
+            <h6 class="h2 text-white d-inline-block mb-0">Liste</h6>
             <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
               <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
                 <li class="breadcrumb-item"><a href="#"><i class="fas fa-home"></i></a></li>
-                <li class="breadcrumb-item"><a href="#">Facturation</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Factures</li>
+                <li class="breadcrumb-item"><a href="#">Déclarations</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Liste</li>
               </ol>
             </nav>
           </div>
@@ -62,51 +62,96 @@
             <div class="card">
               <!-- Card header -->
               <div class="card-header border-0">
-                <h3 class="mb-0"><em>Liste des factures</em>
-                  <a href="{% url 'paiement:add_facture' %}" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
+                <h3 class="mb-0"><em>Liste des déclarations</em>
+                    <a href="#" class="btn btn-sm btn-neutral float-right" role="button" data-toggle="modal" data-target="#modal-declaration-add">+Ajouter</a>
                 </h3>
+                  
+                <div class="modal fade" id="modal-declaration-add" tabindex="-1" role="dialog" aria-labelledby="modal-declaration-add" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered " role="dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title" id="modal-declaration-add">Nouvelle déclaration</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">×</span>
+                                </button>
+                            </div>
+                            <hr>
+                            <div class="modal-body mt--6">
+                                <form action="{% url 'paiement:add_declaration' %}" method="post" id="form-declaration-add">
+                                {% csrf_token %}
+                                <fieldset>
+                                    <legend></legend>
+                                    <div class="row">
+                                        <div class="col">
+                                          <div class="form-group">
+                                            <div class="input-group input-group-merge">
+                                              <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                              </div>
+                                              {{ declarationform.title }}
+                                            </div>
+                                          </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                          <div class="form-group">
+                                            <div class="input-group input-group-merge">
+                                              <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                                              </div>
+                                              {{ declarationform.comment }}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                </fieldset>
+                                <div class="modal-footer justify-content-center">
+                                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
               </div>
               <!-- Light table -->
-              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "ref", "company",  "type", "amount", "actions"]'>
+              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "ref", "title",  "total_employee", "actions"]'>
                 <table class="table align-items-center table-flush">
                   <thead class="thead-light">
                     <tr>
                       <th scope="col" class="sort" data-sort="n°">N°</th>
                       <th scope="col" class="sort" data-sort="ref">Référence</th>
-                      <th scope="col" class="sort" data-sort="company">Entreprise</th>
-                      <th scope="col" class="sort" data-sort="type">Type</th>
-                      <th scope="col" class="sort" data-sort="amount">Montant</th>
+                      <th scope="col" class="sort" data-sort="title">Titre</th>
+                      <th scope="col" class="sort" data-sort="total_employee">Total Employées</th>
                       <th scope="col" class="sort" data-sort="Actions">Actions</th>
                     </tr>
                   </thead>
                   <tbody class="list">
-                    {% for facture in factures %}
+                    {% for declaration in declarations %}
                       <tr>
                         <td class="n°">
                           {{forloop.counter}}
                         </td>
                         <th scope="ref">
-                          {{facture.reference}}
+                          {{declaration.reference}}
                         </th>
-                        <td class="company">
-                          Texte
+                        <td class="title">
+                            {{declaration.title}}
                         </td>
-                        <td class="type">
-                          Texte
-                        </td>
-                        <td>
-                            {{facture.amount}} {{facture.devise.sign}}
+                        <td class="total_employe">
+                            {{declaration.total_employee}}
                         </td>
                         <td class="text-center justify-content-center">
                           <span>
-                            <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-target="#modal-facture-{{facture.id}}">View</button>
+                            <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-target="#modal-declaration-{{declaration.id}}">View</button>
                           </span>
                             
-                          <div class="modal fade" id="modal-facture-{{facture.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-facture-{{facture.id}}" aria-hidden="true">
+                          <div class="modal fade" id="modal-declaration-{{declaration.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-declaration-{{declaration.id}}" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="dialog">
                               <div class="modal-content">
                                 <div class="modal-header justify-content-center">
-                                  <h2>Détails de la facture </h2>
+                                  <h2>Détails de la déclaration </h2>
                                 </div>
                                 <div class="modal-body">
 
@@ -114,7 +159,7 @@
                                     <div class="card-header text-center">
                                       <div class="row text-center">
                                         <div class="col">
-                                          <i class="ni education_hat mr-2"></i><strong>Référence:</strong> {{facture.reference}}
+                                          <i class="ni education_hat mr-2"></i><strong>Référence:</strong> {{declaration.reference}}
                                         </div>
                                       </div>
                                         
@@ -122,23 +167,21 @@
                                     <div class="card-body">
                                       <div class="row">
                                         <div class="col">
-                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Type:</span> 
-                                          <strong>Texte</strong>
+                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Titre:</span> 
+                                          <strong>{{declaration.title}}</strong>
                                         </div>
                                         <div class="col">
-                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Montant:</span>
-                                          <strong>{{facture.amount}} {{facture.devise.sign}}</strong>
+                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Total Employées:</span>
+                                          <strong>{{declaration.total_employee}} </strong>
                                         </div>
                                       </div>
-                                        
-                                      <div class="row mt-3 mb-3">
+                                      <div class="row">
                                         <div class="col">
-                                          <div>
-                                            <i class="ni ni-education_hat mr-2"></i><span class="text-muted">Entreprise:</span>
-                                            <span class="heading"> <h3>Texte</h3> </span>
-                                          </div>
+                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Comment:</span><br> 
+                                          <strong>{{declaration.comment}}</strong>
                                         </div>
                                       </div>
+                                     
                                       <div class="row">
                                         <div class="col">
                                           <i class="ni education_hat mr-2"></i><span class="text-muted">Autres:</span><br> 
@@ -158,11 +201,11 @@
                           </div>
 
                           <span>
-                            <button data-href="{% url 'paiement:edit_payment' facture.id %}" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
+                            <button data-href="{% url 'paiement:edit_declaration' declaration.id %}" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
                           </span>
 
                           <span>
-                            <button data-href="{% url 'paiement:payment_receipt' facture.id %}" onclick="window.open($(this).data('href'), '_blank')" class="btn btn-sm btn-icon-only" role="button">Print</button>
+                            <!-- <button data-href="{% url 'paiement:payment_receipt' declaration.id %}" onclick="window.open($(this).data('href'), '_blank')" class="btn btn-sm btn-icon-only" role="button">Print</button> -->
                           </span>
                           
                         </td>

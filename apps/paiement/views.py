@@ -17,8 +17,8 @@ from reportlab.platypus import Table
 import qrcode
 
 
-from .models import Devise, Facture, Payer, Payment, Permit
-from .forms import DeviseForm, FactureForm, PayerForm, PaymentForm
+from .models import Devise, Facture, Payer, Payment, Permit, Employee, Declaration
+from .forms import DeviseForm, FactureForm, PayerForm, PaymentForm, EmployeeForm, DeclarationForm
 
 
 @login_required(login_url="/login/")
@@ -238,6 +238,106 @@ def get_devise_value(request, permit_id, devise_id):
 
 
 @login_required(login_url="/login/")
+def declarations_view(request):
+    declarations = Declaration.objects.all()
+    form = DeclarationForm()
+
+    return render(request, "paiements/declarations.html", {
+        'declarationform': form,
+        'declarations': declarations,
+        'segment': "facturation"
+    })
+
+
+@login_required(login_url="/login/")
+def add_declaration_view(request):
+    context_empty = {
+        'declarationform': DeclarationForm(),
+        'declarations': Declaration.objects.all(),
+        'segment': 'facturation'
+    }
+
+    if request.method == "POST":
+
+        declarationform = DeclarationForm(request.POST)
+        
+        if declarationform.is_valid():
+            # print("Valid forms submitted!")
+
+            new_declaration = declarationform.save(commit=False)
+
+            new_declaration.created_by = request.user
+
+            new_declaration.save()
+
+            messages.success(request, "Nouvelle déclaration ajoutée.")
+            return redirect("paiement:declarations")
+        else:
+            context = {
+                'declarationform': declarationform,
+                'ErrorMessage': "Formulaire invalid soumit",
+                'segment': 'Facturation'
+            }
+            return render(request, "paiements/declarations.html", context)
+        
+    return render(request, "paiements/declarations.html", context_empty)
+
+
+@login_required(login_url="/login/")
+def edit_declaration_view(request, declaration_id):
+    declaration = Declaration.objects.get(pk=declaration_id)
+    employees = Employee.objects.all()
+    context_empty = {
+        'declarationform': DeclarationForm(instance=declaration, prefix= "declaration"),
+        'employeeform': EmployeeForm(prefix= "employee"),
+        'declaration_id': declaration_id,
+        'employees': employees,
+        'segment': 'facturation'
+    }
+
+    if request.method == "POST" and 'declaration-form-submit' in request.POST:
+        
+        declarationform = DeclarationForm(request.POST, instance=declaration, prefix= "declaration")
+        if declarationform.is_valid():
+            
+            # print("Update form submited !")
+            declaration_updated = declarationform.save()
+            
+            declaration_updated.save()
+
+            messages.success(request, "Déclaration modifiée.")
+            return redirect("paiement:declarations")
+        else:
+            context = {
+                'declarationform': declarationform,
+                'employeeform': EmployeeForm(prefix= "employee"),
+                'declaration_id': declaration_id,
+                'employees': employees,
+                'segment': 'facturation',
+                'ErrorMessage': "Formulaire invalid soumit."
+            }
+            return render(request, "paiements/edit-declaration.html", context)
+
+    elif request.method == "POST" and 'employee-form-submit' in request.POST:
+        # print("add employee form submitted")
+        employeeform = EmployeeForm(request.POST, prefix="employee")
+        if employeeform.is_valid():
+            new_employee = employeeform.save(commit=False)
+            new_employee.declaration = declaration
+
+            new_employee.save()
+            declaration.total_employee = Employee.objects.all().count()
+            declaration.save()
+            messages.success(request, "Employé ajouté.")
+        else:
+            print("Invalid form submitted")
+            context_empty["ErrorMessage"] = "Formulaire invalid soumit."
+
+
+    return render(request, "paiements/edit-declaration.html", context_empty)
+
+
+@login_required(login_url="/login/")
 def factures_view(request):
     factures = Facture.objects.all()
     form = FactureForm()
@@ -280,7 +380,7 @@ def add_facture_view(request):
             context = {
                 'factureform': factureform,
                 'ErrorMessage': "Formulaire invalid soumit",
-                'segment': 'Facturation'
+                'segment': 'facturation'
             }
             return render(request, "paiements/add-facture.html", context)
         

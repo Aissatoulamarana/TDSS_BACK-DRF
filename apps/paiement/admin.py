@@ -1,11 +1,17 @@
 from django.contrib import admin
 
-from .models import Devise, Facture, Payer, Payment, Permit, Job, Country
+from .models import Devise, Facture, Payer, Payment, Permit,JobCategory, Job, Country, Declaration, Employee
 
 # Register your models here.
 
 class DeviseAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'sign', 'value', 'comment')
+
+class DeclarationAdmin(admin.ModelAdmin):
+    list_display = ('id', 'reference', 'title', 'comment', 'created_by')
+
+class EmployeeAdmin(admin.ModelAdmin):
+    list_display = ('id', 'declaration', 'passport_number', 'first', 'last', 'phone')
 
 class FactureAdmin(admin.ModelAdmin):
     list_display = ('id', 'reference', 'client', 'amount', 'devise')
@@ -19,16 +25,22 @@ class PaymentAdmin(admin.ModelAdmin):
 class PermitAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'type', 'price', 'devise', 'comment')
 
-class JobAdmin(admin.ModelAdmin):
+class JobCategoryAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'status', 'comment')
+
+class JobAdmin(admin.ModelAdmin):
+    list_display = ('id', 'category', 'name', 'status', 'comment')
 
 class CountryAdmin(admin.ModelAdmin):
     list_display = ('id', 'code', 'name', 'comment')
 
 admin.site.register(Devise, DeviseAdmin)
+admin.site.register(Declaration, DeclarationAdmin)
+admin.site.register(Employee, EmployeeAdmin)
 admin.site.register(Facture, FactureAdmin)
 admin.site.register(Payer, PayerAdmin)
 admin.site.register(Payment, PaymentAdmin)
 admin.site.register(Permit, PermitAdmin)
+admin.site.register(JobCategory, JobCategoryAdmin)
 admin.site.register(Job, JobAdmin)
 admin.site.register(Country, CountryAdmin)

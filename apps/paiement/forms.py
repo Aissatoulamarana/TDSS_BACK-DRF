@@ -5,7 +5,7 @@ Copyright (c) 2022 - OD
 
 from django import forms
 from django.forms import TextInput, NumberInput, Select, Textarea, FileInput, DateTimeInput, DateInput, EmailInput, RadioSelect, TimeInput, ClearableFileInput
-from .models import Devise, Facture, Payer, Payment
+from .models import Devise, Facture, Payer, Payment, Employee, Declaration
 
 # My forms here
 
@@ -22,11 +22,42 @@ class DeviseForm(forms.ModelForm):
         }
 
 
+class EmployeeForm(forms.ModelForm):
+    class Meta:
+        model = Employee
+        fields = ('job_category', 'job', 'passport_number', 'first', 'last', 'email', 'phone')
+        # Omitted fields: id, declaration, 
+        widgets = {
+            'job_category': Select(attrs={'class': "form-control", 'placeholder': "Catégorie"}),
+            'job': Select(attrs={'class': "form-control", 'placeholder': "Fonction"}),
+            'passport_number': TextInput(attrs={'class': "form-control", 'placeholder': "N° de psseport"}),
+            'first': TextInput(attrs={'class': "form-control", 'placeholder': "Prénoms", 'autofocus': True}),
+            'last': TextInput(attrs={'class': "form-control", 'placeholder': "Nom"}),
+            'email': EmailInput(attrs={'class': "form-control", 'placeholder': "example@mail.com"}),
+            'phone': NumberInput(attrs={'class': "form-control", 'placeholder': "N° de téléphone", 'min': 0, 'type': "phone"}),
+        }
+    def __init__(self, *args, **kwargs):
+        super(EmployeeForm, self).__init__(*args, **kwargs)
+        self.fields['job_category'].empty_label = "Sélectionner la catégorie"
+        self.fields['job'].empty_label = "Sélectionner la fonction"
+
+
+class DeclarationForm(forms.ModelForm):
+    class Meta:
+        model = Declaration
+        fields = ('title', 'comment')
+        # Omitted fields: id, reference, total_employee, created_by, created_on, modified_on
+        widgets = {
+            'title': TextInput(attrs={'class': "form-control", 'placeholder': "Titre"}),
+            'comment': Textarea(attrs={'rows':3, 'placeholder': "Commentaire...", 'class': "form-control" })
+        }
+
+
 class FactureForm(forms.ModelForm):
     class Meta:
         model = Facture
         fields = ('client', 'amount', 'devise', 'comment')
-        # Omitted fields: id, ref, created_by, created_on, modified_on
+        # Omitted fields: id, reference, created_by, created_on, modified_on
         widgets = {
             'client': Select(attrs={'class': "form-control"}),
             'amount': NumberInput(attrs={'class': "form-control", 'placeholder': "0.00", 'min': 0, 'type': "number"}),
@@ -64,7 +95,7 @@ class PaymentForm(forms.ModelForm):
     class Meta:
         model = Payment
         fields = ('type', 'amount', 'devise', 'comment')
-        # Omitted fields: id, facture_ref, ref, payer, created_by, created_on, modified_on
+        # Omitted fields: id, facture_ref, reference, payer, created_by, created_on, modified_on
         widgets = {
             'type': Select(attrs={'class': "form-control amount-param", 'placeholder': "Type de document"}),
             'amount': NumberInput(attrs={'class': "form-control", 'placeholder': "0.00", 'min': 0, 'type': "number", 'readonly': True}),

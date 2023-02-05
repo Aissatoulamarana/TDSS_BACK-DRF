@@ -30,7 +30,17 @@ class Permit(models.Model):
         return self.name
 
 
+class JobCategory(models.Model):
+    name = models.CharField(max_length=50)
+    status = models.CharField(max_length=30, choices=[('ON', "Actif"), ('OFF', "Inactif")], default="ON")
+    comment = models.TextField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Job(models.Model):
+    category = models.ForeignKey(JobCategory, on_delete=models.CASCADE, blank=True, null=True)
     name = models.CharField(max_length=50)
     status = models.CharField(max_length=30, choices=[('ON', "Actif"), ('OFF', "Inactif")], default="ON")
     comment = models.TextField(max_length=255, blank=True, null=True)
@@ -48,6 +58,33 @@ class Country(models.Model):
         return self.name
 
 
+class Declaration(models.Model):
+    reference = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    title = models.CharField(max_length=100)
+    total_employee = models.IntegerField(default=0)
+    comment = models.TextField(max_length=255, blank=True, null=True)
+    created_by = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
+    created_on = models.DateTimeField(auto_now_add=True)
+    modified_on = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.title}"
+
+
+class Employee(models.Model):
+    declaration = models.ForeignKey(Declaration, on_delete=models.PROTECT, related_name="employee_declarations")
+    passport_number = models.CharField(max_length=50, unique=True)
+    first = models.CharField(max_length=100, verbose_name="first name")
+    last = models.CharField(max_length=50, verbose_name="last_name")
+    email = models.EmailField(max_length=100, blank=True, null=True)
+    phone = models.IntegerField()
+    job_category = models.ForeignKey(JobCategory, on_delete=models.PROTECT, blank=True, null=True, related_name="employee_job_categories")
+    job = models.ForeignKey(Job, on_delete=models.PROTECT, blank=True, null=True, related_name="employee_jobs")
+
+    def __str__(self):
+        return f"{self.first} {self.last}"
+
+
 class Facture(models.Model):
     reference = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     client = models.ForeignKey(Profile, on_delete=models.PROTECT)
@@ -59,7 +96,7 @@ class Facture(models.Model):
     modified_on = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.ref} | {self.amount} | {self.devise}"
+        return f"{self.reference} | {self.amount} | {self.devise}"
 
 
 class Payer(models.Model):
@@ -89,4 +126,4 @@ class Payment(models.Model):
     modified_on = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.ref} | {self.amount} | {self.devise}"
+        return f"{self.reference} | {self.amount} | {self.devise}"

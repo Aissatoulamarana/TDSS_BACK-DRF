@@ -14,6 +14,10 @@ import json
 import io
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Table
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.pagesizes import letter, A4
+
 import qrcode
 
 
@@ -130,19 +134,22 @@ def payment_receipt_view(request, payment_id):
 
     pdf = canvas.Canvas(buffer)
 
+    pdf.setPageSize(A4)
+    width, height = A4
     pdf.setTitle("Paiements")
-    pdf.line(50,800, 550, 800)
-    pdf.drawString(200, 780, f"RECU DE PAIEMENT N° 00{payment.id}/2023")
-    pdf.line(50,770, 550, 770)
+    pdf.drawImage('apps/static/assets/img/brand/logo.jpg', 60, 750, 100, 80, showBoundary=False)
+    pdf.line(50, 750, 550, 750)
+    pdf.drawString(200, 730, f"RECU DE PAIEMENT N° 00{payment.id}/2023")
+    pdf.line(50, 720, 550, 720)
     pdf.setFontSize(8, leading=None)
-    pdf.drawString(55, 750, f"Référence: {payment.reference}")
-    pdf.drawString(400, 750, f"Date: {payment.created_on}")
+    pdf.drawString(55, 700, f"Référence: {payment.reference}")
+    pdf.drawString(400, 700, f"Date: {payment.created_on}")
     # pdf.drawString(60, 730, f"- Informations du payeur -")
-    pdf.drawString(55, 720, f"Prénom & Nom:  {payment.payer.first} {payment.payer.last}")
-    pdf.drawString(55, 710, f"Nationalité: {payment.payer.country_origin}")
-    pdf.drawString(55, 700, f"Employeur: {payment.payer.employer}")
-    pdf.drawString(55, 690, f"Fonction: {payment.payer.job}")
-    pdf.drawString(55, 680, f"Téléphone: {payment.payer.phone}")
+    pdf.drawString(55, 680, f"Prénom & Nom:  {payment.payer.first} {payment.payer.last}")
+    pdf.drawString(55, 670, f"Nationalité: {payment.payer.country_origin}")
+    pdf.drawString(55, 660, f"Employeur: {payment.payer.employer}")
+    pdf.drawString(55, 650, f"Fonction: {payment.payer.job}")
+    pdf.drawString(55, 640, f"Téléphone: {payment.payer.phone}")
 
     data = [
         ['Description', 'Type de permis', 'Quantité', 'Montant'],
@@ -150,8 +157,8 @@ def payment_receipt_view(request, payment_id):
     ]
     table = Table(data, colWidths=150)
 
-    table.wrapOn(pdf, 55, 600)
-    table.drawOn(pdf, 55, 600)
+    table.wrapOn(pdf, 55, 580)
+    table.drawOn(pdf, 55, 580)
 
     # Creating the QR Code
     qr_data = {
@@ -166,7 +173,15 @@ def payment_receipt_view(request, payment_id):
     img = qr.make_image()
     img.save('staticfiles/payment_qr.png')
     
-    pdf.drawImage('staticfiles/payment_qr.png', 60, 500, 100, 100, showBoundary=False)
+    pdf.drawImage('staticfiles/payment_qr.png', 60, 480, 100, 100, showBoundary=False)
+
+    pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
+    pdf.setFont('Vera', 12)
+    pdf.line(300, 550, 550, 550)
+    pdf.drawString(320, 530, f"TOTAL TTC")
+    pdf.line(420, 525, 420, 545)
+    pdf.drawString(450, 530, f"{payment.amount} {payment.devise.sign}")
+    pdf.line(300, 520, 550, 520)
 
     pdf.showPage()
     pdf.save()

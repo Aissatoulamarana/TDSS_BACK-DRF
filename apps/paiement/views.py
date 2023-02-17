@@ -301,7 +301,7 @@ def add_declaration_view(request):
 @login_required(login_url="/login/")
 def edit_declaration_view(request, declaration_id):
     declaration = Declaration.objects.get(pk=declaration_id)
-    employees = Employee.objects.all()
+    employees = Employee.objects.filter(declaration=declaration)
     context_empty = {
         'declarationform': DeclarationForm(instance=declaration, prefix= "declaration"),
         'employeeform': EmployeeForm(prefix= "employee"),
@@ -347,6 +347,10 @@ def edit_declaration_view(request, declaration_id):
         else:
             print("Invalid form submitted")
             context_empty["ErrorMessage"] = "Formulaire invalid soumit."
+    
+    elif request.method == "POST" and 'delete-employee-form-submit' in request.POST:
+        employee_id = request.POST["employee-id"]
+        print(f"Employee with id:{employee_id} is submitted for delete")
 
 
     return render(request, "paiements/edit-declaration.html", context_empty)

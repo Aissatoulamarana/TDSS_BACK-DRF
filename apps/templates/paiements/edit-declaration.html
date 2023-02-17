@@ -337,13 +337,49 @@
                                   </div>
                                 </div>
 
-                                <span>
-                                  <!-- <button data-href="{% url 'paiement:edit_declaration' employee.id %}" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button> -->
-                                </span>
-
                                 <!-- <span>
-                                  <button data-href="{% url 'paiement:payment_receipt' employee.id %}" onclick="window.open($(this).data('href'), '_blank')" class="btn btn-sm btn-icon-only" role="button">Print</button>
+                                  <button data-href="{% url 'paiement:edit_declaration' employee.id %}" class="edit-link btn btn-sm btn-icon-only" role="button">Del</button>
                                 </span> -->
+
+                                <span>
+                                  <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-target="#modal-delete-confirmation">Del</button>
+                                </span>
+                                  
+                                <div class="modal fade" id="modal-delete-confirmation" tabindex="-1" role="dialog" aria-labelledby="modal-delete-confirmation" aria-hidden="true">
+                                  <div class="modal-dialog modal-dialog-centered" role="dialog">
+                                    <div class="modal-content">
+                                      <div class="modal-header justify-content-center">
+                                        <h2>Confirmation </h2>
+                                      </div>
+                                      
+                                      <form id="delete-employee-form" role="form" action="{% url 'paiement:edit_declaration' declaration_id %}" method="post">
+                                        {% csrf_token %}
+                                        <div class="modal-body">
+      
+                                          <div class="card card-agency mt--4 mb--4">
+                                            
+                                            <div class="card-body">
+                                              <div class="row">
+                                                <div class="col">
+                                                  <i class="ni education_hat mr-2"></i><span class="text-muted"></span> 
+                                                  <strong>Etes-vous sûr de vouloir supprimer cet employé ?</strong>
+                                                </div>
+                                              </div>
+                                              <input type="hidden" name="employee-id" value="{{employee.id}}">
+                                              
+                                            </div>
+                                          </div>
+        
+                                        </div>
+                                        <div class="modal-footer justify-content-center">
+                                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Non</button>
+                                          <input type="button" name="delete-employee-form-submit" onclick="$('#delete-employee-form').submit()" class="btn btn-primary" value="Oui">
+                                        </div>
+                                        
+                                      </form>
+                                    </div>
+                                  </div>
+                                </div>
                                 
                               </td>
                             </tr>
@@ -400,6 +436,14 @@
 {% block javascripts %}
   <script>
     $(function(){
+
+      setTimeout(function() {
+        $(".alert").alert('close');
+      }, 6000);
+
+      $(".edit-link").click(function() {
+        window.location = $(this).data("href");
+      });
 
       // Deleting employee in tab
       $('.amount-param').change(function(){

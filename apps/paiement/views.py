@@ -350,7 +350,15 @@ def edit_declaration_view(request, declaration_id):
     
     elif request.method == "POST" and 'delete-employee-form-submit' in request.POST:
         employee_id = request.POST["employee-id"]
-        print(f"Employee with id:{employee_id} is submitted for delete")
+        # print(f"Employee with id:{employee_id} is submitted for delete")
+        try:
+            employee = Employee.objects.get(pk=employee_id)
+            employee.delete()
+            declaration.total_employee = Employee.objects.all().count()
+            declaration.save()
+            messages.success(request, "Employé supprimé.")
+        except Employee.DoesNotExist:
+            messages.error(request, "Employé inexistant.")
 
 
     return render(request, "paiements/edit-declaration.html", context_empty)

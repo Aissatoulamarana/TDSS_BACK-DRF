@@ -232,7 +232,7 @@
                                             </div>
                                         </fieldset>
                                         <div class="modal-footer justify-content-center">
-                                            <input type="submit" name="employee-form-submit" class="btn btn-primary" value="Enregistrer">
+                                          <input type="submit" name="employee-form-submit" class="btn btn-primary" value="Enregistrer">
                                         </div>
                                     </form>
                                 </div>
@@ -272,6 +272,7 @@
                                 {{employee.phone}}
                             </td>
                               <td class="text-center justify-content-center">
+                                
                                 <span>
                                   <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-target="#modal-employee-{{employee.id}}">View</button>
                                 </span>
@@ -342,20 +343,20 @@
                                 </span> -->
 
                                 <span>
-                                  <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-target="#modal-delete-confirmation">Del</button>
+                                  <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-target="#modal-delete-confirmation-{{employee.id}}">Del</button>
                                 </span>
                                   
-                                <div class="modal fade" id="modal-delete-confirmation" tabindex="-1" role="dialog" aria-labelledby="modal-delete-confirmation" aria-hidden="true">
+                                <div class="modal fade" id="modal-delete-confirmation-{{employee.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-delete-confirmation-{{employee.id}}" aria-hidden="true">
                                   <div class="modal-dialog modal-dialog-centered" role="dialog">
                                     <div class="modal-content">
                                       <div class="modal-header justify-content-center">
                                         <h2>Confirmation </h2>
                                       </div>
                                       
-                                      <form id="delete-employee-form" role="form" action="{% url 'paiement:edit_declaration' declaration_id %}" method="post">
+                                      <form id="delete-employee-{{employee.id}}-form" role="form" action="{% url 'paiement:edit_declaration' declaration_id %}" method="post">
                                         {% csrf_token %}
                                         <div class="modal-body">
-      
+          
                                           <div class="card card-agency mt--4 mb--4">
                                             
                                             <div class="card-body">
@@ -365,15 +366,16 @@
                                                   <strong>Etes-vous sûr de vouloir supprimer cet employé ?</strong>
                                                 </div>
                                               </div>
-                                              <input type="hidden" name="employee-id" value="{{employee.id}}">
-                                              
+                                              <input type="hidden" name="employee-id" value="0">
                                             </div>
                                           </div>
-        
+          
                                         </div>
                                         <div class="modal-footer justify-content-center">
                                           <button type="button" class="btn btn-secondary" data-dismiss="modal">Non</button>
-                                          <input type="button" name="delete-employee-form-submit" onclick="$('#delete-employee-form').submit()" class="btn btn-primary" value="Oui">
+                                          <input type="hidden" name="delete-employee-form-submit" value="">
+                                          <input type="submit" id="delete-employee-{{employee.id}}" data-employee="{{employee.id}}" class="btn btn-danger submit-btn" value="Oui">
+                                          
                                         </div>
                                         
                                       </form>
@@ -388,6 +390,7 @@
                           
                         </tbody>
                       </table>
+                      
                     </div>
                     <!-- Card footer -->
                     <div class="card-footer py-4">
@@ -446,32 +449,12 @@
       });
 
       // Deleting employee in tab
-      $('.amount-param').change(function(){
-        var permit_id = parseInt($('#id_payment-type').val());
-        var devise_id = parseInt($('#id_payment-devise').val());
-        // alert(permit_id + "Devise:" + devise_id);
-
-        fetch(`/devises/${permit_id}/${devise_id}/value`, {
-          method: "GET",
-          // body: JSON.stringify({
-          //   permit: parseInt(permit_id),
-          // })
-        })
-        .then (response => response.json())
-        .then (result => {
-          if (result.error) {
-            alert(result.error);
-          } else {
-            // alert(result.permit_price + "Devise: " + result.devise_value);
-            $('#id_payment-amount').val(parseFloat(result.permit_price * result.devise_value).toFixed(2))
-          }
-        })
-        return false;
-
-
+      $(".submit-btn").click(function(){
+        $("input[name='employee-id']").val(parseInt($(this).data("employee")));
+        // console.log($("input[name='employee-id']").val());
+        $(this).closest('form').submit();
       });
 
-      
     });
   </script>
 {% endblock javascripts %}

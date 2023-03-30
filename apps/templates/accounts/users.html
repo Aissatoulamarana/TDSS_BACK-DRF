@@ -220,6 +220,41 @@
                               <a class="dropdown-item" href="#">Edit</a>
                             </div>
                           </div> -->
+                          <span>
+                            <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-target="#modal-reinit-confirmation-{{user.id}}">Rst</button>
+                          </span>
+                            
+                          <div class="modal fade" id="modal-reinit-confirmation-{{user.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-reinit-confirmation-{{user.id}}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="dialog">
+                              <div class="modal-content">
+                                <div class="modal-header justify-content-center">
+                                  <h2>Confirmation </h2>
+                                </div>
+                                
+                                <div class="modal-body">
+    
+                                  <div class="card card-agency mt--4 mb--4">
+                                    
+                                    <div class="card-body">
+                                      <div class="row">
+                                        <div class="col">
+                                          <i class="ni education_hat mr-2"></i><span class="text-muted"></span> 
+                                          <strong>Etes-vous sûr de vouloir réinitialiser son mot de passe ?</strong>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+  
+                                </div>
+                                <div class="modal-footer justify-content-center">
+                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Non</button>
+                                  <button data-href="{% url 'authentication:reinit_password' user.id %}" href="#" class="edit-link btn btn-primary" role="button">Oui</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+
                         </td>
                       </tr>
                     {% empty %}

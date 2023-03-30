@@ -80,6 +80,27 @@ def users_view(request):
     })
 
 
+# Resetting user's password via Admin
+def reinit_password_view(request, user_id):
+    user = CustomUser.objects.get(pk=user_id)
+    # print("Reinit password called!")
+    
+    new_password = ''.join((secrets.choice(string.ascii_letters + string.digits + string.punctuation) for i in range(8)))
+    user.set_password(new_password)
+    user.reset_pwd = True
+    user.save()
+
+    send_mail(
+        "Réinitialisation de mot de passe",
+        f"Bonjour, votre mot de passe vient d'être réinitialiser sur le site de paiement par l'Admin. Nouveau MDP: {new_password}",
+        "noreply.odiallo@gmail.com",
+        [user.email],
+        fail_silently=False
+    )
+    messages.success(request, "Mot de passe réinitialisé.")
+    return redirect("authentication:users")
+
+
 def activate_user_view(request, user_id):
     user = CustomUser.objects.get(pk=user_id)
     
@@ -216,7 +237,10 @@ def edit_user_view(request, user_id):
         
         form = CustomUserForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
-            form.save()
+            updated_user = form.save(commit=False)
+            updated_user.username = updated_user.email
+
+            updated_user.save()
             print("User updated!")
 
             messages.success(request, "Compte utilisateur modifié avec succès !")
@@ -306,27 +330,3 @@ def edit_agency_view(request, agency_id):
     return render(request, "accounts/edit-agency.html", context_empty)
 
 
-
-def register_user(request):
-    msg = None
-    success = False
-
-    if request.method == "POST":
-        form = SignUpForm(request.POST)
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get("username")
-            raw_password = form.cleaned_data.get("password1")
-            user = authenticate(username=username, password=raw_password)
-
-            msg = 'User created - please <a href="/login">login</a>.'
-            success = True
-
-            # return redirect("/login/")
-
-        else:
-            msg = 'Form is not valid'
-    else:
-        form = SignUpForm()
-
-    return render(request, "accounts/register.html", {"form": form, "msg": msg, "success": success})

@@ -8,7 +8,7 @@ class DeviseAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'sign', 'value', 'comment')
 
 class DeclarationAdmin(admin.ModelAdmin):
-    list_display = ('id', 'reference', 'title', 'comment', 'created_by')
+    list_display = ('id', 'reference', 'title', 'status', 'comment', 'created_by')
 
 class EmployeeAdmin(admin.ModelAdmin):
     list_display = ('id', 'declaration', 'passport_number', 'first', 'last', 'phone')
@@ -26,7 +26,7 @@ class PermitAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'type', 'price', 'devise', 'comment')
 
 class JobCategoryAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'status', 'comment')
+    list_display = ('id', 'name', 'permit', 'status', 'comment')
 
 class JobAdmin(admin.ModelAdmin):
     list_display = ('id', 'category', 'name', 'status', 'comment')

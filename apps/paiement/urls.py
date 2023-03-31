@@ -17,6 +17,7 @@ urlpatterns = [
     path("declarations/", views.declarations_view, name="declarations"),
     path("declarations/add/", views.add_declaration_view, name="add_declaration"),
     path("declarations/<int:declaration_id>/edit", views.edit_declaration_view, name="edit_declaration"),
+    path("declarations/<int:declaration_id>/validate", views.validate_declaration_view, name="validate_declaration"),
     path("factures/", views.factures_view, name="factures"),
     path("factures/add/", views.add_facture_view, name="add_facture"),
     path("devises/", views.devises_view, name="devises"),

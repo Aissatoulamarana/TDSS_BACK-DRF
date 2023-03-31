@@ -32,6 +32,7 @@ class Permit(models.Model):
 
 class JobCategory(models.Model):
     name = models.CharField(max_length=50)
+    permit = models.ForeignKey(Permit, on_delete=models.PROTECT, blank=True, null=True)
     status = models.CharField(max_length=30, choices=[('ON', "Actif"), ('OFF', "Inactif")], default="ON")
     comment = models.TextField(max_length=255, blank=True, null=True)
 
@@ -61,7 +62,7 @@ class Country(models.Model):
 class Declaration(models.Model):
     reference = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     title = models.CharField(max_length=100)
-    total_employee = models.IntegerField(default=0)
+    status = models.CharField(max_length=30, choices=[('unvalidated', "Non Validée"), ('validated', "Validée")], default="unvalidated")
     comment = models.TextField(max_length=255, blank=True, null=True)
     created_by = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
     created_on = models.DateTimeField(auto_now_add=True)

@@ -123,12 +123,14 @@ def profiles_view(request):
     profiles = Profile.objects.all()
     form = ProfileForm()
     userform = CustomUserForm()
+    profile_types = ProfileType.objects.all()
 
     return render(request, "accounts/profiles.html", {
         #  To edit
         'form': form,
         'userform': userform,
         'profiles': profiles,
+        'profile_types': profile_types,
         'segment': "administration"
     })
 

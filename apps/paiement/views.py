@@ -341,8 +341,6 @@ def edit_declaration_view(request, declaration_id):
             new_employee.declaration = declaration
 
             new_employee.save()
-            declaration.total_employee = Employee.objects.all().count()
-            declaration.save()
             messages.success(request, "Employé ajouté.")
         else:
             print("Invalid form submitted")
@@ -354,14 +352,26 @@ def edit_declaration_view(request, declaration_id):
         try:
             employee = Employee.objects.get(pk=employee_id)
             employee.delete()
-            declaration.total_employee = Employee.objects.all().count()
-            declaration.save()
             messages.success(request, "Employé supprimé.")
         except Employee.DoesNotExist:
             messages.error(request, "Employé inexistant.")
 
 
     return render(request, "paiements/edit-declaration.html", context_empty)
+
+
+@login_required(login_url="/login/")
+def validate_declaration_view(request, declaration_id):
+    
+    try:
+        declaration = Declaration.objects.get(pk=declaration_id)
+        declaration.status = 'validated'
+        declaration.save()
+        messages.success(request, "Déclaration validée.")
+    except Declaration.DoesNotExist:
+        messages.error(request, "Déclaration inexistante.")
+    
+    return redirect("paiement:declarations")
 
 
 @login_required(login_url="/login/")

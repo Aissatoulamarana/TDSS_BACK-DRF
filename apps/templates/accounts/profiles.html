@@ -23,7 +23,7 @@
             </nav>
           </div>
           <div class="col-lg-6 col-5 text-right">
-            <a href="#" class="btn btn-sm btn-neutral">Filters</a>
+            <a id="filters" href="#" class="btn btn-sm btn-neutral">Filters</a>
           </div>
         </div>
         
@@ -37,6 +37,20 @@
     
     <div class="row">
       <div class="col-xl-12">
+
+        <div class="card p-2" id="filters-div" style="display: none;">
+          
+          <span>Par Type:</span>
+          <div class="form-check form-check-inline form-check-inline-margin-end-5">
+            {% for profile_type in profile_types %}
+              <input class="form-check-input ml-4 filter-item" type="radio" name="profile-type-{{profile_type.name}}" id="profile-type-{{profile_type.id}}">
+              <label class="form-check-label" for="profile-type-profile_type.id">
+                {{profile_type.name}}
+              </label>
+            {% endfor %}
+          </div>
+          
+        </div>
 
         {% if messages %}
           <!-- Alerts -->
@@ -277,6 +291,18 @@
 
     $(".edit-link").click(function() {
       window.location = $(this).data("href");
-    })
+    });
+
+    $("#filters").click(function() {
+      if ($("#filters-div").css('display') == 'none') {
+        $("#filters-div").css('display', 'block');
+      } else {
+        $("#filters-div").css('display', 'none');
+      }
+    });
+
+    $(".filter-item").click(function() {
+      alert("En cours de dev...");
+    });
   </script>
 {% endblock javascripts %}

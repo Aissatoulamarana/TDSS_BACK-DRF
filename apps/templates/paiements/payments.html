@@ -63,8 +63,53 @@
               <!-- Card header -->
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des paiements</em>
-                  <a href="{% url 'paiement:add_payment' %}" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
+                  <!-- <a href="{% url 'paiement:add_payment' %}" class="btn btn-sm btn-neutral float-right">+ Ajouter</a> -->
+                  <button class="btn btn-sm btn-neutral float-right" role="button" data-toggle="modal" data-target="#modal-payment-generate">Generate</button>
                 </h3>
+              </div>
+              <div class="modal fade" id="modal-payment-generate" tabindex="-1" role="dialog" aria-labelledby="modal-payment-generate" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="dialog">
+                  <div class="modal-content">
+                    <div class="modal-header justify-content-center">
+                      <h2>Paiement de facture</h2>
+                    </div>
+                    <form role="form" action="{% url 'paiement:generate_payment' %}" method="post">
+                      {% csrf_token %}
+                      <div class="modal-body">
+
+                        <div class="card card-agency mt--4 mb--4">
+                          <div class="card-header text-center">
+                            <div class="row text-center">
+                              <div class="col">
+                                Veuillez saisir la référence de la facture.
+                              </div>
+                            </div>
+                          </div>
+                          <div class="card-body">
+                            <div class="row">
+                              <div class="col">
+                                <div class="form-group">
+                                  <div class="input-group input-group-merge">
+                                    <div class="input-group-prepend">
+                                      <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                    </div>
+                                    <input class="form-control" type="text" name="facture_ref" id="facture_ref" placeholder="N° de la référence" required>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+  
+                      </div>
+                      <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                        <input type="submit" class="btn btn-primary" value="Valider">
+                      </div>
+                    </form>
+                    
+                  </div>
+                </div>
               </div>
               <!-- Light table -->
               <div class="table-responsive" data-toggle="list" data-list-values='["n°", "ref", "payer",  "type", "amount", "actions"]'>
@@ -165,7 +210,7 @@
                           </div>
 
                           <span>
-                            <button data-href="{% url 'paiement:edit_payment' payment.id %}" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
+                            <!-- <button data-href="{% url 'paiement:edit_payment' payment.id %}" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button> -->
                           </span>
 
                           <span>

@@ -11,7 +11,7 @@ class DeclarationAdmin(admin.ModelAdmin):
     list_display = ('id', 'reference', 'title', 'status', 'comment', 'created_by')
 
 class EmployeeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'declaration', 'passport_number', 'first', 'last', 'phone')
+    list_display = ('id', 'declaration', 'job_category', 'job', 'passport_number', 'first', 'last', 'phone')
 
 class FactureAdmin(admin.ModelAdmin):
     list_display = ('id', 'reference', 'client', 'amount', 'devise')

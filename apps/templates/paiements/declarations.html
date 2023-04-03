@@ -255,7 +255,7 @@
                             </div>
                           </div>
                           
-                          {% if declaration.status == 'validated' %}
+                          {% if declaration.status == 'validated' and declaration.status != 'billed' %}
                             <span>
                               <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-target="#modal-declaration-bill-{{declaration.id}}">Fct</button>
                             </span>
@@ -285,8 +285,7 @@
                                 </div>
                                 <div class="modal-footer justify-content-center">
                                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Non</button>
-                                  <!-- <button data-href="{% url 'paiement:validate_declaration' declaration.id %}" href="#" class="edit-link btn btn-primary" role="button">Oui</button> -->
-                                  <button  onclick="alert('En cours de dev...')" class="btn btn-primary" role="button">Oui</button>
+                                  <button data-href="{% url 'paiement:bill_declaration' declaration.id %}" href="#" class="edit-link btn btn-primary" role="button">Oui</button>
                                 </div>
                               </div>
                             </div>

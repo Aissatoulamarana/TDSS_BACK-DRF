@@ -3,6 +3,7 @@
 Copyright (c) 2022 - OD
 """
 
+from uuid import UUID
 from django import template
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -21,7 +22,8 @@ from reportlab.lib.pagesizes import letter, A4
 import qrcode
 
 
-from .models import Devise, Facture, Payer, Payment, Permit, Employee, Declaration
+from .models import Devise, Facture, Payer, Payment, Permit, Employee, Declaration, JobCategory, Job
+from apps.authentication.models import Profile, CustomUser
 from .forms import DeviseForm, FactureForm, PayerForm, PaymentForm, EmployeeForm, DeclarationForm
 
 
@@ -38,6 +40,79 @@ def payments_view(request):
         'payments': payments,
         'segment': "paiements"
     })
+
+
+@login_required(login_url="/login/")
+def generate_payment_view(request):
+    context_empty = {
+        'segment': 'paiements'
+    }
+
+    if request.method == "POST" and 'facture_ref' in request.POST:
+        facture_ref = request.POST["facture_ref"]
+        # print(facture_ref)
+
+        try:
+            facture = Facture.objects.get(reference=UUID(facture_ref).hex)
+
+            default_devise = Devise.objects.first()
+            initial_value = {'devise': default_devise}
+            context_empty = {
+                'paymentform': PaymentForm(prefix= "payment", initial= initial_value), 
+                'payerform': PayerForm(prefix= "payer"),
+                'facture': facture,
+                'segment': 'paiements'
+            }
+            return render(request, "paiements/generate-payment.html", context_empty)
+        except ValueError:
+            messages.error(request, "Cette référence n'est pas valide.")
+            return redirect("paiement:payments")
+        except Facture.DoesNotExist:
+            messages.error(request, "Cette facture n'existe pas.")
+            return redirect("paiement:payments")
+        
+    elif request.method == "POST" and 'generate-form-submit' in request.POST:
+
+        bill = request.POST.get('facture')
+        facture = Facture.objects.get(reference=UUID(bill).hex)
+        print(facture.reference)
+        
+        paymentform = PaymentForm(request.POST, prefix= "payment")
+        payerform = PayerForm(request.POST, prefix= "payer")
+
+        paymentform.fields["type"].required = False
+        
+        if paymentform.is_valid() and payerform.is_valid():
+            # print("Valid forms submitted!")
+
+            new_payer = payerform.save(commit=False)
+
+            new_payer.save()
+            # print("Payer created!")
+
+            new_payment = paymentform.save(commit=False)
+            new_payment.facture_ref = facture
+            new_payment.type = Permit.objects.first()
+            new_payment.payer = new_payer
+            new_payment.created_by = request.user
+
+            new_payment.save()
+            # print("Payment created!")
+
+            messages.success(request, "Nouveau paiement ajouté.")
+            return redirect("paiement:payments")
+        else:
+            context = {
+                'paymentform': paymentform, 
+                'payerform': payerform,
+                'facture': facture,
+                'ErrorMessage': "Formulaire invalid soumit",
+                'segment': 'paiements'
+            }
+            return render(request, "paiements/generate-payment.html", context)
+
+
+    # return redirect("paiement:payments")
 
 
 @login_required(login_url="/login/")
@@ -249,7 +324,20 @@ def get_devise_value(request, permit_id, devise_id):
         
         return JsonResponse({'permit_price': permit.price, 'devise_value': devise.value})
     else:
-        return JsonResponse({"error": "Erreur requête. COntactez l'admin."})
+        return JsonResponse({"error": "Erreur requête. Contactez l'admin."})
+
+
+def get_devise(request, devise_id):
+    if request.method == "GET":
+        
+        try:
+            devise = Devise.objects.get(pk=devise_id)
+        except Devise.DoesNotExist:
+            return JsonResponse({'error': "Devise inexistante."})
+        
+        return JsonResponse({'devise_value': devise.value})
+    else:
+        return JsonResponse({"error": "Erreur requête. Contactez l'admin."})
 
 
 @login_required(login_url="/login/")
@@ -375,14 +463,51 @@ def validate_declaration_view(request, declaration_id):
 
 
 @login_required(login_url="/login/")
+def bill_declaration_view(request, declaration_id):
+    try:
+        declaration = Declaration.objects.get(pk=declaration_id)
+        # Getting job categories
+        cadres = JobCategory.objects.get(pk=1)
+        agents = JobCategory.objects.get(pk=2)
+        ouvriers = JobCategory.objects.get(pk=3)
+
+        new_bill = Facture()
+        new_bill.declaration_ref = declaration
+        new_bill.client = Profile.objects.get(account=request.user)
+        new_bill.total_cadres = declaration.employee_declarations.filter(job_category=cadres).count()
+        new_bill.total_agents = declaration.employee_declarations.filter(job_category=agents).count()
+        new_bill.total_ouvriers = declaration.employee_declarations.filter(job_category=ouvriers).count()
+
+        new_bill.amount = (new_bill.total_cadres * cadres.permit.price) + (new_bill.total_agents * agents.permit.price) + (
+                            new_bill.total_ouvriers * ouvriers.permit.price)
+        
+        new_bill.devise = cadres.permit.devise
+        new_bill.created_by = request.user
+        # print(new_bill.client.name, new_bill.amount, new_bill.devise)
+
+        new_bill.save()
+
+        declaration.status = 'billed'
+        declaration.save()
+
+        messages.success(request, "Déclaration facturée.")
+    except Declaration.DoesNotExist:
+        messages.error(request, "Déclaration inexistante.")
+    
+    return redirect("paiement:declarations")
+
+
+@login_required(login_url="/login/")
 def factures_view(request):
     factures = Facture.objects.all()
+    job_categories = JobCategory.objects.all()
     form = FactureForm()
 
     return render(request, "paiements/factures.html", {
         #  To edit
         'form': form,
         'factures': factures,
+        'job_categories': job_categories,
         'segment': "facturation"
     })
 

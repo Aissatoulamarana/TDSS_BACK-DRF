@@ -1,4 +1,5 @@
 {% extends "layouts/base.html" %}
+{% load custom_filters %}
 
 {% block title %} Factures {% endblock %}
 
@@ -67,14 +68,13 @@
                 </h3>
               </div>
               <!-- Light table -->
-              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "ref", "company",  "type", "amount", "actions"]'>
+              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "ref", "company", "amount", "actions"]'>
                 <table class="table align-items-center table-flush">
                   <thead class="thead-light">
                     <tr>
                       <th scope="col" class="sort" data-sort="n°">N°</th>
                       <th scope="col" class="sort" data-sort="ref">Référence</th>
                       <th scope="col" class="sort" data-sort="company">Entreprise</th>
-                      <th scope="col" class="sort" data-sort="type">Type</th>
                       <th scope="col" class="sort" data-sort="amount">Montant</th>
                       <th scope="col" class="sort" data-sort="Actions">Actions</th>
                     </tr>
@@ -89,10 +89,7 @@
                           {{facture.reference}}
                         </th>
                         <td class="company">
-                          Texte
-                        </td>
-                        <td class="type">
-                          Texte
+                          {{facture.client.name}}
                         </td>
                         <td>
                             {{facture.amount}} {{facture.devise.sign}}
@@ -120,6 +117,40 @@
                                         
                                     </div>
                                     <div class="card-body">
+                                      <div class="row mb-2">
+                                        <div class="col">
+                                          <div>
+                                            <i class="ni ni-education_hat mr-2"></i><span class="text-muted">Entreprise:</span>
+                                            <span class="heading"> <h3>{{facture.client.name}}</h3> </span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div class="row">
+                                        <div class="col">
+                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Déclaration:</span>
+                                          <strong>{{facture.declaration_ref.title}}</strong>
+                                        </div>
+                                      </div>
+                                      <div class="row mb-3">
+                                        <div class="col">
+                                          <div>
+                                            <i class="ni ni-education_hat mr-2"></i><span class="text-muted">Cadres:</span>
+                                            <span class="heading"> <h3>{{facture.total_cadres}}</h3> </span>
+                                          </div>
+                                        </div>
+                                        <div class="col">
+                                          <div>
+                                            <i class="ni ni-education_hat mr-2"></i><span class="text-muted">Agents:</span>
+                                            <span class="heading"> <h3>{{facture.total_agents}}</h3> </span>
+                                          </div>
+                                        </div>
+                                        <div class="col">
+                                          <div>
+                                            <i class="ni ni-education_hat mr-2"></i><span class="text-muted">Ouvriers:</span>
+                                            <span class="heading"> <h3>{{facture.total_ouvriers}}</h3> </span>
+                                          </div>
+                                        </div>
+                                      </div>
                                       <div class="row">
                                         <div class="col">
                                           <i class="ni education_hat mr-2"></i><span class="text-muted">Type:</span> 
@@ -130,22 +161,78 @@
                                           <strong>{{facture.amount}} {{facture.devise.sign}}</strong>
                                         </div>
                                       </div>
-                                        
-                                      <div class="row mt-3 mb-3">
-                                        <div class="col">
-                                          <div>
-                                            <i class="ni ni-education_hat mr-2"></i><span class="text-muted">Entreprise:</span>
-                                            <span class="heading"> <h3>Texte</h3> </span>
-                                          </div>
-                                        </div>
+
+                                      <!-- Light table -->
+                                      <div class="table-responsive">
+                                        <table class="table align-items-center table-flush">
+                                          <thead class="thead-light">
+                                            <tr>
+                                              <th scope="col" class="sort" data-sort="permit">Permis</th>
+                                              <th scope="col" class="sort" data-sort="quantity">Quantité</th>
+                                              <th scope="col" class="sort" data-sort="price">P.U</th>
+                                              <th scope="col" class="sort" data-sort="tprice">Total</th>
+                                            </tr>
+                                          </thead>
+                                          <tbody class="list">
+                                            
+                                              <tr>
+                                                <th scope="row">
+                                                  <div class="media align-items-center">
+                                                    <span class="name">{{job_categories.0}}</span>
+                                                  </div>
+                                                </th>
+                                                <td class="text-center">
+                                                  <span class="name">{{facture.total_cadres}}</span>
+                                                </td>
+                                                <td class="text-center">
+                                                  <span class="name">{{job_categories.0.permit.price}}</span>
+                                                </td>
+                                                <td class="budget">
+                                                  <span class="name">{{job_categories.0.permit.price | multiply:facture.total_cadres}}</span>
+                                                </td>
+                                              </tr>
+
+                                            
+                                              <tr>
+                                                <th scope="row">
+                                                  <div class="media align-items-center">
+                                                    <span class="name">{{job_categories.1}}</span>
+                                                  </div>
+                                                </th>
+                                                <td class="text-center">
+                                                  <span class="name">{{facture.total_agents}}</span>
+                                                </td>
+                                                <td class="text-center">
+                                                  <span class="name">{{job_categories.1.permit.price}}</span>
+                                                </td>
+                                                <td class="budget">
+                                                  <span class="name">{{job_categories.1.permit.price | multiply:facture.total_agents}}</span>
+                                                </td>
+                                              </tr>
+
+                                            
+                                              <tr>
+                                                <th scope="row">
+                                                  <div class="media align-items-center">
+                                                    <span class="name">{{job_categories.2}}</span>
+                                                  </div>
+                                                </th>
+                                                <td class="text-center">
+                                                  <span class="name">{{facture.total_ouvriers}}</span>
+                                                </td>
+                                                <td class="text-center">
+                                                  <span class="name">{{job_categories.2.permit.price}}</span>
+                                                </td>
+                                                <td class="budget">
+                                                  <span class="name">{{job_categories.2.permit.price | multiply:facture.total_ouvriers}}</span>
+                                                </td>
+                                              </tr>
+                                            
+                                            
+                                          </tbody>
+                                        </table>
                                       </div>
-                                      <div class="row">
-                                        <div class="col">
-                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Autres:</span><br> 
-                                          <strong>Texte</strong>
-                                        </div>
-                                        
-                                      </div>
+                                      
                                     </div>
                                   </div>
 
@@ -157,12 +244,13 @@
                             </div>
                           </div>
 
-                          <span>
+                          <!-- <span>
                             <button data-href="{% url 'paiement:edit_payment' facture.id %}" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
-                          </span>
+                          </span> -->
 
                           <span>
-                            <button data-href="{% url 'paiement:payment_receipt' facture.id %}" onclick="window.open($(this).data('href'), '_blank')" class="btn btn-sm btn-icon-only" role="button">Print</button>
+                            <!-- <button data-href="{% url 'paiement:payment_receipt' facture.id %}" onclick="window.open($(this).data('href'), '_blank')" class="btn btn-sm btn-icon-only" role="button">Print</button> -->
+                            <button onclick="alert('En cours de dev...')" class="btn btn-sm btn-icon-only" role="button">Print</button>
                           </span>
                           
                         </td>

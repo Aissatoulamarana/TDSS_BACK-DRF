@@ -64,7 +64,7 @@
               <!-- Card header -->
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des factures</em>
-                  <a href="{% url 'paiement:add_facture' %}" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
+                  <!-- <a href="{% url 'paiement:add_facture' %}" class="btn btn-sm btn-neutral float-right">+ Ajouter</a> -->
                 </h3>
               </div>
               <!-- Light table -->
@@ -100,7 +100,7 @@
                           </span>
                             
                           <div class="modal fade" id="modal-facture-{{facture.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-facture-{{facture.id}}" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered" role="dialog">
+                            <div class="modal-dialog modal-dialog-centered modal-lg" role="dialog">
                               <div class="modal-content">
                                 <div class="modal-header justify-content-center">
                                   <h2>Détails de la facture </h2>
@@ -125,52 +125,22 @@
                                           </div>
                                         </div>
                                       </div>
-                                      <div class="row">
+                                      <div class="row mb-3">
                                         <div class="col">
                                           <i class="ni education_hat mr-2"></i><span class="text-muted">Déclaration:</span>
                                           <strong>{{facture.declaration_ref.title}}</strong>
                                         </div>
                                       </div>
-                                      <div class="row mb-3">
-                                        <div class="col">
-                                          <div>
-                                            <i class="ni ni-education_hat mr-2"></i><span class="text-muted">Cadres:</span>
-                                            <span class="heading"> <h3>{{facture.total_cadres}}</h3> </span>
-                                          </div>
-                                        </div>
-                                        <div class="col">
-                                          <div>
-                                            <i class="ni ni-education_hat mr-2"></i><span class="text-muted">Agents:</span>
-                                            <span class="heading"> <h3>{{facture.total_agents}}</h3> </span>
-                                          </div>
-                                        </div>
-                                        <div class="col">
-                                          <div>
-                                            <i class="ni ni-education_hat mr-2"></i><span class="text-muted">Ouvriers:</span>
-                                            <span class="heading"> <h3>{{facture.total_ouvriers}}</h3> </span>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div class="row">
-                                        <div class="col">
-                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Type:</span> 
-                                          <strong>Texte</strong>
-                                        </div>
-                                        <div class="col">
-                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Montant:</span>
-                                          <strong>{{facture.amount}} {{facture.devise.sign}}</strong>
-                                        </div>
-                                      </div>
 
                                       <!-- Light table -->
-                                      <div class="table-responsive">
+                                      <div class="table-responsive table-sm">
                                         <table class="table align-items-center table-flush">
                                           <thead class="thead-light">
                                             <tr>
-                                              <th scope="col" class="sort" data-sort="permit">Permis</th>
+                                              <th scope="col" class="sort" data-sort="permit">Catégorie de Permis</th>
                                               <th scope="col" class="sort" data-sort="quantity">Quantité</th>
                                               <th scope="col" class="sort" data-sort="price">P.U</th>
-                                              <th scope="col" class="sort" data-sort="tprice">Total</th>
+                                              <th scope="col" class="sort" data-sort="tprice">Montant</th>
                                             </tr>
                                           </thead>
                                           <tbody class="list">
@@ -228,8 +198,13 @@
                                                 </td>
                                               </tr>
                                             
-                                            
                                           </tbody>
+                                          <tfoot>
+                                            <tr class="border-top">
+                                              <th class="text-left" colspan="3">TOTAL</th>
+                                              <th class="h2"><h2>{{facture.amount}} {{facture.devise.sign}}</h2></th>
+                                            </tr>
+                                          </tfoot>
                                         </table>
                                       </div>
                                       
@@ -249,8 +224,8 @@
                           </span> -->
 
                           <span>
-                            <!-- <button data-href="{% url 'paiement:payment_receipt' facture.id %}" onclick="window.open($(this).data('href'), '_blank')" class="btn btn-sm btn-icon-only" role="button">Print</button> -->
-                            <button onclick="alert('En cours de dev...')" class="btn btn-sm btn-icon-only" role="button">Print</button>
+                            <button data-href="{% url 'paiement:bill_receipt' facture.id %}" onclick="window.open($(this).data('href'), '_blank')" class="btn btn-sm btn-icon-only" role="button">Print</button>
+                            
                           </span>
                           
                         </td>

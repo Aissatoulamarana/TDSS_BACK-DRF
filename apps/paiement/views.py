@@ -86,6 +86,7 @@ def generate_payment_view(request):
             # print("Valid forms submitted!")
 
             new_payer = payerform.save(commit=False)
+            new_payer.employer = facture.client
 
             new_payer.save()
             # print("Payer created!")
@@ -197,73 +198,6 @@ def edit_payment_view(request, payment_id):
 
 
     return render(request, "paiements/edit-payment.html", context_empty)
-
-
-@login_required(login_url="/login/")
-def payment_receipt_view(request, payment_id):
-    # Getting the payment
-    payment = Payment.objects.get(pk=payment_id)
-
-    # Creating a buffer for the pdf
-    buffer = io.BytesIO()
-
-    pdf = canvas.Canvas(buffer)
-
-    pdf.setPageSize(A4)
-    width, height = A4
-    pdf.setTitle("Paiements")
-    pdf.drawImage('apps/static/assets/img/brand/logo.jpg', 60, 750, 100, 80, showBoundary=False)
-    pdf.line(50, 750, 550, 750)
-    pdf.drawString(200, 730, f"RECU DE PAIEMENT N° 00{payment.id}/2023")
-    pdf.line(50, 720, 550, 720)
-    pdf.setFontSize(8, leading=None)
-    pdf.drawString(55, 700, f"Référence: {payment.reference}")
-    pdf.drawString(400, 700, f"Date: {payment.created_on}")
-    # pdf.drawString(60, 730, f"- Informations du payeur -")
-    pdf.drawString(55, 680, f"Prénom & Nom:  {payment.payer.first} {payment.payer.last}")
-    pdf.drawString(55, 670, f"Nationalité: {payment.payer.country_origin}")
-    pdf.drawString(55, 660, f"Employeur: {payment.payer.employer}")
-    pdf.drawString(55, 650, f"Fonction: {payment.payer.job}")
-    pdf.drawString(55, 640, f"Téléphone: {payment.payer.phone}")
-
-    data = [
-        ['Description', 'Type de permis', 'Quantité', 'Montant'],
-        ['Frais d\'acquisition', payment.type, '01', payment.amount]
-    ]
-    table = Table(data, colWidths=150)
-
-    table.wrapOn(pdf, 55, 580)
-    table.drawOn(pdf, 55, 580)
-
-    # Creating the QR Code
-    qr_data = {
-        'ID': payment.id, 
-        'REF': payment.reference, 
-        'Payeur': f"{payment.payer.first} {payment.payer.last}", 
-        'Montant': f"{payment.amount} {payment.devise.sign}"
-    }
-    qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L, border=4)
-    qr.add_data(qr_data)
-    qr.make(fit=True)
-    img = qr.make_image()
-    img.save('staticfiles/payment_qr.png')
-    
-    pdf.drawImage('staticfiles/payment_qr.png', 60, 480, 100, 100, showBoundary=False)
-
-    pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
-    pdf.setFont('Vera', 12)
-    pdf.line(300, 550, 550, 550)
-    pdf.drawString(320, 530, f"TOTAL TTC")
-    pdf.line(420, 525, 420, 545)
-    pdf.drawString(450, 530, f"{payment.amount} {payment.devise.sign}")
-    pdf.line(300, 520, 550, 520)
-
-    pdf.showPage()
-    pdf.save()
-
-    buffer.seek(0)
-
-    return FileResponse(buffer, filename="recu_paiement.pdf")
 
 
 @login_required(login_url="/login/")

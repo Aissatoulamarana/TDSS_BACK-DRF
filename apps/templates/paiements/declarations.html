@@ -1,4 +1,5 @@
 {% extends "layouts/base.html" %}
+{% load custom_filters %}
 
 {% block title %} Déclarations {% endblock %}
 
@@ -152,7 +153,7 @@
                           </span>
                             
                           <div class="modal fade" id="modal-declaration-{{declaration.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-declaration-{{declaration.id}}" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered" role="dialog">
+                            <div class="modal-dialog modal-dialog-centered modal-lg" role="dialog">
                               <div class="modal-content">
                                 <div class="modal-header justify-content-center">
                                   <h2>Détails de la déclaration </h2>
@@ -169,30 +170,84 @@
                                         
                                     </div>
                                     <div class="card-body">
-                                      <div class="row">
+                                      <div class="row mb-3">
                                         <div class="col">
                                           <i class="ni education_hat mr-2"></i><span class="text-muted">Titre:</span> 
                                           <strong>{{declaration.title}}</strong>
                                         </div>
                                         <div class="col">
                                           <i class="ni education_hat mr-2"></i><span class="text-muted">Total Employées:</span>
-                                          <strong>{{declaration.employee_declarations.count}} </strong>
+                                          <span class="heading"><strong>{{declaration.employee_declarations.count}} </strong></span>
                                         </div>
                                       </div>
-                                      <div class="row">
+                                      <div class="row mb-3">
                                         <div class="col">
-                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Comment:</span><br> 
-                                          <strong>{{declaration.comment}}</strong>
+                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Statut:</span> 
+                                          <strong>{{declaration.get_status_display}}</strong>
                                         </div>
                                       </div>
                                      
-                                      <div class="row">
+                                      <div class="row mb-3">
                                         <div class="col">
-                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Autres:</span><br> 
-                                          <strong>Texte</strong>
+                                          <div>
+                                            <i class="ni ni-education_hat mr-2"></i><span class="text-muted">Cadres:</span>
+                                            <span class="heading"> <h3>{{declaration.employee_declarations | count_employee_jobcategory:1}}</h3> </span>
+                                          </div>
                                         </div>
-                                        
+                                        <div class="col">
+                                          <div>
+                                            <i class="ni ni-education_hat mr-2"></i><span class="text-muted">Agents:</span>
+                                            <span class="heading"> <h3>{{declaration.employee_declarations | count_employee_jobcategory:2}}</h3> </span>
+                                          </div>
+                                        </div>
+                                        <div class="col">
+                                          <div>
+                                            <i class="ni ni-education_hat mr-2"></i><span class="text-muted">Ouvriers:</span>
+                                            <span class="heading"> <h3>{{declaration.employee_declarations | count_employee_jobcategory:3}}</h3> </span>
+                                          </div>
+                                        </div>
                                       </div>
+
+
+                                      <!-- Light table -->
+                                      <div class="table-responsive table-sm mt-3">
+                                        <table class="table align-items-center table-flush">
+                                          <thead class="thead-light">
+                                            <tr>
+                                              <th scope="col" class="sort" data-sort="num">N°</th>
+                                              <th scope="col" class="sort" data-sort="passport">N° de Passeport</th>
+                                              <th scope="col" class="sort" data-sort="name">Prénoms & Nom</th>
+                                              <th scope="col" class="sort" data-sort="job">Fonction</th>
+                                              <th scope="col" class="sort" data-sort="phone">Téléphone</th>
+                                            </tr>
+                                          </thead>
+                                          <tbody class="list">
+                                            {% for employee in declaration.employee_declarations.all %}
+                                              <tr>
+                                                <td class="text-center">
+                                                  <span class="name">{{forloop.counter}}</span>
+                                                </td>
+                                                <th scope="row">
+                                                  <div class="media align-items-center">
+                                                    <span class="name">{{employee.passport_number}}</span>
+                                                  </div>
+                                                </th>
+                                                <td class="text-left">
+                                                  <span class="name">{{employee.first}} {{employee.last}}</span>
+                                                </td>
+                                                <td class="text-left">
+                                                  <span class="name">{{employee.job}}</span>
+                                                </td>
+                                                <td class="budget">
+                                                  <span class="name">{{employee.phone}}</span>
+                                                </td>
+                                              </tr>
+                                            
+                                            {% endfor %}
+                                          </tbody>
+                                        </table>
+                                      </div>
+
                                     </div>
                                   </div>
 
@@ -209,10 +264,6 @@
                               <button data-href="{% url 'paiement:edit_declaration' declaration.id %}" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
                             </span>
                           {% endif %}
-
-                          <span>
-                            <!-- <button data-href="{% url 'paiement:payment_receipt' declaration.id %}" onclick="window.open($(this).data('href'), '_blank')" class="btn btn-sm btn-icon-only" role="button">Print</button> -->
-                          </span>
 
                           {% if declaration.status == 'unvalidated' and declaration.employee_declarations.count > 0 %}
                             <span>
@@ -259,6 +310,12 @@
                             <span>
                               <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-target="#modal-declaration-bill-{{declaration.id}}">Fct</button>
                             </span>
+                          {% endif %}
+
+                          {% if declaration.status == 'validated' or declaration.status == 'billed' %}
+                          <span>
+                            <button data-href="{% url 'paiement:declaration_receipt' declaration.id %}" onclick="window.open($(this).data('href'), '_blank')" class="btn btn-sm btn-icon-only" role="button">Print</button>
+                          </span>
                           {% endif %}
                             
                           <div class="modal fade" id="modal-declaration-bill-{{declaration.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-declaration-bill-{{declaration.id}}" aria-hidden="true">

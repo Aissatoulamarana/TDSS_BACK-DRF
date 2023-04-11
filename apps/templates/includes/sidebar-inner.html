@@ -23,98 +23,145 @@
             <!-- Nav items -->
             <ul class="navbar-nav">
                 <li class="nav-item">
-                <a class="nav-link {% if 'index' in segment %} active {% endif %}" 
-                   href="#navbar-dashboards" data-toggle="collapse" role="button" aria-expanded="true" aria-controls="navbar-dashboards">
-                    <i class="ni ni-shop text-primary"></i>
-                    <span class="nav-link-text">Dashboards</span>
-                </a>
+                    <a class="nav-link {% if 'index' in segment %} active {% endif %}" 
+                    href="#navbar-dashboards" data-toggle="collapse" role="button" aria-expanded="true" aria-controls="navbar-dashboards">
+                        <i class="ni ni-shop text-primary"></i>
+                        <span class="nav-link-text">Dashboards</span>
+                    </a>
+                    <div class="collapse" id="navbar-dashboards">
+                        <ul class="nav nav-sm flex-column">
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                <span class="sidenav-mini-icon"> S </span>
+                                <span class="sidenav-normal"> Statistiques </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="/" class="nav-link">
+                                <span class="sidenav-mini-icon"> G </span>
+                                <span class="sidenav-normal"> Graphes </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {% if 'enrollement' in segment %} active {% endif %}" 
+                    href="#navbar-enrollement" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="navbar-enrollement">
+                        <i class="ni ni-collection text-success"></i>
+                        <span class="nav-link-text">Enrollement</span>
+                    </a>
+                    <div class="collapse" id="navbar-enrollement">
+                        <ul class="nav nav-sm flex-column">
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                <span class="sidenav-mini-icon"> LE </span>
+                                <span class="sidenav-normal"> Liste </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                <span class="sidenav-mini-icon"> EE </span>
+                                <span class="sidenav-normal"> Etats </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link {% if 'facturation' in segment %} active {% endif %}" 
+                    href="#navbar-facturation" data-toggle="collapse" role="button" aria-expanded="{% if 'facturation' in segment %} true {% else %} false {% endif %}" aria-controls="navbar-facturation">
+                        <i class="ni ni-ui-04 text-info"></i>
+                        <span class="nav-link-text">Facturation</span>
+                    </a>
+                    <div class="collapse" id="navbar-facturation">
+                        <ul class="nav nav-sm flex-column">
+                            <li class="nav-item">
+                                <a href="{% url 'paiement:declarations' %}" class="nav-link">
+                                <span class="sidenav-mini-icon"> D </span>
+                                <span class="sidenav-normal"> Déclarations </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'paiement:factures' %}" class="nav-link">
+                                <span class="sidenav-mini-icon"> F </span>
+                                <span class="sidenav-normal"> Factures </span>
+                                </a>
+                            </li>
+                            <!-- <li class="nav-item">
+                                <a href="/" class="nav-link">
+                                <span class="sidenav-mini-icon"> I </span>
+                                <span class="sidenav-normal"> Impression </span>
+                                </a>
+                            </li> -->
+                        </ul>
+                    </div>
                 </li>
                 <li class="nav-item">
-                <a class="nav-link {% if 'paiements' in segment %} active {% endif %}" 
-                   href="#navbar-paiements" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="navbar-paiements">
-                    <i class="ni ni-ungroup text-orange"></i>
-                    <span class="nav-link-text">Paiements</span>
-                </a>
-                <div class="collapse" id="navbar-paiements">
-                    <ul class="nav nav-sm flex-column">
-                        <li class="nav-item">
-                            <a href="{% url 'paiement:payments' %}" class="nav-link">
-                            <span class="sidenav-mini-icon"> L </span>
-                            <span class="sidenav-normal"> Liste </span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{% url 'paiement:devises' %}" class="nav-link">
-                            <span class="sidenav-mini-icon"> D </span>
-                            <span class="sidenav-normal"> Dévises </span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/" class="nav-link">
-                            <span class="sidenav-mini-icon"> E </span>
-                            <span class="sidenav-normal"> Etats </span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                </li>
+                    <a class="nav-link {% if 'paiements' in segment %} active {% endif %}" 
+                       href="#navbar-paiements" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="navbar-paiements">
+                        <i class="ni ni-credit-card text-orange"></i>
+                        <span class="nav-link-text">Paiements</span>
+                    </a>
+                    <div class="collapse" id="navbar-paiements">
+                        <ul class="nav nav-sm flex-column">
+                            <li class="nav-item">
+                                <a href="{% url 'paiement:payments' %}" class="nav-link">
+                                <span class="sidenav-mini-icon"> L </span>
+                                <span class="sidenav-normal"> Liste </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'paiement:devises' %}" class="nav-link">
+                                <span class="sidenav-mini-icon"> D </span>
+                                <span class="sidenav-normal"> Dévises </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                <span class="sidenav-mini-icon"> E </span>
+                                <span class="sidenav-normal"> Etats </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    </li>
                 <li class="nav-item">
-                <a class="nav-link {% if 'facturation' in segment %} active {% endif %}" 
-                   href="#navbar-facturation" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="navbar-facturation">
-                    <i class="ni ni-ui-04 text-info"></i>
-                    <span class="nav-link-text">Facturation</span>
-                </a>
-                <div class="collapse" id="navbar-facturation">
-                    <ul class="nav nav-sm flex-column">
-                        <li class="nav-item">
-                            <a href="{% url 'paiement:declarations' %}" class="nav-link">
-                            <span class="sidenav-mini-icon"> D </span>
-                            <span class="sidenav-normal"> Déclarations </span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{% url 'paiement:factures' %}" class="nav-link">
-                            <span class="sidenav-mini-icon"> F </span>
-                            <span class="sidenav-normal"> Factures </span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/" class="nav-link">
-                            <span class="sidenav-mini-icon"> I </span>
-                            <span class="sidenav-normal"> Impression </span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                </li>
-                <li class="nav-item">
-                <a class="nav-link {% if 'administration' in segment %} active {% endif %}" 
-                   href="#navbar-administration" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="navbar-administration">
-                    <i class="ni ni-single-copy-04 text-pink"></i>
-                    <span class="nav-link-text">Administration</span>
-                </a>
-                <div class="collapse" id="navbar-administration">
-                    <ul class="nav nav-sm flex-column">
-                        <li class="nav-item">
-                            <a href="{% url 'authentication:users' %}" class="nav-link">
-                            <span class="sidenav-mini-icon"> U </span>
-                            <span class="sidenav-normal"> Utilisateurs </span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{% url 'authentication:profiles' %}" class="nav-link">
-                            <span class="sidenav-mini-icon"> P </span>
-                            <span class="sidenav-normal"> Profils </span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{% url 'authentication:agencies' %}" class="nav-link">
-                            <span class="sidenav-mini-icon"> A </span>
-                            <span class="sidenav-normal"> Agences </span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                    <a class="nav-link {% if 'administration' in segment %} active {% endif %}" 
+                    href="#navbar-administration" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="navbar-administration">
+                        <i class="ni ni-settings text-pink"></i>
+                        <span class="nav-link-text">Administration</span>
+                    </a>
+                    <div class="collapse" id="navbar-administration">
+                        <ul class="nav nav-sm flex-column">
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                <span class="sidenav-mini-icon"> PM </span>
+                                <span class="sidenav-normal"> Permissions </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'authentication:users' %}" class="nav-link">
+                                <span class="sidenav-mini-icon"> U </span>
+                                <span class="sidenav-normal"> Utilisateurs </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'authentication:profiles' %}" class="nav-link">
+                                <span class="sidenav-mini-icon"> P </span>
+                                <span class="sidenav-normal"> Profils </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'authentication:agencies' %}" class="nav-link">
+                                <span class="sidenav-mini-icon"> A </span>
+                                <span class="sidenav-normal"> Agences </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </li>
             </ul>
             <!-- Divider -->

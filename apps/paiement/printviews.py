@@ -251,9 +251,9 @@ def payment_receipt_view(request, payment_id):
     date = DateFormat(payment.created_on)
     pdf.drawString(480, 700, f"Date: {date.format('d/m/y')}")
     # pdf.drawString(60, 730, f"- Informations du payeur -")
-    pdf.drawString(55, 680, f"Prénom & Nom:  {payment.payer.first} {payment.payer.last}")
-    pdf.drawString(55, 670, f"Nationalité: {payment.payer.country_origin}")
-    pdf.drawString(55, 660, f"Employeur: {payment.payer.employer}")
+    pdf.drawString(55, 680, f"Facture N° : {payment.facture_ref.reference}")
+    pdf.drawString(55, 670, f"Entreprise : {payment.payer.employer}")
+    pdf.drawString(55, 660, f"Payer Par :  {payment.payer.first} {payment.payer.last}")
     pdf.drawString(55, 650, f"Fonction: {payment.payer.job}")
     pdf.drawString(55, 640, f"Téléphone: {payment.payer.phone}")
 

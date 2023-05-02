@@ -23,7 +23,7 @@
             </nav>
           </div>
           <div class="col-lg-6 col-5 text-right">
-            <a href="#" class="btn btn-sm btn-neutral">Filters</a>
+            <a href="#" class="btn btn-sm btn-neutral" data-id="a-paiements-filters">Filters</a>
           </div>
         </div>
         
@@ -64,7 +64,7 @@
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des paiements</em>
                   <!-- <a href="{% url 'paiement:add_payment' %}" class="btn btn-sm btn-neutral float-right">+ Ajouter</a> -->
-                  <button class="btn btn-sm btn-neutral float-right" role="button" data-toggle="modal" data-target="#modal-payment-generate">Generate</button>
+                  <button class="btn btn-sm btn-neutral float-right" data-id="a-paiements-generer" role="button" data-toggle="modal" data-target="#modal-payment-generate">Generate</button>
                 </h3>
               </div>
               <div class="modal fade" id="modal-payment-generate" tabindex="-1" role="dialog" aria-labelledby="modal-payment-generate" aria-hidden="true">
@@ -144,7 +144,7 @@
                         </td>
                         <td class="text-center justify-content-center">
                           <span>
-                            <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-target="#modal-payment-{{payment.id}}">View</button>
+                            <button class="btn btn-sm btn-icon-only" role="button" data-id="a-paiements-consulter" data-toggle="modal" data-target="#modal-payment-{{payment.id}}">View</button>
                           </span>
                             
                           <div class="modal fade" id="modal-payment-{{payment.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-payment-{{payment.id}}" aria-hidden="true">
@@ -214,7 +214,7 @@
                           </span>
 
                           <span>
-                            <button data-href="{% url 'paiement:payment_receipt' payment.id %}" onclick="window.open($(this).data('href'), '_blank')" class="btn btn-sm btn-icon-only" role="button">Print</button>
+                            <button data-href="{% url 'paiement:payment_receipt' payment.id %}" data-id="a-paiements-imprimer" onclick="window.open($(this).data('href'), '_blank')" class="btn btn-sm btn-icon-only" role="button">Print</button>
                           </span>
                           
                         </td>

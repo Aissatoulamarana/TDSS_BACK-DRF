@@ -98,7 +98,7 @@ class Facture(models.Model):
     total_cadres = models.SmallIntegerField()
     total_agents = models.SmallIntegerField()
     total_ouvriers = models.SmallIntegerField()
-    amount = models.DecimalField(max_digits=9, decimal_places=2)
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
     devise = models.ForeignKey(Devise, on_delete=models.PROTECT, related_name="facture_devises")
     comment = models.TextField(max_length=255, blank=True, null=True)
     created_by = models.ForeignKey(CustomUser, on_delete=models.PROTECT)

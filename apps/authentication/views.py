@@ -5,8 +5,8 @@ Copyright (c) 2022 - OD
 
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
-from .forms import LoginForm, SignUpForm, ProfileForm, CustomUserForm, ResetPwdForm, AgencyForm
-from .models import CustomUser, ProfileType, Profile, Region, Agency, UserType
+from .forms import LoginForm, SignUpForm, ProfileForm, CustomUserForm, ResetPwdForm, AgencyForm, PermissionForm
+from .models import CustomUser, ProfileType, Profile, Region, Agency, UserType, Menu, SubMenu, Action, Permission
 import secrets, string
 from django.db import IntegrityError
 from django.core.mail import send_mail
@@ -332,3 +332,72 @@ def edit_agency_view(request, agency_id):
     return render(request, "accounts/edit-agency.html", context_empty)
 
 
+def permissions_view(request):
+    permissions = Permission.objects.all()
+
+    return render(request, "accounts/permissions.html", {
+        
+        'permissions': permissions,
+        'segment': "administration"
+    })
+
+
+def add_permission_view(request):
+    context_empty = {
+        'form': PermissionForm(),
+        'menus': Menu.objects.all(),
+        'segment': 'administration'
+    }
+
+    if request.method == "POST":
+        form = PermissionForm(request.POST)
+
+        if form.is_valid():
+            new_permission = form.save()
+            messages.success(request, "Nouvelle permission ajoutée avec succès !")
+            return redirect("authentication:permissions")
+        else:
+            context = {'form': form, 'ErrorMessage': "Formulaire invalid soumit.", 'segment': 'administration'}
+            return render(request, "accounts/add-permissions.html", context)
+
+    return render(request, "accounts/add-permissions.html", context_empty)
+
+
+def edit_permission_view(request, permission_id):
+    permission = Permission.objects.get(pk=permission_id)
+    context_empty = {
+        'form': PermissionForm(instance=permission), 
+        'menus': Menu.objects.all(),
+        'permission_id': permission_id, 
+        'segment': 'administration'
+    }
+
+    if request.method == "POST":
+        
+        form = PermissionForm(request.POST, instance=permission)
+        if form.is_valid():
+            form.save()
+            print("Permission updated!")
+
+            messages.success(request, "Permission modifiée avec succès !")
+            return redirect("authentication:permissions")
+
+        else:
+            context = {'form': form, 'ErrorMessage': "Formulaire invalid soumit.", 'permission_id': permission_id, 'segment': 'administration'}
+            return render(request, "accounts/edit-permission.html", context)
+
+
+    return render(request, "accounts/edit-permission.html", context_empty)
+
+
+def delete_permission_view(request, permission_id):
+    
+    try:
+        permission = Permission.objects.get(pk=permission_id)
+        permission.delete()
+
+        messages.success(request, "Permission supprimée !")
+        return redirect("authentication:permissions")
+    except Permission.DoesNotExist:
+        messages.error(request, "Permission inexistante !")
+        return redirect("authentication:permissions")

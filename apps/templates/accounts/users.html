@@ -23,7 +23,7 @@
             </nav>
           </div>
           <div class="col-lg-6 col-5 text-right">
-            <a href="#" class="btn btn-sm btn-neutral">Filters</a>
+            <a href="#" class="btn btn-sm btn-neutral" data-id="a-utilisateurs-filters">Filters</a>
           </div>
         </div>
         
@@ -61,7 +61,7 @@
               <!-- Card header -->
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des utilisateurs du système</em>
-                  <a href="{% url 'authentication:add_user' %}" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
+                  <a href="{% url 'authentication:add_user' %}" data-id="a-utilisateurs-ajouter" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
                 </h3>
               </div>
               <!-- Light table -->
@@ -114,7 +114,7 @@
                         </td>
                         <td class="text-center justify-content-center">
                           <span>
-                            <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-target="#modal-user-{{user.id}}">View</button>
+                            <button class="btn btn-sm btn-icon-only" role="button" data-id="a-utilisateurs-consulter" data-toggle="modal" data-target="#modal-user-{{user.id}}">View</button>
                           </span>
                             
                           <div class="modal fade" id="modal-user-{{user.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-user-{{user.id}}" aria-hidden="true">
@@ -209,7 +209,7 @@
                           </div>
                             
                           <span>
-                            <button data-href="{% url 'authentication:edit_user' user.id %}" href="#" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
+                            <button data-href="{% url 'authentication:edit_user' user.id %}" data-id="a-utilisateurs-modifier" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
                           </span>
                           <!-- <div class="dropdown">
                             <a class="btn btn-sm btn-icon-only text-light" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -221,7 +221,7 @@
                             </div>
                           </div> -->
                           <span>
-                            <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-target="#modal-reinit-confirmation-{{user.id}}">Rst</button>
+                            <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-id="a-utilisateurs-reset" data-target="#modal-reinit-confirmation-{{user.id}}">Rst</button>
                           </span>
                             
                           <div class="modal fade" id="modal-reinit-confirmation-{{user.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-reinit-confirmation-{{user.id}}" aria-hidden="true">

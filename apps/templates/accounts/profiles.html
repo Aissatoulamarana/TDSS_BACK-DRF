@@ -23,7 +23,7 @@
             </nav>
           </div>
           <div class="col-lg-6 col-5 text-right">
-            <a id="filters" href="#" class="btn btn-sm btn-neutral">Filters</a>
+            <a id="filters" href="#" class="btn btn-sm btn-neutral" data-id="a-profiles-filters">Filters</a>
           </div>
         </div>
         
@@ -106,7 +106,7 @@
               <!-- Card header -->
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des profils du système</em>
-                  <a href="{% url 'authentication:add_profile' %}" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
+                  <a href="{% url 'authentication:add_profile' %}" data-id="a-profiles-ajouter" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
                 </h3>
               </div>
               <!-- Light table -->
@@ -155,7 +155,7 @@
                         </td>
                         <td class="text-center justify-content-center">
                           <span>
-                            <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-target="#modal-profile-{{profile.uuid}}">View</button>
+                            <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-id="a-profiles-consulter" data-target="#modal-profile-{{profile.uuid}}">View</button>
                           </span>
                             
                           <div class="modal fade" id="modal-profile-{{profile.uuid}}" tabindex="-1" role="dialog" aria-labelledby="modal-profile-{{profile.uuid}}" aria-hidden="true">
@@ -230,7 +230,7 @@
                           </div>
 
                           <span>
-                            <button data-href="{% url 'authentication:edit_profile' profile.uuid %}" href="#" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
+                            <button data-href="{% url 'authentication:edit_profile' profile.uuid %}" data-id="a-profiles-modifier" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
                           </span>
                           
                         </td>

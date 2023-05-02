@@ -8,7 +8,7 @@ from django.forms import TextInput, NumberInput, Select, Textarea, FileInput, Da
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from .models import Profile, CustomUser, ProfileType, UserType, Agency, Region
+from .models import Profile, CustomUser, ProfileType, UserType, Agency, Region, Permission
 
 
 class LoginForm(forms.Form):
@@ -89,6 +89,20 @@ class CustomUserForm(forms.ModelForm):
         self.fields['location'].empty_label = "Sélectionner l'emplacement"
         self.fields['type'].empty_label = "Sélectionner le type"
         self.fields['type'].queryset = UserType.objects.filter(status='ON').order_by('id')
+
+
+class PermissionForm(forms.ModelForm):
+    class Meta:
+        model = Permission
+        fields = ('name', 'permissions_list')
+        # Omitteed fields: id, status
+        widgets = {
+            'name': TextInput(attrs={'class': "form-control", 'placeholder': "Nom de la permission"}),
+            'permissions_list': Textarea(attrs={'rows':4, 'placeholder': "Liste des autorisations...", 'class': "form-control", 'readonly': "readonly" }),
+        }
+    def __init__(self, *args, **kwargs):
+        super(PermissionForm, self).__init__(*args, **kwargs)
+        self.fields['permissions_list'].readonly = True
 
 
 class AgencyForm(forms.ModelForm):

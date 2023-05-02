@@ -1,0 +1,190 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Permissions {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+  <!-- Header -->
+  <div class="header bg-primary pb-6">
+    <div class="container-fluid">
+      <div class="header-body">
+        <div class="row align-items-center py-4">
+          <div class="col-lg-6 col-7">
+            <h6 class="h2 text-white d-inline-block mb-0">Permissions</h6>
+            <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+              <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+                <li class="breadcrumb-item"><a href="#"><i class="fas fa-home"></i></a></li>
+                <li class="breadcrumb-item"><a href="#">Administration</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Permissions</li>
+                <li class="breadcrumb-item active" aria-current="page">Ajout</li>
+              </ol>
+            </nav>
+          </div>
+          <div class="col-lg-6 col-5 text-right">
+            <a href="#" class="btn btn-sm btn-neutral">Filters</a>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Page content -->
+  <div class="container-fluid mt--6">
+    
+    <div class="row">
+      <div class="col-xl-12">
+        <div class="row">
+            <div class="col-lg-12">
+              <div class="card-wrapper">
+                <!-- Input groups -->
+                <div class="card">
+                  <!-- Card header -->
+                  <div class="card-header">
+                    <h3 class="mb-0"><a href="{% url 'authentication:permissions' %}">
+                        <i class="ni ni-bold-left"></i></a> <span class="ml-4">Nouvelle Permission</span>
+                    </h3>
+                  </div>
+                  <!-- Card body -->
+                  {% if ErrorMessage %}
+                    <!-- Alerts -->
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <span class="alert-icon"><i class="ni ni-like-2"></i></span>
+                        <span class="alert-text">
+                            <strong>Erreur!</strong> {{ErrorMessage}}
+                            <br>
+                            <ul>
+                                {% for field in form %}
+                                    {% if field.errors %}
+                                        <li> {{field.label}}: {{field.errors | striptags}} </li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </span>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                  {% endif %}
+                  <div class="card-body">
+                    <form role="form" action="{% url 'authentication:add_permissions' %}" method="post">
+                        {% csrf_token %}
+                      <!-- Input groups with icon -->
+                      <fieldset class="fieldset">
+                        <legend></legend>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <div class="input-group input-group-merge">
+                                <div class="input-group-prepend">
+                                  <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
+                                </div>
+                                {{ form.name }}
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <div class="input-group input-group-merge">
+                                <div class="input-group-prepend">
+                                  <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
+                                </div>
+                                {{ form.permissions_list }}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <p>Veuillez choisir les autorisations :</p>
+                            <ul>
+                                {% for menu in menus %}
+                                    <li class="custom-control custom-control-alternative custom-checkbox">
+                                        <input class="custom-control-input" id="{{menu.uid}}" type="checkbox">
+                                        <label class="custom-control-label" for="{{menu.uid}}">{{menu.name}}</label>
+
+                                        <a class="d-inline-block ml-3" href="#div-{{menu.name}}" data-toggle="collapse"
+                                            role="button" aria-expanded="false" aria-controls="navbar-{{menu.name}}">
+                                            <i class="ni ni-bold-right text-dark"></i>
+                                        </a>
+                                        <div class="collapse" id="div-{{menu.name}}">
+                                            <ul class="ml--4">
+                                                {% for sub in menu.menu_subs.all %}
+                                                    <li class="custom-control custom-control-alternative custom-checkbox">
+                                                        <input class="custom-control-input" id="{{sub.uid}}" type="checkbox">
+                                                        <label class="custom-control-label" for="{{sub.uid}}">{{sub.name}}</label>
+
+                                                        <a class="d-inline-block ml-3" href="#div-{{sub.name}}" data-toggle="collapse"
+                                                            role="button" aria-expanded="false" aria-controls="navbar-{{sub.name}}">
+                                                            <i class="ni ni-bold-right text-dark"></i>
+                                                        </a>
+                                                        <div class="collapse" id="div-{{sub.name}}">
+                                                            <ul class="ml--4">
+                                                                {% for action in sub.submenu_actions.all %}
+                                                                    <li class="custom-control custom-control-alternative custom-checkbox">
+                                                                        <input class="custom-control-input" id="{{action.uid}}" type="checkbox">
+                                                                        <label class="custom-control-label" for="{{action.uid}}">{{action.name}}</label>
+                                                                    </li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        </div>
+                                                    </li>
+                                                    
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                          </div>
+                          
+                        </div>
+                        
+                      </fieldset>
+                      <div class="card-footer">
+                        <div class="row justify-content-center">
+                            <input type="reset" class="btn btn-secondary" value="Effacer">
+                            <input type="submit" class="btn btn-primary" value="Enregistrer">
+                        </div>
+                      </div>
+
+                    </form>
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+            
+          </div>     
+      </div>
+    </div>
+
+    {% include 'includes/footer.html' %}
+
+  </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+    <script>
+        setTimeout(function() {
+            $(".alert").alert('close');
+        }, 3000);
+
+        $('input[type=checkbox]').change(function() {
+            // alert("Hello!");
+            if ($(this).is(':checked')) {
+                $('#id_permissions_list').val($('#id_permissions_list').val() + $(this).next('label').text() + " ");
+            } else {
+                $('#id_permissions_list').val($('#id_permissions_list').val().replace($(this).next('label').text() + " ", ""));
+            };
+        });
+
+        
+    </script>
+{% endblock javascripts %}

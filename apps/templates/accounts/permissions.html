@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} Agence {% endblock %}
+{% block title %} Permissions {% endblock %}
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}{% endblock stylesheets %}
@@ -13,17 +13,17 @@
       <div class="header-body">
         <div class="row align-items-center py-4">
           <div class="col-lg-6 col-7">
-            <h6 class="h2 text-white d-inline-block mb-0">Agences</h6>
+            <h6 class="h2 text-white d-inline-block mb-0">Permissions</h6>
             <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
               <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
                 <li class="breadcrumb-item"><a href="#"><i class="fas fa-home"></i></a></li>
                 <li class="breadcrumb-item"><a href="#">Administration</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Agences</li>
+                <li class="breadcrumb-item active" aria-current="page">Permissions</li>
               </ol>
             </nav>
           </div>
           <div class="col-lg-6 col-5 text-right">
-            <a href="#" class="btn btn-sm btn-neutral" data-id="a-agences-filters">Filters</a>
+            <a href="#" class="btn btn-sm btn-neutral" data-id="a-permissions-filters">Filters</a>
           </div>
         </div>
         
@@ -60,51 +60,47 @@
             <div class="card">
               <!-- Card header -->
               <div class="card-header border-0">
-                <h3 class="mb-0"><em>Liste des agences du système</em>
-                  <a href="{% url 'authentication:add_agency' %}" data-id="a-agences-ajouter" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
+                <h3 class="mb-0"><em>Liste des permissions</em>
+                  <a href="{% url 'authentication:add_permissions' %}" data-id="a-permissions-ajouter" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
                 </h3>
               </div>
               <!-- Light table -->
-              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "code", "region", "name", "actions"]'>
+              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "name", "autorisations", "actions"]'>
                 <table class="table align-items-center table-flush">
                   <thead class="thead-light">
                     <tr>
-                      <th scope="col" class="sort" data-sort="row">N°</th>
-                      <th scope="col" class="sort" data-sort="code">Code</th>
-                      <th scope="col" class="sort" data-sort="region">Région</th>
-                      <th scope="col" class="sort" data-sort="name">Nom de l'agence</th>
-                      <th scope="col" class="sort" data-sort="Actions">Actions</th>
+                      <th scope="col" class="sort" data-sort="n°">N°</th>
+                      <th scope="col" class="sort" data-sort="name">Nom</th>
+                      <th scope="col" class="sort" data-sort="autorisations">Autorisations</th>
+                      <th scope="col" class="sort" data-sort="actions">Actions</th>
                     </tr>
                   </thead>
                   <tbody class="list">
-                    {% for agency in agencies %}
+                    {% for permission in permissions %}
                       <tr>
                         <td class="n°">
                           {{forloop.counter}}
                         </td>
-                        <th scope="row">
+                        <th scope="name">
                           <div class="media align-items-center">
                             <div class="media-body">
-                              <span class="name mb-0 text-sm"> {{agency.code}} </span>
+                              <span class="name mb-0 text-sm"> {{permission.name}} </span>
                             </div>
                           </div>
                         </th>
-                        <td class="region">
-                          {{agency.region}}
+                        <td class="autorisations">
+                          {{permission.permissions_list}}
                         </td>
-                        <td class="name">
-                          {{agency.name}}
-                        </td>
-                        <td class="text-center justify-content-center">
+                        <td class="text-center justify-content-center actions">
                           <span>
-                            <button class="btn btn-sm btn-icon-only" role="button" data-id="a-agences-consulter" data-toggle="modal" data-target="#modal-agency-{{agency.id}}">View</button>
+                            <button class="btn btn-sm btn-icon-only" role="button" data-id="a-permissions-consulter" data-toggle="modal" data-target="#modal-permission-{{permission.id}}">View</button>
                           </span>
                             
-                          <div class="modal fade" id="modal-agency-{{agency.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-agency-{{agency.id}}" aria-hidden="true">
+                          <div class="modal fade" id="modal-permission-{{permission.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-permission-{{permission.id}}" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="dialog">
                               <div class="modal-content">
                                 <div class="modal-header justify-content-center">
-                                    <h2>Informations de l'agence</h2>
+                                    <h2>Détails des accès</h2>
                                 </div>
                                 <div class="modal-body">
 
@@ -112,10 +108,7 @@
                                       <div class="card-header text-center">
                                         <div class="row text-center">
                                           <div class="col">
-                                            <i class="ni education_hat mr-2"></i><strong>Code:</strong> {{agency.code}}
-                                          </div>
-                                          <div class="col">
-                                            <i class="ni education_hat mr-2"></i><strong>Région:</strong> {{agency.region}}
+                                            <i class="ni education_hat mr-2"></i><strong>Nom:</strong> {{permission.name}}
                                           </div>
                                         </div>
                                           
@@ -125,15 +118,16 @@
                                         <div class="row">
                                           <div class="col">
                                             <div>
-                                              <span class="heading"> <h2>{{agency.name}}</h2> </span>
-                                              <!-- <span class="description">Titre</span> -->
+                                              <span class="heading"> <h2>Liste des autorisations</h2> </span>
+                                              {{permission.permissions_list}}
+                                              
                                             </div>
                                           </div>
                                         </div>
                                         <div class="text-center">
                                           <h4 class="h4">
-                                              <span class="text-muted">Commentaire</span><br>
-                                            {{agency.comment}}
+                                            <span class="text-muted">Commentaire</span><br>
+                                            No comment.
                                           </h4>
                                         </div>
                                       </div>
@@ -148,14 +142,54 @@
                           </div>
 
                           <span>
-                            <button data-href="{% url 'authentication:edit_agency' agency.id %}" data-id="a-agences-modifier" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
+                            <button data-href="{% url 'authentication:edit_permission' permission.id %}" data-id="a-permissions-modifier" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
                           </span>
+
+                          <span>
+                            <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-id="a-permissions-supprimer" data-target="#modal-delete-confirmation-{{permission.id}}">Del</button>
+                          </span>
+                            
+                          <div class="modal fade" id="modal-delete-confirmation-{{permission.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-delete-confirmation-{{permission.id}}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="dialog">
+                              <div class="modal-content">
+                                <div class="modal-header justify-content-center">
+                                  <h2>Confirmation </h2>
+                                </div>
+                                
+                                <form id="delete-permission-{{permission.id}}-form" role="form" action="{% url 'authentication:delete_permission' permission.id %}" method="post">
+                                  {% csrf_token %}
+                                  <div class="modal-body">
+    
+                                    <div class="card card-agency mt--4 mb--4">
+                                      
+                                      <div class="card-body">
+                                        <div class="row">
+                                          <div class="col">
+                                            <i class="ni education_hat mr-2"></i><span class="text-muted"></span> 
+                                            <strong>Etes-vous sûr de vouloir supprimer cette permission ?</strong>
+                                          </div>
+                                        </div>
+                                        <input type="hidden" name="permission-id" value="0">
+                                      </div>
+                                    </div>
+    
+                                  </div>
+                                  <div class="modal-footer justify-content-center">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Non</button>
+                                    <input type="submit" id="delete-permisssion-{{permission.id}}" data-permission="{{permission.id}}" class="btn btn-danger submit-btn" value="Oui">
+                                    
+                                  </div>
+                                  
+                                </form>
+                              </div>
+                            </div>
+                          </div>
                           
                         </td>
                       </tr>
                     {% empty %}
                       <tr>
-                        <p>- Aucune agence enregistré.</p>
+                        <!-- <p>- Aucune permission enregistrée.</p> -->
                       </tr>
                     {% endfor %}
                     
@@ -209,6 +243,12 @@
 
     $(".edit-link").click(function() {
       window.location = $(this).data("href");
-    })
+    });
+
+    // Deleting permission in tab
+    $(".submit-btn").click(function(){
+        $("input[name='permission-id']").val(parseInt($(this).data("permission")));
+        $(this).closest('form').submit();
+    });
   </script>
 {% endblock javascripts %}

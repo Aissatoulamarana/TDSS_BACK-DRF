@@ -9,12 +9,33 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
 
+from apps.authentication.models import CustomUser, Profile, ProfileType
+from apps.paiement.models import Declaration, Facture, Payment
+
 
 @login_required(login_url="/login/")
 def index(request):
-    context = {'segment': 'index'}
+    context = {
+        'segment': 'index',
+        'total_users': CustomUser.objects.all().count(),
+        'total_ministeres': Profile.objects.filter(type=ProfileType.objects.get(uid=3)).count(),
+        'total_banques': Profile.objects.filter(type=ProfileType.objects.get(uid=2)).count(),
+        'total_entreprise': Profile.objects.filter(type=ProfileType.objects.get(uid=4)).count(),
+
+        'total_declarations': Declaration.objects.all().count(),
+        'total_factures': Facture.objects.all().count(),
+        'total_paiements': Payment.objects.all().count()
+    }
 
     html_template = loader.get_template('home/index.html')
+    return HttpResponse(html_template.render(context, request))
+
+
+@login_required(login_url="/login/")
+def graphs_view(request):
+    context = {'segment': 'index'}
+
+    html_template = loader.get_template('home/graphs.html')
     return HttpResponse(html_template.render(context, request))
 
 

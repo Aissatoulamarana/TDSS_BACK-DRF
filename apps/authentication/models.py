@@ -87,3 +87,40 @@ class Profile(models.Model):
     def __str__(self):
         return f"{self.name}"
 
+
+class Menu(models.Model):
+    uid = models.CharField(max_length=50)
+    name = models.CharField(max_length=100)
+    status = models.CharField(max_length=30, choices=[('ON', "Actif"), ('OFF', "Inactif")], default="ON")
+
+    def __str__(self):
+        return f"{self.name}"
+
+
+class SubMenu(models.Model):
+    uid = models.CharField(max_length=50)
+    menu_id = models.ForeignKey(Menu, on_delete=models.PROTECT, related_name="menu_subs")
+    name = models.CharField(max_length=100)
+    status = models.CharField(max_length=30, choices=[('ON', "Actif"), ('OFF', "Inactif")], default="ON")
+
+    def __str__(self):
+        return f"{self.name}"
+
+
+class Action(models.Model):
+    uid = models.CharField(max_length=50)
+    submenu_id = models.ForeignKey(SubMenu, on_delete=models.PROTECT, related_name="submenu_actions")
+    name = models.CharField(max_length=100)
+    status = models.CharField(max_length=30, choices=[('ON', "Actif"), ('OFF', "Inactif")], default="ON")
+
+    def __str__(self):
+        return f"{self.name}"
+
+
+class Permission(models.Model):
+    name = models.CharField(max_length=100)
+    permissions_list = models.TextField(max_length=255)
+
+    def __str__(self):
+        return f"{self.name}"
+

@@ -25,4 +25,8 @@ urlpatterns = [
     path("agencies/", views.agencies_view, name="agencies"),
     path("agencies/add/", views.add_agency_view, name="add_agency"),
     path("agencies/<int:agency_id>/edit", views.edit_agency_view, name="edit_agency"),
+    path("permissions/", views.permissions_view, name="permissions"),
+    path("permissions/add/", views.add_permission_view, name="add_permissions"),
+    path("permissions/<int:permission_id>/edit", views.edit_permission_view, name="edit_permission"),
+    path("permissions/<int:permission_id>/delete", views.delete_permission_view, name="delete_permission"),
 ]

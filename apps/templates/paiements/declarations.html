@@ -24,7 +24,7 @@
             </nav>
           </div>
           <div class="col-lg-6 col-5 text-right">
-            <a href="#" class="btn btn-sm btn-neutral">Filters</a>
+            <a href="#" class="btn btn-sm btn-neutral" data-id="a-declarations-filters">Filters</a>
           </div>
         </div>
         
@@ -64,7 +64,7 @@
               <!-- Card header -->
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des déclarations</em>
-                    <a href="#" class="btn btn-sm btn-neutral float-right" role="button" data-toggle="modal" data-target="#modal-declaration-add">+Ajouter</a>
+                    <a href="#" class="btn btn-sm btn-neutral float-right" role="button" data-id="a-declarations-ajouter" data-toggle="modal" data-target="#modal-declaration-add">+Ajouter</a>
                 </h3>
                   
                 <div class="modal fade" id="modal-declaration-add" tabindex="-1" role="dialog" aria-labelledby="modal-declaration-add" aria-hidden="true">
@@ -149,7 +149,7 @@
                         </td>
                         <td class="text-center justify-content-center">
                           <span>
-                            <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-target="#modal-declaration-{{declaration.id}}">View</button>
+                            <button class="btn btn-sm btn-icon-only" role="button" data-id="a-declarations-consulter" data-toggle="modal" data-target="#modal-declaration-{{declaration.id}}">View</button>
                           </span>
                             
                           <div class="modal fade" id="modal-declaration-{{declaration.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-declaration-{{declaration.id}}" aria-hidden="true">
@@ -261,13 +261,13 @@
 
                           {% if declaration.status == 'unvalidated' %}
                             <span>
-                              <button data-href="{% url 'paiement:edit_declaration' declaration.id %}" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
+                              <button data-href="{% url 'paiement:edit_declaration' declaration.id %}" data-id="a-declarations-modifier"  class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
                             </span>
                           {% endif %}
 
                           {% if declaration.status == 'unvalidated' and declaration.employee_declarations.count > 0 %}
                             <span>
-                              <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-target="#modal-declaration-validation-{{declaration.id}}">Val</button>
+                              <button class="btn btn-sm btn-icon-only" role="button" data-id="a-declarations-valider" data-toggle="modal" data-target="#modal-declaration-validation-{{declaration.id}}">Val</button>
                             </span>
                           {% endif %}
                             
@@ -308,13 +308,13 @@
                           
                           {% if declaration.status == 'validated' and declaration.status != 'billed' %}
                             <span>
-                              <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-target="#modal-declaration-bill-{{declaration.id}}">Fct</button>
+                              <button class="btn btn-sm btn-icon-only" role="button" data-id="a-declarations-facturer" data-toggle="modal" data-target="#modal-declaration-bill-{{declaration.id}}">Fct</button>
                             </span>
                           {% endif %}
 
                           {% if declaration.status == 'validated' or declaration.status == 'billed' %}
                           <span>
-                            <button data-href="{% url 'paiement:declaration_receipt' declaration.id %}" onclick="window.open($(this).data('href'), '_blank')" class="btn btn-sm btn-icon-only" role="button">Print</button>
+                            <button data-href="{% url 'paiement:declaration_receipt' declaration.id %}" data-id="a-declarations-imprimer" onclick="window.open($(this).data('href'), '_blank')" class="btn btn-sm btn-icon-only" role="button">Print</button>
                           </span>
                           {% endif %}
                             

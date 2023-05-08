@@ -24,7 +24,9 @@
             </nav>
           </div>
           <div class="col-lg-6 col-5 text-right">
-            <a href="#" class="btn btn-sm btn-neutral" data-id="a-factures-filters">Filters</a>
+            {% if 'a-factures-filters' in user.permissions.codes or user.is_staff %}
+              <a href="#" class="btn btn-sm btn-neutral" data-id="a-factures-filters">Filters</a>
+            {% endif %}
           </div>
         </div>
         
@@ -96,7 +98,9 @@
                         </td>
                         <td class="text-center justify-content-center">
                           <span>
-                            <button class="btn btn-sm btn-icon-only" role="button" data-id="a-factures-consulter" data-toggle="modal" data-target="#modal-facture-{{facture.id}}">View</button>
+                            {% if 'a-factures-consulter' in user.permissions.codes or user.is_staff %}
+                              <button class="btn btn-sm btn-icon-only" role="button" data-id="a-factures-consulter" data-toggle="modal" data-target="#modal-facture-{{facture.id}}">View</button>
+                            {% endif %}
                           </span>
                             
                           <div class="modal fade" id="modal-facture-{{facture.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-facture-{{facture.id}}" aria-hidden="true">
@@ -224,8 +228,9 @@
                           </span> -->
 
                           <span>
+                            {% if 'a-factures-imprimer' in user.permissions.codes or user.is_staff %}
                             <button data-href="{% url 'paiement:bill_receipt' facture.id %}" data-id="a-factures-imprimer" onclick="window.open($(this).data('href'), '_blank')" class="btn btn-sm btn-icon-only" role="button">Print</button>
-                            
+                            {% endif %}
                           </span>
                           
                         </td>

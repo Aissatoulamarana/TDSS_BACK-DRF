@@ -78,12 +78,28 @@
                         <legend></legend>
                         <div class="row">
                           <div class="col-md-6">
-                            <div class="form-group">
-                              <div class="input-group input-group-merge">
-                                <div class="input-group-prepend">
-                                  <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
+                            <div class="row">
+                              <div class="col-md-12">
+                                <div class="form-group">
+                                  <div class="input-group input-group-merge">
+                                    <div class="input-group-prepend">
+                                      <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
+                                    </div>
+                                    {{ form.name }}
+                                  </div>
                                 </div>
-                                {{ form.name }}
+                              </div>
+                            </div>
+                            <div class="row">
+                              <div class="col-md-12">
+                                <div class="form-group">
+                                  <div class="input-group input-group-merge">
+                                    <div class="input-group-prepend">
+                                      <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
+                                    </div>
+                                    {{ form.profile_type }}
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -93,8 +109,9 @@
                                 <div class="input-group-prepend">
                                   <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
                                 </div>
-                                {{ form.permissions_list }}
+                                {{ form.list }}
                               </div>
+                              {{ form.codes.as_hidden }}
                             </div>
                           </div>
                         </div>
@@ -109,7 +126,7 @@
 
                                         <a class="d-inline-block ml-3" href="#div-{{menu.name}}" data-toggle="collapse"
                                             role="button" aria-expanded="false" aria-controls="navbar-{{menu.name}}">
-                                            <i class="ni ni-bold-right text-dark"></i>
+                                            <i class="ni ni-bold-down text-dark arrow"></i>
                                         </a>
                                         <div class="collapse" id="div-{{menu.name}}">
                                             <ul class="ml--4">
@@ -120,7 +137,7 @@
 
                                                         <a class="d-inline-block ml-3" href="#div-{{sub.name}}" data-toggle="collapse"
                                                             role="button" aria-expanded="false" aria-controls="navbar-{{sub.name}}">
-                                                            <i class="ni ni-bold-right text-dark"></i>
+                                                            <i class="ni ni-bold-down text-dark arrow"></i>
                                                         </a>
                                                         <div class="collapse" id="div-{{sub.name}}">
                                                             <ul class="ml--4">
@@ -172,18 +189,39 @@
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
     <script>
-        setTimeout(function() {
-            $(".alert").alert('close');
-        }, 3000);
+      setTimeout(function() {
+          $(".alert").alert('close');
+      }, 3000);
 
-        $('input[type=checkbox]').change(function() {
-            // alert("Hello!");
-            if ($(this).is(':checked')) {
-                $('#id_permissions_list').val($('#id_permissions_list').val() + $(this).next('label').text() + " ");
-            } else {
-                $('#id_permissions_list').val($('#id_permissions_list').val().replace($(this).next('label').text() + " ", ""));
-            };
-        });
+      let degree = 0;
+      $('.arrow').click(function() {
+        degree += 180;
+        // console.log($(this));
+        $(this).css('transform',`rotate(${degree}deg)`);
+        
+      });
+
+      $('input[type=checkbox]').change(function() {
+
+        if ($(this).is(':checked')) {
+          // $(this).parents('div:first').siblings('input').prop('checked', true);
+          // $('#id_list').val($('#id_list').val() + $(this).parents('div:first').siblings('input').next('label').text() + " ");
+          // $('#id_codes').val($('#id_codes').val() + $(this).parents('div:first').siblings('input').attr('id') + " ");
+          // console.log($(this).parents('div:first').siblings('input').attr('id'));
+          
+          $('#id_list').val($('#id_list').val() + $(this).next('label').text() + " ");
+          $('#id_codes').val($('#id_codes').val() + $(this).attr('id') + " ");
+          console.log($('#id_codes').val());
+        } else {
+          // $('#id_list').val($('#id_list').val().replace($(this).parents('div:first').siblings('input').next('label').text() + " ", ""));
+          // $('#id_codes').val($('#id_codes').val().replace($(this).parents('div:first').siblings('input').attr('id') + " ", ""));
+
+          $('#id_list').val($('#id_list').val().replace($(this).next('label').text() + " ", ""));
+          $('#id_codes').val($('#id_codes').val().replace($(this).attr('id') + " ", ""));
+          // $(this).parents('div:first').siblings('input').prop('checked', false);
+          console.log($('#id_codes').val());
+        };
+      });
 
         
     </script>

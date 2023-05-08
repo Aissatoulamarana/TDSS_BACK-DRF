@@ -37,7 +37,7 @@ class ActionAdmin(admin.ModelAdmin):
     list_display = ('id', 'uid', 'submenu_id', 'name', 'status')
 
 class PermissionAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'permissions_list')
+    list_display = ('id', 'name', 'profile_type', 'codes', 'list')
 
 
 admin.site.register(CustomUser, CustomUserAdmin)

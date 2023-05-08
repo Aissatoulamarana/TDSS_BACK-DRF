@@ -23,7 +23,9 @@
             </nav>
           </div>
           <div class="col-lg-6 col-5 text-right">
-            <a href="#" class="btn btn-sm btn-neutral" data-id="a-agences-filters">Filters</a>
+            {% if 'a-agences-filters' in user.permissions.codes or user.is_staff %}
+              <a href="#" class="btn btn-sm btn-neutral" data-id="a-agences-filters">Filters</a>
+            {% endif %}
           </div>
         </div>
         
@@ -61,7 +63,9 @@
               <!-- Card header -->
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des agences du système</em>
-                  <a href="{% url 'authentication:add_agency' %}" data-id="a-agences-ajouter" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
+                  {% if 'a-agences-ajouter' in user.permissions.codes or user.is_staff %}
+                    <a href="{% url 'authentication:add_agency' %}" data-id="a-agences-ajouter" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
+                  {% endif %}
                 </h3>
               </div>
               <!-- Light table -->
@@ -96,9 +100,11 @@
                           {{agency.name}}
                         </td>
                         <td class="text-center justify-content-center">
-                          <span>
-                            <button class="btn btn-sm btn-icon-only" role="button" data-id="a-agences-consulter" data-toggle="modal" data-target="#modal-agency-{{agency.id}}">View</button>
-                          </span>
+                          {% if 'a-agences-consulter' in user.permissions.codes or user.is_staff %}
+                            <span>
+                              <button class="btn btn-sm btn-icon-only" role="button" data-id="a-agences-consulter" data-toggle="modal" data-target="#modal-agency-{{agency.id}}">View</button>
+                            </span>
+                          {% endif %}
                             
                           <div class="modal fade" id="modal-agency-{{agency.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-agency-{{agency.id}}" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="dialog">
@@ -147,9 +153,11 @@
                             </div>
                           </div>
 
-                          <span>
-                            <button data-href="{% url 'authentication:edit_agency' agency.id %}" data-id="a-agences-modifier" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
-                          </span>
+                          {% if 'a-agences-modifier' in user.permissions.codes or user.is_staff %}
+                            <span>
+                              <button data-href="{% url 'authentication:edit_agency' agency.id %}" data-id="a-agences-modifier" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
+                            </span>
+                          {% endif %}
                           
                         </td>
                       </tr>

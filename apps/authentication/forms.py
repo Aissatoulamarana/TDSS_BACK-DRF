@@ -69,7 +69,7 @@ class ProfileForm(forms.ModelForm):
 class CustomUserForm(forms.ModelForm):
     class Meta:
         model = CustomUser
-        fields = ('email', 'first_name', 'last_name', 'phone', 'location', 'agency', 'type', 'job', 'picture')
+        fields = ('email', 'first_name', 'last_name', 'phone', 'location', 'agency', 'type', 'job', 'picture', 'permissions')
         # Omitted fields: username, created_by, created_on, modified_on
         widgets = {
             'first_name': TextInput(attrs={'class': "form-control", 'placeholder': "Prenoms"}),
@@ -78,15 +78,17 @@ class CustomUserForm(forms.ModelForm):
             'phone': NumberInput(attrs={'class': "form-control", 'placeholder': "N° de téléphone", 'type': "number", 'min': 0}),
             'location': Select(attrs={'class': "form-control", 'placeholder': "Emplacement/Région"}),
             'agency': Select(attrs={'class': "form-control", 'placeholder': "Agence"}),
-            'type': Select(attrs={'class': "form-control", 'placeholder': "Type d.utilisateur"}),
+            'type': Select(attrs={'class': "form-control", 'placeholder': "Type d'utilisateur"}),
             'job': TextInput(attrs={'class': "form-control", 'placeholder': "Poste"}),
-            'picture': FileInput(attrs={'class': "form-control"})
+            'picture': FileInput(attrs={'class': "form-control"}),
+            'permissions': Select(attrs={'class': "form-control", 'placeholder': "Permissions"})
         }
     def __init__(self, *args, **kwargs):
         super(CustomUserForm, self).__init__(*args, **kwargs)
         self.fields['agency'].empty_label = "Sélectionner l'agence"
         self.fields['agency'].required = False
-        self.fields['location'].empty_label = "Sélectionner l'emplacement"
+        self.fields['location'].empty_label = "Sélectionner l'emplacement..."
+        self.fields['permissions'].empty_label = "Sélectionner les permissions..."
         self.fields['type'].empty_label = "Sélectionner le type"
         self.fields['type'].queryset = UserType.objects.filter(status='ON').order_by('id')
 
@@ -94,15 +96,17 @@ class CustomUserForm(forms.ModelForm):
 class PermissionForm(forms.ModelForm):
     class Meta:
         model = Permission
-        fields = ('name', 'permissions_list')
+        fields = ('name', 'profile_type', 'codes', 'list')
         # Omitteed fields: id, status
         widgets = {
             'name': TextInput(attrs={'class': "form-control", 'placeholder': "Nom de la permission"}),
-            'permissions_list': Textarea(attrs={'rows':4, 'placeholder': "Liste des autorisations...", 'class': "form-control", 'readonly': "readonly" }),
+            'profile_type': Select(attrs={'class': "form-control", 'placeholder': "Type de profil"}),
+            'codes': Textarea(attrs={'rows':4, 'placeholder': "Code des autorisations...", 'class': "form-control" }),
+            'list': Textarea(attrs={'rows':4, 'placeholder': "Liste des autorisations...", 'class': "form-control", 'readonly': "readonly" }),
         }
     def __init__(self, *args, **kwargs):
         super(PermissionForm, self).__init__(*args, **kwargs)
-        self.fields['permissions_list'].readonly = True
+        self.fields['profile_type'].empty_label = "Sélectionner le type de profil..."
 
 
 class AgencyForm(forms.ModelForm):

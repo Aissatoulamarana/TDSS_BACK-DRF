@@ -23,7 +23,9 @@
             </nav>
           </div>
           <div class="col-lg-6 col-5 text-right">
-            <a id="filters" href="#" class="btn btn-sm btn-neutral" data-id="a-profiles-filters">Filters</a>
+            {% if 'a-profiles-filters' in user.permissions.codes or user.is_staff %}
+              <a id="filters" href="#" class="btn btn-sm btn-neutral" data-id="a-profiles-filters">Filters</a>
+            {% endif %}
           </div>
         </div>
         
@@ -106,7 +108,9 @@
               <!-- Card header -->
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des profils du système</em>
-                  <a href="{% url 'authentication:add_profile' %}" data-id="a-profiles-ajouter" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
+                  {% if 'a-profiles-ajouter' in user.permissions.codes or user.is_staff %}
+                    <a href="{% url 'authentication:add_profile' %}" data-id="a-profiles-ajouter" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
+                  {% endif %}
                 </h3>
               </div>
               <!-- Light table -->
@@ -154,9 +158,11 @@
                             {% endif %}
                         </td>
                         <td class="text-center justify-content-center">
-                          <span>
-                            <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-id="a-profiles-consulter" data-target="#modal-profile-{{profile.uuid}}">View</button>
-                          </span>
+                          {% if 'a-profiles-consulter' in user.permissions.codes or user.is_staff %}
+                            <span>
+                              <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-id="a-profiles-consulter" data-target="#modal-profile-{{profile.uuid}}">View</button>
+                            </span>
+                          {% endif %}
                             
                           <div class="modal fade" id="modal-profile-{{profile.uuid}}" tabindex="-1" role="dialog" aria-labelledby="modal-profile-{{profile.uuid}}" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="dialog">
@@ -229,9 +235,11 @@
                             </div>
                           </div>
 
-                          <span>
-                            <button data-href="{% url 'authentication:edit_profile' profile.uuid %}" data-id="a-profiles-modifier" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
-                          </span>
+                          {% if 'a-profiles-modifier' in user.permissions.codes or user.is_staff %}
+                            <span>
+                              <button data-href="{% url 'authentication:edit_profile' profile.uuid %}" data-id="a-profiles-modifier" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
+                            </span>
+                          {% endif %}
                           
                         </td>
                       </tr>

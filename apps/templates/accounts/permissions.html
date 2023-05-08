@@ -23,7 +23,9 @@
             </nav>
           </div>
           <div class="col-lg-6 col-5 text-right">
-            <a href="#" class="btn btn-sm btn-neutral" data-id="a-permissions-filters">Filters</a>
+            {% if 'a-permissions-filters' in user.permissions.codes or user.is_staff %}
+              <a href="#" class="btn btn-sm btn-neutral" data-id="a-permissions-filters">Filters</a>
+            {% endif %}
           </div>
         </div>
         
@@ -61,16 +63,19 @@
               <!-- Card header -->
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des permissions</em>
-                  <a href="{% url 'authentication:add_permissions' %}" data-id="a-permissions-ajouter" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
+                  {% if 'a-permissions-ajouter' in user.permissions.codes or user.is_staff %}
+                    <a href="{% url 'authentication:add_permissions' %}" data-id="a-permissions-ajouter" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
+                  {% endif %}
                 </h3>
               </div>
               <!-- Light table -->
-              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "name", "autorisations", "actions"]'>
+              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "profile", "name", "autorisations", "actions"]'>
                 <table class="table align-items-center table-flush">
                   <thead class="thead-light">
                     <tr>
                       <th scope="col" class="sort" data-sort="n°">N°</th>
                       <th scope="col" class="sort" data-sort="name">Nom</th>
+                      <th scope="col" class="sort" data-sort="profile">Type de profil</th>
                       <th scope="col" class="sort" data-sort="autorisations">Autorisations</th>
                       <th scope="col" class="sort" data-sort="actions">Actions</th>
                     </tr>
@@ -89,12 +94,17 @@
                           </div>
                         </th>
                         <td class="autorisations">
-                          {{permission.permissions_list}}
+                          {{permission.profile_type}}
+                        </td>
+                        <td class="autorisations" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 5%;">
+                          {{permission.list}}
                         </td>
                         <td class="text-center justify-content-center actions">
-                          <span>
-                            <button class="btn btn-sm btn-icon-only" role="button" data-id="a-permissions-consulter" data-toggle="modal" data-target="#modal-permission-{{permission.id}}">View</button>
-                          </span>
+                          {% if 'a-permissions-consulter' in user.permissions.codes or user.is_staff %}
+                            <span>
+                              <button class="btn btn-sm btn-icon-only" role="button" data-id="a-permissions-consulter" data-toggle="modal" data-target="#modal-permission-{{permission.id}}">View</button>
+                            </span>
+                          {% endif %}
                             
                           <div class="modal fade" id="modal-permission-{{permission.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-permission-{{permission.id}}" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="dialog">
@@ -119,7 +129,7 @@
                                           <div class="col">
                                             <div>
                                               <span class="heading"> <h2>Liste des autorisations</h2> </span>
-                                              {{permission.permissions_list}}
+                                              {{permission.list}}
                                               
                                             </div>
                                           </div>
@@ -141,13 +151,16 @@
                             </div>
                           </div>
 
-                          <span>
-                            <button data-href="{% url 'authentication:edit_permission' permission.id %}" data-id="a-permissions-modifier" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
-                          </span>
-
-                          <span>
-                            <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-id="a-permissions-supprimer" data-target="#modal-delete-confirmation-{{permission.id}}">Del</button>
-                          </span>
+                          {% if 'a-permissions-modifier' in user.permissions.codes or user.is_staff %}
+                            <span>
+                              <button data-href="{% url 'authentication:edit_permission' permission.id %}" data-id="a-permissions-modifier" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
+                            </span>
+                          {% endif %}
+                          {% if 'a-permissions-supprimer' in user.permissions.codes or user.is_staff %}
+                            <span>
+                              <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-id="a-permissions-supprimer" data-target="#modal-delete-confirmation-{{permission.id}}">Del</button>
+                            </span>
+                          {% endif %}
                             
                           <div class="modal fade" id="modal-delete-confirmation-{{permission.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-delete-confirmation-{{permission.id}}" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="dialog">

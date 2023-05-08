@@ -47,6 +47,16 @@ class Agency(models.Model):
 
     def __str__(self):
         return self.name
+    
+
+class Permission(models.Model):
+    name = models.CharField(max_length=100)
+    profile_type = models.ForeignKey(ProfileType, on_delete=models.PROTECT, related_name="permissions_profile_types")
+    codes = models.TextField(max_length=255)
+    list = models.TextField(max_length=255)
+
+    def __str__(self):
+        return f"{self.name}"
 
 
 class CustomUser(AbstractUser):
@@ -58,6 +68,7 @@ class CustomUser(AbstractUser):
     agency = models.ForeignKey(Agency, on_delete=models.PROTECT, related_name="user_agency", blank=True, null=True)
     picture = models.ImageField(upload_to="staticfiles", blank=True, null=True, verbose_name="user picture")
     reset_pwd = models.BooleanField(default=True)
+    permissions = models.ForeignKey(Permission, on_delete=models.PROTECT, blank=True, null=True, related_name="customuser_permissions")
     created_by = models.ForeignKey('self', on_delete=models.PROTECT, related_name="user_creator", blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
@@ -115,12 +126,3 @@ class Action(models.Model):
 
     def __str__(self):
         return f"{self.name}"
-
-
-class Permission(models.Model):
-    name = models.CharField(max_length=100)
-    permissions_list = models.TextField(max_length=255)
-
-    def __str__(self):
-        return f"{self.name}"
-

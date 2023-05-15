@@ -209,15 +209,15 @@
           // $('#id_codes').val($('#id_codes').val() + $(this).parents('div:first').siblings('input').attr('id') + " ");
           // console.log($(this).parents('div:first').siblings('input').attr('id'));
           
-          $('#id_list').val($('#id_list').val() + $(this).next('label').text() + " ");
-          $('#id_codes').val($('#id_codes').val() + $(this).attr('id') + " ");
+          $('#id_list').val($('#id_list').val() + " " + $(this).next('label').text());
+          $('#id_codes').val($('#id_codes').val() + " " + $(this).attr('id'));
           console.log($('#id_codes').val());
         } else {
           // $('#id_list').val($('#id_list').val().replace($(this).parents('div:first').siblings('input').next('label').text() + " ", ""));
           // $('#id_codes').val($('#id_codes').val().replace($(this).parents('div:first').siblings('input').attr('id') + " ", ""));
 
-          $('#id_list').val($('#id_list').val().replace($(this).next('label').text() + " ", ""));
-          $('#id_codes').val($('#id_codes').val().replace($(this).attr('id') + " ", ""));
+          $('#id_list').val($('#id_list').val().replace(" " + $(this).next('label').text(), ""));
+          $('#id_codes').val($('#id_codes').val().replace(" " + $(this).attr('id'), ""));
           // $(this).parents('div:first').siblings('input').prop('checked', false);
           console.log($('#id_codes').val());
         };

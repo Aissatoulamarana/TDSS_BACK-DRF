@@ -52,8 +52,8 @@ class Agency(models.Model):
 class Permission(models.Model):
     name = models.CharField(max_length=100)
     profile_type = models.ForeignKey(ProfileType, on_delete=models.PROTECT, related_name="permissions_profile_types")
-    codes = models.TextField(max_length=255)
-    list = models.TextField(max_length=255)
+    codes = models.TextField(max_length=2048)
+    list = models.TextField(max_length=2048)
 
     def __str__(self):
         return f"{self.name}"

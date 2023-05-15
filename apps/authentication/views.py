@@ -357,7 +357,7 @@ def add_permission_view(request):
             messages.success(request, "Nouvelle permission ajoutée avec succès !")
             return redirect("authentication:permissions")
         else:
-            context = {'form': form, 'ErrorMessage': "Formulaire invalid soumit.", 'segment': 'administration'}
+            context = {'form': form, 'menus': Menu.objects.all(), 'ErrorMessage': "Formulaire invalid soumit.", 'segment': 'administration'}
             return render(request, "accounts/add-permissions.html", context)
 
     return render(request, "accounts/add-permissions.html", context_empty)

@@ -82,7 +82,7 @@
                     </tr>
                   </thead>
                   <tbody class="list">
-                    {% for user in users %}
+                    {% for rowuser in users %}
                       <tr>
                         <td class="n°">
                           {{forloop.counter}}
@@ -93,18 +93,18 @@
                               <img alt="Image placeholder" src="/static/assets/img/theme/bootstrap.jpg">
                             </a> -->
                             <div class="media-body">
-                              <span class="name mb-0 text-sm"> {{user.email}} </span>
+                              <span class="name mb-0 text-sm"> {{rowuser.email}} </span>
                             </div>
                           </div>
                         </th>
                         <td class="prenoms&nom">
-                          {{user.first_name}} {{user.last_name}}
+                          {{rowuser.first_name}} {{rowuser.last_name}}
                         </td>
                         <td class="phone">
-                          {{user.phone}}
+                          {{rowuser.phone}}
                         </td>
                         <td>
-                            {% if user.is_active %} 
+                            {% if rowuser.is_active %} 
                               <span class="badge badge-dot mr-4">
                                 <i class="bg-success"></i>
                                 <span class="statut"> Actif </span>
@@ -119,11 +119,11 @@
                         <td class="text-center justify-content-center">
                           {% if 'a-utilisateurs-consulter' in user.permissions.codes or user.is_staff %}
                             <span>
-                              <button class="btn btn-sm btn-icon-only" role="button" data-id="a-utilisateurs-consulter" data-toggle="modal" data-target="#modal-user-{{user.id}}">View</button>
+                              <button class="btn btn-sm btn-icon-only" role="button" data-id="a-utilisateurs-consulter" data-toggle="modal" data-target="#modal-user-{{rowuser.id}}">View</button>
                             </span>
                           {% endif %}
                             
-                          <div class="modal fade" id="modal-user-{{user.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-user-{{user.id}}" aria-hidden="true">
+                          <div class="modal fade" id="modal-user-{{rowuser.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-user-{{rowuser.id}}" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="dialog">
                               <div class="modal-content">
                                 <div class="modal-header">
@@ -131,22 +131,30 @@
                                 <div class="modal-body">
 
                                   <div class="card card-profile mt--4 mb--4">
-                                    <img src="/static/assets/img/theme/img-1-1000x600.jpg" alt="Image placeholder" class="card-img-top">
+                                    {% if rowuser.profile_account.picture %}
+                                      Hello
+                                    {% else %}
+                                      <img src="/static/assets/img/theme/img-1-1000x600.jpg" alt="Image placeholder" class="card-img-top">
+                                    {% endif %}
                                     <div class="row justify-content-center">
                                       <div class="col-lg-3 order-lg-2">
                                         <div class="card-profile-image">
                                           <a href="#">
-                                            <img src="/static/assets/img/theme/team-4.jpg" class="rounded-circle">
+                                            {% if rowuser.picture %}
+                                              <img src="{{rowuser.picture.url}}" alt="Photo" class="rounded-circle">
+                                            {% else %}
+                                              <img src="/static/assets/img/theme/team-4.jpg" class="rounded-circle">
+                                            {% endif %}
                                           </a>
                                         </div>
                                       </div>
                                     </div>
                                     <div class="card-header text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
                                       <div class="d-flex justify-content-between">
-                                        <a href="#" class="btn btn-sm btn-info  mr-4 ">{{user.type}}</a>
+                                        <a href="#" class="btn btn-sm btn-info  mr-4 ">{{rowuser.type}}</a>
                                         <a href="#" class="btn btn-sm btn-default float-right">
-                                          {% if user.poste %}
-                                            {{user.poste}}
+                                          {% if rowuser.poste %}
+                                            {{rowuser.poste}}
                                           {% else %}
                                             Inconnu
                                           {% endif %}
@@ -158,16 +166,16 @@
                                         <div class="col">
                                           <div class="card-profile-stats d-flex justify-content-center">
                                             <div>
-                                              <span class="heading"> {{user.location}} </span>
+                                              <span class="heading"> {{rowuser.location}} </span>
                                               <span class="description">Emplacement</span>
                                             </div>
                                             <div>
-                                              <span class="heading"> {{user.agency}} </span>
+                                              <span class="heading"> {{rowuser.agency}} </span>
                                               <span class="description">Agence</span>
                                             </div>
                                             <div>
                                               <span class="heading">
-                                                {% if user.is_active %} 
+                                                {% if rowuser.is_active %} 
                                                   Actif
                                                   <span class="badge badge-dot">
                                                     <i class="bg-success"></i> 
@@ -186,24 +194,25 @@
                                       </div>
                                       <div class="text-center">
                                         <h2 class="h2">
-                                          {{user.first_name}} {{user.last_name}}
+                                          {{rowuser.first_name}} {{rowuser.last_name}}
                                         </h2>
                                         <div class="h5 mt-2">
-                                          <i class="ni business_briefcase-24 mr-2"></i><strong>Email:</strong> {{user.email}} 
+                                          <i class="ni business_briefcase-24 mr-2"></i><strong>Email:</strong> {{rowuser.email}} 
                                         </div>
                                         <div>
-                                          <i class="ni education_hat mr-2"></i><strong>Téléphone:</strong> {{user.phone}}
+                                          <i class="ni education_hat mr-2"></i><strong>Téléphone:</strong> {{rowuser.phone}}
                                         </div>
                                         <div>
-                                          <i class="ni education_hat mr-2"></i><strong>Permissions:</strong> {{user.permissions.list}}
+                                          <i class="ni education_hat mr-2"></i><strong>Permissions:</strong> {{rowuser.permissions.list}}<br>
+                                          <!-- Persmissions Handles here -->
                                         </div>
                                       </div>
                                       <div class="row justify-content-center mt-2">
-                                        {% if user.is_active %} 
-                                          <button data-href="{% url 'authentication:deactivate_user' user.id %}" class="edit-link btn btn-danger btn-sm" role="button">Bloquer</button>
+                                        {% if rowuser.is_active %} 
+                                          <button data-href="{% url 'authentication:deactivate_user' rowuser.id %}" class="edit-link btn btn-danger btn-sm" role="button">Bloquer</button>
                                           
                                         {% else %}
-                                          <button data-href="{% url 'authentication:activate_user' user.id %}" class="edit-link btn btn-success btn-sm" role="button">Activer</button>
+                                          <button data-href="{% url 'authentication:activate_user' rowuser.id %}" class="edit-link btn btn-success btn-sm" role="button">Activer</button>
 
                                         {% endif %}
                                       </div>
@@ -219,7 +228,7 @@
                             
                           {% if 'a-utilisateurs-modifier' in user.permissions.codes or user.is_staff %}
                             <span>
-                              <button data-href="{% url 'authentication:edit_user' user.id %}" data-id="a-utilisateurs-modifier" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
+                              <button data-href="{% url 'authentication:edit_user' rowuser.id %}" data-id="a-utilisateurs-modifier" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
                             </span>
                           {% endif %}
                           <!-- <div class="dropdown">
@@ -233,11 +242,11 @@
                           </div> -->
                           {% if 'a-utilisateurs-reset' in user.permissions.codes or user.is_staff %}
                             <span>
-                              <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-id="a-utilisateurs-reset" data-target="#modal-reinit-confirmation-{{user.id}}">Rst</button>
+                              <button class="btn btn-sm btn-icon-only" role="button" data-toggle="modal" data-id="a-utilisateurs-reset" data-target="#modal-reinit-confirmation-{{rowuser.id}}">Rst</button>
                             </span>
                           {% endif %}
                             
-                          <div class="modal fade" id="modal-reinit-confirmation-{{user.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-reinit-confirmation-{{user.id}}" aria-hidden="true">
+                          <div class="modal fade" id="modal-reinit-confirmation-{{rowuser.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-reinit-confirmation-{{rowuser.id}}" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="dialog">
                               <div class="modal-content">
                                 <div class="modal-header justify-content-center">
@@ -261,7 +270,7 @@
                                 </div>
                                 <div class="modal-footer justify-content-center">
                                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Non</button>
-                                  <button data-href="{% url 'authentication:reinit_password' user.id %}" href="#" class="edit-link btn btn-primary" role="button">Oui</button>
+                                  <button data-href="{% url 'authentication:reinit_password' rowuser.id %}" href="#" class="edit-link btn btn-primary" role="button">Oui</button>
                                 </div>
                               </div>
                             </div>

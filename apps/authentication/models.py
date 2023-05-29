@@ -66,7 +66,7 @@ class CustomUser(AbstractUser):
     job = models.TextField(max_length=50, blank=True, null=True, verbose_name="poste")
     location = models.ForeignKey(Region, on_delete=models.PROTECT, related_name="user_location", blank=True, null=True)
     agency = models.ForeignKey(Agency, on_delete=models.PROTECT, related_name="user_agency", blank=True, null=True)
-    picture = models.ImageField(upload_to="staticfiles", blank=True, null=True, verbose_name="user picture")
+    picture = models.ImageField(upload_to="user_pictures", blank=True, null=True, verbose_name="user picture")
     reset_pwd = models.BooleanField(default=True)
     permissions = models.ForeignKey(Permission, on_delete=models.PROTECT, blank=True, null=True, related_name="customuser_permissions")
     created_by = models.ForeignKey('self', on_delete=models.PROTECT, related_name="user_creator", blank=True, null=True)

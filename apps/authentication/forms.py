@@ -80,7 +80,7 @@ class CustomUserForm(forms.ModelForm):
             'agency': Select(attrs={'class': "form-control", 'placeholder': "Agence"}),
             'type': Select(attrs={'class': "form-control", 'placeholder': "Type d'utilisateur"}),
             'job': TextInput(attrs={'class': "form-control", 'placeholder': "Poste"}),
-            'picture': FileInput(attrs={'class': "form-control"}),
+            'picture': ClearableFileInput(attrs={'class': "form-control"}),
             'permissions': Select(attrs={'class': "form-control", 'placeholder': "Permissions"})
         }
     def __init__(self, *args, **kwargs):

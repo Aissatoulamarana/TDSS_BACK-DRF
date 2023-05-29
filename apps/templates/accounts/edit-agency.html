@@ -45,7 +45,7 @@
                 <div class="card">
                   <!-- Card header -->
                   <div class="card-header">
-                    <h3 class="mb-0"><a href="{% url 'authentication:users' %}">
+                    <h3 class="mb-0"><a href="{% url 'authentication:agencies' %}">
                         <i class="ni ni-bold-left"></i></a> <span class="ml-4">Modification d'agence</span>
                     </h3>
                   </div>
@@ -81,7 +81,7 @@
                             <div class="form-group">
                               <div class="input-group input-group-merge">
                                 <div class="input-group-prepend">
-                                  <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
+                                  <span class="input-group-text"><i class="fas fa-barcode"></i></span>
                                 </div>
                                 {{ form.code }}
                               </div>
@@ -91,7 +91,7 @@
                             <div class="form-group">
                               <div class="input-group input-group-merge">
                                 <div class="input-group-prepend">
-                                  <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
+                                  <span class="input-group-text"><i class="fas fa-location-arrow"></i></span>
                                 </div>
                                 {{ form.region }}
                               </div>
@@ -103,7 +103,7 @@
                             <div class="form-group">
                               <div class="input-group input-group-merge">
                                 <div class="input-group-prepend">
-                                  <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
+                                  <span class="input-group-text"><i class="fas fa-file-signature"></i></span>
                                 </div>
                                 {{ form.name }}
                               </div>
@@ -113,12 +113,9 @@
                             <div class="form-group">
                               <div class="input-group input-group-merge">
                                 <div class="input-group-prepend">
-                                  <span class="input-group-text"><i class="fas fa-globe-americas"></i></span>
+                                  <span class="input-group-text"><i class="fas fa-comments"></i></span>
                                 </div>
                                 {{ form.comment }}
-                                <div class="input-group-append">
-                                  <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                                </div>
                               </div>
                             </div>
                           </div>

@@ -47,7 +47,7 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ('name', 'type', 'description', 'location', 'contact', 'picture', 'adresse', 'email')
-        # Omitted fields: uuid, account, created_by, created_on, modified_on, status
+        # Omitted fields: uuid, created_on, modified_on, status
         widgets = {
             'name': TextInput(attrs={'class': "form-control", 'placeholder': "Nom du profil", 'autofocus': "True"}),
             'type': Select(attrs={'class': "form-control", 'placeholder': "Type du profil"}),
@@ -70,7 +70,7 @@ class CustomUserForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = ('email', 'first_name', 'last_name', 'phone', 'location', 'agency', 'type', 'job', 'picture', 'permissions')
-        # Omitted fields: username, created_by, created_on, modified_on
+        # Omitted fields: username, profile, created_by, created_on, modified_on
         widgets = {
             'first_name': TextInput(attrs={'class': "form-control", 'placeholder': "Prenoms"}),
             'last_name': TextInput(attrs={'class': "form-control", 'placeholder': "Nom"}),

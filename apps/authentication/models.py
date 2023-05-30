@@ -59,10 +59,31 @@ class Permission(models.Model):
         return f"{self.name}"
 
 
+class Profile(models.Model):
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    name = models.CharField(verbose_name="profile name", max_length=100)
+    type = models.ForeignKey(ProfileType, on_delete=models.PROTECT)
+    description = models.TextField(max_length=255, blank=True, null=True)
+    location = models.ForeignKey(Region, on_delete=models.PROTECT, related_name="profile_location", blank=True, null=True)
+    contact = models.IntegerField(blank=True, null=True)
+    # account = models.ForeignKey(CustomUser, on_delete=models.PROTECT, related_name="profile_account")
+    status = models.CharField(max_length=30, choices=[('ON', "Actif"), ('OFF', "Inactif")], default="ON")
+    picture = models.ImageField(upload_to="profile_pictures", blank=True, null=True, verbose_name="profile picture")
+    email = models.EmailField(max_length=100, blank=True, null=True)
+    adresse = models.TextField(max_length=255, blank=True, null=True)
+    # created_by = models.ForeignKey(CustomUser, on_delete=models.PROTECT, related_name="profile_creator")
+    created_on = models.DateTimeField(auto_now_add=True)
+    modified_on = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name}"
+
+
 class CustomUser(AbstractUser):
     email = models.EmailField(verbose_name="email address", max_length=100, unique=True)
     phone = models.IntegerField(unique=True)
     type = models.ForeignKey(UserType, on_delete=models.PROTECT)
+    profile = models.ForeignKey(Profile, on_delete=models.PROTECT, blank=True, null=True, related_name="user_profiles")
     job = models.TextField(max_length=50, blank=True, null=True, verbose_name="poste")
     location = models.ForeignKey(Region, on_delete=models.PROTECT, related_name="user_location", blank=True, null=True)
     agency = models.ForeignKey(Agency, on_delete=models.PROTECT, related_name="user_agency", blank=True, null=True)
@@ -77,26 +98,6 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.email
-
-
-class Profile(models.Model):
-    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    name = models.CharField(verbose_name="profile name", max_length=100)
-    type = models.ForeignKey(ProfileType, on_delete=models.PROTECT)
-    description = models.TextField(max_length=255, blank=True, null=True)
-    location = models.ForeignKey(Region, on_delete=models.PROTECT, related_name="profile_location", blank=True, null=True)
-    contact = models.IntegerField(blank=True, null=True)
-    account = models.ForeignKey(CustomUser, on_delete=models.PROTECT, related_name="profile_account")
-    status = models.CharField(max_length=30, choices=[('ON', "Actif"), ('OFF', "Inactif")], default="ON")
-    picture = models.ImageField(upload_to="profile_pictures", blank=True, null=True, verbose_name="profile picture")
-    email = models.EmailField(max_length=100, blank=True, null=True)
-    adresse = models.TextField(max_length=255, blank=True, null=True)
-    created_by = models.ForeignKey(CustomUser, on_delete=models.PROTECT, related_name="profile_creator")
-    created_on = models.DateTimeField(auto_now_add=True)
-    modified_on = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"{self.name}"
 
 
 class Menu(models.Model):

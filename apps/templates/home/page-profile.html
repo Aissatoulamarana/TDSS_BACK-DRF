@@ -8,16 +8,36 @@
 {% block content %}
 
     <!-- Header -->
-    <div class="header pb-6 d-flex align-items-center" style="min-height: 500px; background-image: url(/static/assets/img/theme/profile-cover.jpg); background-size: cover; background-position: center top;">
+    <div class="header pb-6 d-flex align-items-center" style="min-height: 500px; background-image: url('/media/{{request.user.profile.picture}}'); background-size: cover; background-position: center top;">
+      <!-- Default background image to save url(/static/assets/img/theme/profile-cover.jpg) -->
       <!-- Mask -->
       <span class="mask bg-gradient-default opacity-8"></span>
       <!-- Header container -->
       <div class="container-fluid d-flex align-items-center">
         <div class="row">
           <div class="col-lg-7 col-md-10">
-            <h1 class="display-2 text-white">Hello {{ request.user.username }} </h1>
-            <p class="text-white mt-0 mb-5">This is your profile page. You can see the progress you've made with your work and manage your projects or assigned tasks</p>
-            <a href="#!" class="btn btn-neutral">Edit profile</a>
+            {% if messages %}
+              <!-- Alerts -->
+              <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <span class="alert-icon"><i class="ni ni-like-2"></i></span>
+                <span class="alert-text">
+                  <strong>Success!</strong>
+                  {% for message in messages %}
+                    {{ message | safe }}
+                  {% endfor %}
+                </span>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+            {% endif %}
+            <h1 class="display-2 text-white">Bonjour <br> {{ request.user.first_name }} {{ request.user.last_name }} </h1>
+            <!-- <p class="text-white mt-0 mb-5">This is your profile page. You can see the progress you've made with your work and manage your projects or assigned tasks</p> -->
+            <p class="text-white mt-0 mb-5">Ceci est votre page de profil. Vous pouvez visualier le progrès effectué sur les différentes tâches et gérer vos activités.</p>
+            <!-- <a href="{% url 'authentication:edit_user' request.user.id %}" class="btn btn-neutral">Modifier</a> -->
+            <span>
+              <button class="btn btn-neutral" role="button" data-id="a-utilisateurs-edit-profil" data-toggle="modal" data-target="#modal-user-edit">Modifier</button>
+            </span>
           </div>
         </div>
       </div>
@@ -27,22 +47,36 @@
     <div class="container-fluid mt--6">
 
       <div class="row">
-        <div class="col-xl-4 order-xl-2">
+        <div class="col-xl-6 order-xl-1">
           <div class="card card-profile">
-            <img src="/static/assets/img/theme/img-1-1000x600.jpg" alt="Image placeholder" class="card-img-top">
+            {% if request.user.profile.picture %}
+              <img src="{{request.user.profile.picture.url}}" alt="Logo" class="card-img-top" style="max-height: 226px;">
+            {% else %}
+              <img src="/static/assets/img/theme/img-1-1000x600.jpg" alt="Image placeholder" class="card-img-top">
+            {% endif %}
             <div class="row justify-content-center">
               <div class="col-lg-3 order-lg-2">
                 <div class="card-profile-image">
                   <a href="#">
-                    <img src="/static/assets/img/theme/team-4.jpg" class="rounded-circle">
+                    {% if request.user.picture %}
+                      <img src="{{request.user.picture.url}}" alt="Photo" class="rounded-circle">
+                    {% else %}
+                      <img src="/static/assets/img/theme/team-4.jpg" class="rounded-circle">
+                    {% endif %}
                   </a>
                 </div>
               </div>
             </div>
             <div class="card-header text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
               <div class="d-flex justify-content-between">
-                <a href="#" class="btn btn-sm btn-info  mr-4 ">Connect</a>
-                <a href="#" class="btn btn-sm btn-default float-right">Message</a>
+                <a href="#" class="btn btn-sm btn-info  mr-4 ">{{request.user.type}}</a>
+                <a href="#" class="btn btn-sm btn-default float-right">
+                  {% if request.user.job %}
+                    {{request.user.job}}
+                  {% else %}
+                    Inconnu
+                  {% endif %}
+                </a>
               </div>
             </div>
             <div class="card-body pt-0">
@@ -50,36 +84,108 @@
                 <div class="col">
                   <div class="card-profile-stats d-flex justify-content-center">
                     <div>
-                      <span class="heading">22</span>
-                      <span class="description">Friends</span>
+                      <span class="heading"> {% if request.user.location %}{{request.user.location}}{% else %}Inconnu{% endif %} </span>
+                      <span class="description">Emplacement</span>
                     </div>
                     <div>
-                      <span class="heading">10</span>
-                      <span class="description">Photos</span>
+                      <span class="heading"> {% if request.user.agency %}{{request.user.agency}}{% else %}Inconnu{% endif %} </span>
+                      <span class="description">Agence</span>
                     </div>
                     <div>
-                      <span class="heading">89</span>
-                      <span class="description">Comments</span>
+                      <span class="heading">
+                        {% if request.user.is_active %} 
+                          Actif
+                          <span class="badge badge-dot">
+                            <i class="bg-success"></i> 
+                          </span>
+                        {% else %}
+                          Inactif
+                          <span class="badge badge-dot">
+                            <i class="bg-danger"></i> 
+                          </span>
+                        {% endif %}
+                      </span>
+                      <span class="description">Statut</span>
                     </div>
                   </div>
                 </div>
               </div>
               <div class="text-center">
-                <h5 class="h3">
-                  Jessica Jones<span class="font-weight-light">, 27</span>
-                </h5>
-                <div class="h5 font-weight-300">
-                  <i class="ni location_pin mr-2"></i>Bucharest, Romania
-                </div>
-                <div class="h5 mt-4">
-                  <i class="ni business_briefcase-24 mr-2"></i>Solution Manager - Creative Tim Officer
+                <h2 class="h2">
+                  {{request.user.first_name}} {{request.user.last_name}}
+                </h2>
+                <div class="h5 mt-2">
+                  <i class="ni business_briefcase-24 mr-2"></i><strong>Email:</strong> {{request.user.email}} 
                 </div>
                 <div>
-                  <i class="ni education_hat mr-2"></i>University of Computer Science
+                  <i class="ni education_hat mr-2"></i><strong>Téléphone:</strong> {{request.user.phone}}
+                </div>
+                <div>
+                  <i class="ni education_hat mr-2"></i><strong>Permissions:</strong> {{request.user.permissions.list}}<br>
+                  <!-- Persmissions Handles here -->
+                </div>
+              </div>
+              <div class="row justify-content-center mt-2">
+                {% if request.user.is_active %} 
+                  <button data-href="{% url 'authentication:deactivate_user' request.user.id %}" class="edit-link btn btn-danger btn-sm" role="button">Bloquer</button>
+                  
+                {% else %}
+                  <button data-href="{% url 'authentication:activate_user' request.user.id %}" class="edit-link btn btn-success btn-sm" role="button">Activer</button>
+
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          
+        </div>
+        <div class="col-xl-6 order-xl-2">
+          <div class="row">
+            <div class="col-lg-6">
+              <div class="card bg-gradient-info border-0">
+                <!-- Card body -->
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col">
+                      <h5 class="card-title text-uppercase text-muted mb-0 text-white">Total traffic</h5>
+                      <span class="h2 font-weight-bold mb-0 text-white">350,897</span>
+                    </div>
+                    <div class="col-auto">
+                      <div class="icon icon-shape bg-white text-dark rounded-circle shadow">
+                        <i class="ni ni-active-40"></i>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="mt-3 mb-0 text-sm">
+                    <span class="text-white mr-2"><i class="fa fa-arrow-up"></i> 3.48%</span>
+                    <span class="text-nowrap text-light">Since last month</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div class="card bg-gradient-danger border-0">
+                <!-- Card body -->
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col">
+                      <h5 class="card-title text-uppercase text-muted mb-0 text-white">Performance</h5>
+                      <span class="h2 font-weight-bold mb-0 text-white">49,65%</span>
+                    </div>
+                    <div class="col-auto">
+                      <div class="icon icon-shape bg-white text-dark rounded-circle shadow">
+                        <i class="ni ni-spaceship"></i>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="mt-3 mb-0 text-sm">
+                    <span class="text-white mr-2"><i class="fa fa-arrow-up"></i> 3.48%</span>
+                    <span class="text-nowrap text-light">Since last month</span>
+                  </p>
                 </div>
               </div>
             </div>
           </div>
+          
           <!-- Progress track -->
           <div class="card">
             <!-- Card header -->
@@ -107,22 +213,7 @@
                     </div>
                   </div>
                 </li>
-                <li class="list-group-item px-0">
-                  <div class="row align-items-center">
-                    <div class="col-auto">
-                      <!-- Avatar -->
-                      <a href="#" class="avatar rounded-circle">
-                        <img alt="Image placeholder" src="/static/assets/img/theme/angular.jpg">
-                      </a>
-                    </div>
-                    <div class="col">
-                      <h5>Angular Now UI Kit PRO</h5>
-                      <div class="progress progress-xs mb-0">
-                        <div class="progress-bar bg-green" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;"></div>
-                      </div>
-                    </div>
-                  </div>
-                </li>
+                
                 <li class="list-group-item px-0">
                   <div class="row align-items-center">
                     <div class="col-auto">
@@ -174,143 +265,144 @@
               </ul>
             </div>
           </div>
-        </div>
-        <div class="col-xl-8 order-xl-1">
-          <div class="row">
-            <div class="col-lg-6">
-              <div class="card bg-gradient-info border-0">
-                <!-- Card body -->
-                <div class="card-body">
-                  <div class="row">
-                    <div class="col">
-                      <h5 class="card-title text-uppercase text-muted mb-0 text-white">Total traffic</h5>
-                      <span class="h2 font-weight-bold mb-0 text-white">350,897</span>
-                    </div>
-                    <div class="col-auto">
-                      <div class="icon icon-shape bg-white text-dark rounded-circle shadow">
-                        <i class="ni ni-active-40"></i>
-                      </div>
-                    </div>
-                  </div>
-                  <p class="mt-3 mb-0 text-sm">
-                    <span class="text-white mr-2"><i class="fa fa-arrow-up"></i> 3.48%</span>
-                    <span class="text-nowrap text-light">Since last month</span>
-                  </p>
+
+          <div class="modal fade" id="modal-user-edit" tabindex="-1" role="dialog" aria-labelledby="modal-user-edit" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered" role="dialog">
+              <div class="modal-content">
+                <div class="modal-header">
                 </div>
-              </div>
-            </div>
-            <div class="col-lg-6">
-              <div class="card bg-gradient-danger border-0">
-                <!-- Card body -->
-                <div class="card-body">
-                  <div class="row">
-                    <div class="col">
-                      <h5 class="card-title text-uppercase text-muted mb-0 text-white">Performance</h5>
-                      <span class="h2 font-weight-bold mb-0 text-white">49,65%</span>
-                    </div>
-                    <div class="col-auto">
-                      <div class="icon icon-shape bg-white text-dark rounded-circle shadow">
-                        <i class="ni ni-spaceship"></i>
+                <div class="modal-body mt--4">
+                  <div class="card">
+                    <div class="card-header">
+                      <div class="row align-items-center">
+                        <div class="col-8">
+                          <h3 class="mb-0">Modifier votre profil </h3>
+                        </div>
                       </div>
                     </div>
+                    <div class="card-body">
+                      <form role="form" action="{% url 'home:page_profile_edit' user_id %}" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <!-- Input groups with icon -->
+                        <fieldset class="fieldset">
+                          <legend></legend>
+                          <div class="row">
+                            <div class="col-md-6">
+                              <div class="form-group">
+                                <div class="input-group input-group-merge">
+                                  <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-file-signature"></i></span>
+                                  </div>
+                                  {{ userform.first_name }}
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-6">
+                              <div class="form-group">
+                                <div class="input-group input-group-merge">
+                                  <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-file-signature"></i></span>
+                                  </div>
+                                  {{ userform.last_name }}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-6">
+                              <div class="form-group">
+                                <div class="input-group input-group-merge">
+                                  <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                  </div>
+                                  {{ userform.email }}
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-6">
+                              <div class="form-group">
+                                <div class="input-group input-group-merge">
+                                  <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                  </div>
+                                  {{ userform.phone }}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-6">
+                              <div class="form-group">
+                                <div class="input-group input-group-merge">
+                                  <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                                  </div>
+                                  {{ userform.type }}
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-6">
+                              <div class="form-group">
+                                <div class="input-group input-group-merge">
+                                  <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-briefcase"></i></span>
+                                  </div>
+                                  {{ userform.job }}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-6">
+                              <div class="form-group">
+                                <div class="input-group input-group-merge">
+                                  <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-location-arrow"></i></span>
+                                  </div>
+                                  {{ userform.location }}
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-6">
+                              <div class="form-group">
+                                <div class="input-group input-group-merge">
+                                  <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-map-marker"></i></span>
+                                  </div>
+                                  {{ userform.agency }}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-6">
+                              <div class="form-group">
+                                <div class="input-group input-group-merge">
+                                  {{ userform.picture }}
+                                  <div class="input-group-append">
+                                    <span class="input-group-text"><i class="fas fa-image"></i></span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            {{ userform.permissions.as_hidden }}
+                          </div>
+                        </fieldset>
+                        <div class="card-footer">
+                          <div class="row justify-content-center">
+                              <input type="button" class="btn btn-secondary" data-dismiss="modal" value="Annuler">
+                              <input type="submit" class="btn btn-primary" value="Enregistrer">
+                          </div>
+                        </div>
+        
+                      </form>
+                    </div>
                   </div>
-                  <p class="mt-3 mb-0 text-sm">
-                    <span class="text-white mr-2"><i class="fa fa-arrow-up"></i> 3.48%</span>
-                    <span class="text-nowrap text-light">Since last month</span>
-                  </p>
                 </div>
               </div>
             </div>
           </div>
-          <div class="card">
-            <div class="card-header">
-              <div class="row align-items-center">
-                <div class="col-8">
-                  <h3 class="mb-0">Edit profile </h3>
-                </div>
-                <div class="col-4 text-right">
-                  <a href="#!" class="btn btn-sm btn-primary">Settings</a>
-                </div>
-              </div>
-            </div>
-            <div class="card-body">
-              <form>
-                <h6 class="heading-small text-muted mb-4">User information</h6>
-                <div class="pl-lg-4">
-                  <div class="row">
-                    <div class="col-lg-6">
-                      <div class="form-group">
-                        <label class="form-control-label" for="input-username">Username</label>
-                        <input type="text" id="input-username" class="form-control" placeholder="Username" value="{{ request.user.username }}">
-                      </div>
-                    </div>
-                    <div class="col-lg-6">
-                      <div class="form-group">
-                        <label class="form-control-label" for="input-email">Email address</label>
-                        <input type="email" id="input-email" class="form-control" placeholder="{{ request.user.email }}">
-                      </div>
-                    </div>
-                  </div>
-                  <div class="row">
-                    <div class="col-lg-6">
-                      <div class="form-group">
-                        <label class="form-control-label" for="input-first-name">First name</label>
-                        <input type="text" id="input-first-name" class="form-control" placeholder="First name" value="">
-                      </div>
-                    </div>
-                    <div class="col-lg-6">
-                      <div class="form-group">
-                        <label class="form-control-label" for="input-last-name">Last name</label>
-                        <input type="text" id="input-last-name" class="form-control" placeholder="Last name" value="">
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <hr class="my-4" />
-                <!-- Address -->
-                <h6 class="heading-small text-muted mb-4">Contact information</h6>
-                <div class="pl-lg-4">
-                  <div class="row">
-                    <div class="col-md-12">
-                      <div class="form-group">
-                        <label class="form-control-label" for="input-address">Address</label>
-                        <input id="input-address" class="form-control" placeholder="Home Address" value="Bld Mihail Kogalniceanu, nr. 8 Bl 1, Sc 1, Ap 09" type="text">
-                      </div>
-                    </div>
-                  </div>
-                  <div class="row">
-                    <div class="col-lg-4">
-                      <div class="form-group">
-                        <label class="form-control-label" for="input-city">City</label>
-                        <input type="text" id="input-city" class="form-control" placeholder="City" value="New York">
-                      </div>
-                    </div>
-                    <div class="col-lg-4">
-                      <div class="form-group">
-                        <label class="form-control-label" for="input-country">Country</label>
-                        <input type="text" id="input-country" class="form-control" placeholder="Country" value="United States">
-                      </div>
-                    </div>
-                    <div class="col-lg-4">
-                      <div class="form-group">
-                        <label class="form-control-label" for="input-country">Postal code</label>
-                        <input type="number" id="input-postal-code" class="form-control" placeholder="Postal code">
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <hr class="my-4" />
-                <!-- Description -->
-                <h6 class="heading-small text-muted mb-4">About me</h6>
-                <div class="pl-lg-4">
-                  <div class="form-group">
-                    <label class="form-control-label">About Me</label>
-                    <textarea rows="4" class="form-control" placeholder="A few words about you ...">A beautiful premium dashboard for Bootstrap 4.</textarea>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
+          
         </div>
       </div>
 
@@ -321,5 +413,11 @@
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
-{% block javascripts %}{% endblock javascripts %}
+{% block javascripts %}
+  <script>
+    setTimeout(function() {
+        $(".alert").alert('close');
+    }, 3000);
+  </script>
+{% endblock javascripts %}
  

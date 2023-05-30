@@ -5,6 +5,7 @@ Copyright (c) 2022 - OD
 
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
 from .forms import LoginForm, SignUpForm, ProfileForm, CustomUserForm, ResetPwdForm, AgencyForm, PermissionForm
 from .models import CustomUser, ProfileType, Profile, Region, Agency, UserType, Menu, SubMenu, Action, Permission
 import secrets, string
@@ -44,9 +45,9 @@ def login_view(request):
 
 def reset_password_view(request):
     msg = None
-    form = ResetPwdForm(request.POST or None)
 
     if request.method == "POST":
+        form = ResetPwdForm(request.POST)
         
         if form.is_valid():
             oldpwd = form.cleaned_data.get("old_password")
@@ -67,6 +68,8 @@ def reset_password_view(request):
 
         else:
             msg = "Formulaire invalid soumit."
+    else:
+        form = ResetPwdForm()
     
     return render(request, "accounts/reset-password.html", {"form": form, "msg": msg})
 
@@ -101,6 +104,7 @@ def reinit_password_view(request, user_id):
     return redirect("authentication:users")
 
 
+@login_required(login_url="/login/")
 def activate_user_view(request, user_id):
     user = CustomUser.objects.get(pk=user_id)
     
@@ -111,6 +115,7 @@ def activate_user_view(request, user_id):
     return redirect("authentication:users")
 
 
+@login_required(login_url="/login/")
 def deactivate_user_view(request, user_id):
     user = CustomUser.objects.get(pk=user_id)
     user.is_active = False
@@ -119,6 +124,7 @@ def deactivate_user_view(request, user_id):
     return redirect("authentication:users")
 
 
+@login_required(login_url="/login/")
 def profiles_view(request):
     profiles = Profile.objects.all()
     form = ProfileForm()
@@ -135,6 +141,7 @@ def profiles_view(request):
     })
 
 
+@login_required(login_url="/login/")
 def add_profile_view(request):
     default_region = Region.objects.first()
     initial_value = {'location': default_region}
@@ -154,31 +161,30 @@ def add_profile_view(request):
         if profileform.is_valid() and userform.is_valid():
             print("Valid forms submitted!")
 
+            new_profile = profileform.save(commit=False)
+
+            new_profile.save()
+            print("Profile created!")
+
             new_user = userform.save(commit=False)
             random_pwd = ''.join((secrets.choice(string.ascii_letters + string.digits + string.punctuation) for i in range(8)))
             new_user.username = new_user.email
             new_user.set_password(random_pwd)
             new_user.created_by = request.user
             new_user.type = UserType.objects.first()
+            new_user.profile = new_profile
 
             new_user.save()
             print("User created!")
 
             send_mail(
                 "Creation de nouveau compte",
-                f"Bonjour, un compe a été créer pour vous sur le site de paiement. MDP: {random_pwd}",
+                f"Bonjour, un compe a été créer pour vous sur le site de paiement. \nMot de Passe: {random_pwd}",
                 "noreply.odiallo@gmail.com",
                 [new_user.email],
                 fail_silently=False
             )
             print("Mail sent!")
-
-            new_profile = profileform.save(commit=False)
-            new_profile.account = new_user
-            new_profile.created_by = request.user
-
-            new_profile.save()
-            print("Profile created!")
 
             messages.success(request, "Nouveau profil ajouté. <br> Un compte utilisateur a été crée pour le responsable.")
             return redirect("authentication:profiles")
@@ -194,6 +200,7 @@ def add_profile_view(request):
     return render(request, "accounts/add-profile.html", context_empty)
 
 
+@login_required(login_url="/login/")
 def add_user_view(request):
     default_region = Region.objects.first()
     default_agency = Agency.objects.first()
@@ -208,6 +215,7 @@ def add_user_view(request):
             new_user.username = new_user.email
             new_user.set_password(random_pwd)
             new_user.created_by = request.user
+            new_user.profile = request.user.profile
             # print(random_pwd)
 
             new_user.save()
@@ -215,7 +223,7 @@ def add_user_view(request):
 
             send_mail(
                 "Creation de nouveau compte",
-                f"Bonjour, un compe a été créer pour vous sur le site de paiement. MDP: {random_pwd}",
+                f"Bonjour, un compe a été créer pour vous sur le site de paiement. \nMot de Passe: {random_pwd}",
                 "noreply.odiallo@gmail.com",
                 [new_user.email],
                 fail_silently=False
@@ -231,6 +239,7 @@ def add_user_view(request):
     return render(request, "accounts/add-user.html", context_empty)
 
 
+@login_required(login_url="/login/")
 def edit_user_view(request, user_id):
     user = CustomUser.objects.get(pk=user_id)
     context_empty = {'userform': CustomUserForm(instance=user), 'user_id': user_id, 'segment': 'administration'}
@@ -245,7 +254,7 @@ def edit_user_view(request, user_id):
             updated_user.save()
             print("User updated!")
 
-            messages.success(request, "Compte utilisateur modifié avec succès !")
+            messages.success(request, "Compte utilisateur modifié.")
             return redirect("authentication:users")
 
         else:
@@ -256,6 +265,7 @@ def edit_user_view(request, user_id):
     return render(request, "accounts/edit-user.html", context_empty)
 
 
+@login_required(login_url="/login/")
 def edit_profile_view(request, profile_id):
     profile = Profile.objects.get(pk=profile_id)
     context_empty = {'profileform': ProfileForm(instance=profile), 'profile_id': profile_id, 'segment': 'administration'}
@@ -267,11 +277,11 @@ def edit_profile_view(request, profile_id):
             form.save()
             print("Profile updated!")
 
-            messages.success(request, "Profil modifié avec succès !")
+            messages.success(request, "Profil modifié.")
             return redirect("authentication:profiles")
 
         else:
-            context = {'userform': form, 'ErrorMessage': "Formulaire invalid soumit.", 'profile_id': profile_id, 'segment': 'administration'}
+            context = {'profileform': form, 'ErrorMessage': "Formulaire invalid soumit.", 'profile_id': profile_id, 'segment': 'administration'}
             return render(request, "accounts/edit-profile.html", context)
 
 
@@ -279,6 +289,7 @@ def edit_profile_view(request, profile_id):
 
 
 
+@login_required(login_url="/login/")
 def agencies_view(request):
     agencies = Agency.objects.all()
     form = AgencyForm()
@@ -291,6 +302,7 @@ def agencies_view(request):
     })
 
 
+@login_required(login_url="/login/")
 def add_agency_view(request):
     default_region = Region.objects.first()
     initial_value = {'region': default_region}
@@ -310,6 +322,7 @@ def add_agency_view(request):
     return render(request, "accounts/add-agency.html", context_empty)
 
 
+@login_required(login_url="/login/")
 def edit_agency_view(request, agency_id):
     agency = Agency.objects.get(pk=agency_id)
     context_empty = {'form': AgencyForm(instance=agency), 'agency_id': agency_id, 'segment': 'administration'}
@@ -332,6 +345,7 @@ def edit_agency_view(request, agency_id):
     return render(request, "accounts/edit-agency.html", context_empty)
 
 
+@login_required(login_url="/login/")
 def permissions_view(request):
     permissions = Permission.objects.all()
 
@@ -342,6 +356,7 @@ def permissions_view(request):
     })
 
 
+@login_required(login_url="/login/")
 def add_permission_view(request):
     context_empty = {
         'form': PermissionForm(),
@@ -363,6 +378,7 @@ def add_permission_view(request):
     return render(request, "accounts/add-permissions.html", context_empty)
 
 
+@login_required(login_url="/login/")
 def edit_permission_view(request, permission_id):
     permission = Permission.objects.get(pk=permission_id)
     context_empty = {
@@ -390,6 +406,7 @@ def edit_permission_view(request, permission_id):
     return render(request, "accounts/edit-permission.html", context_empty)
 
 
+@login_required(login_url="/login/")
 def delete_permission_view(request, permission_id):
     
     try:

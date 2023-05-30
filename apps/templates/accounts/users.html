@@ -131,8 +131,8 @@
                                 <div class="modal-body">
 
                                   <div class="card card-profile mt--4 mb--4">
-                                    {% if rowuser.profile_account.picture %}
-                                      Hello
+                                    {% if rowuser.profile.picture %}
+                                      <img src="{{rowuser.profile.picture.url}}" alt="Logo" class="card-img-top" style="max-height: 226px;">
                                     {% else %}
                                       <img src="/static/assets/img/theme/img-1-1000x600.jpg" alt="Image placeholder" class="card-img-top">
                                     {% endif %}
@@ -153,8 +153,8 @@
                                       <div class="d-flex justify-content-between">
                                         <a href="#" class="btn btn-sm btn-info  mr-4 ">{{rowuser.type}}</a>
                                         <a href="#" class="btn btn-sm btn-default float-right">
-                                          {% if rowuser.poste %}
-                                            {{rowuser.poste}}
+                                          {% if rowuser.job %}
+                                            {{rowuser.job}}
                                           {% else %}
                                             Inconnu
                                           {% endif %}
@@ -166,11 +166,11 @@
                                         <div class="col">
                                           <div class="card-profile-stats d-flex justify-content-center">
                                             <div>
-                                              <span class="heading"> {{rowuser.location}} </span>
+                                              <span class="heading"> {% if rowuser.location %}{{rowuser.location}}{% else %}Inconnu{% endif %} </span>
                                               <span class="description">Emplacement</span>
                                             </div>
                                             <div>
-                                              <span class="heading"> {{rowuser.agency}} </span>
+                                              <span class="heading"> {% if rowuser.agency %}{{rowuser.agency}}{% else %}Inconnu{% endif %} </span>
                                               <span class="description">Agence</span>
                                             </div>
                                             <div>

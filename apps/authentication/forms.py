@@ -106,7 +106,7 @@ class PermissionForm(forms.ModelForm):
         }
     def __init__(self, *args, **kwargs):
         super(PermissionForm, self).__init__(*args, **kwargs)
-        self.fields['profile_type'].empty_label = "Sélectionner le type de profil..."
+        self.fields['profile_type'].empty_label = "Sélectionner le type de profil"
 
 
 class AgencyForm(forms.ModelForm):

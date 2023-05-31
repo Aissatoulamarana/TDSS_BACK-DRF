@@ -4,7 +4,9 @@ Copyright (c) 2022 - OD
 """
 
 from django.urls import path
-from apps.paiement import views, printviews
+from apps.paiement import views, printviews, apiviews
+
+from rest_framework.urlpatterns import format_suffix_patterns
 
 app_name = 'paiement'
 
@@ -28,4 +30,9 @@ urlpatterns = [
     path("devises/update", views.devises_update_view, name="update_devises"),
     path("devises/<int:permit_id>/<int:devise_id>/value", views.get_devise_value, name="get_devise_value"),
     path("devises/<int:devise_id>/value", views.get_devise, name="get_devise"),
+    
+    path('get-employees/', apiviews.employee_list, name="api_employees"),
+    path('get-employees/<str:pid>/', apiviews.employee_detail, name="api_employee_detail"),
 ]
+
+urlpatterns = format_suffix_patterns(urlpatterns)

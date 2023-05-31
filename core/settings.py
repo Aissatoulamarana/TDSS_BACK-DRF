@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'apps.authentication', # Enable the authentication app
     'apps.home',  # Enable the inner home (home)
     'apps.paiement',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [

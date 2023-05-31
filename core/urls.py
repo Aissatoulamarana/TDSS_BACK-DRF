@@ -9,7 +9,20 @@ from django.urls import path, include  # add this
 from django.conf import settings
 from django.conf.urls.static import static
 
+from apps.paiement import apiviews
+
+# import routers
+from rest_framework import routers
+
+# define the router
+router = routers.DefaultRouter()
+
+# define the router path and viewset to be used
+router.register(r'get-declarations', apiviews.DeclarationViewSet)
+
 urlpatterns = []
+
+urlpatterns += router.urls
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 
@@ -19,5 +32,6 @@ urlpatterns += [
     path("", include("apps.authentication.urls")), # Auth routes - login / register
     path("", include("apps.paiement.urls")),
     path("", include("apps.home.urls")),             # UI Kits Html files
+    path('api-auth/', include('rest_framework.urls')), # For API calls
 ]
  

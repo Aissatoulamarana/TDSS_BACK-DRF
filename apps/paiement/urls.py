@@ -3,7 +3,7 @@
 Copyright (c) 2022 - OD
 """
 
-from django.urls import path, re_path
+from django.urls import path
 from apps.paiement import views, printviews
 
 app_name = 'paiement'

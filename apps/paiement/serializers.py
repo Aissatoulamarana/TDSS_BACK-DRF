@@ -9,7 +9,7 @@ class DeclarationSerializer(serializers.HyperlinkedModelSerializer):
     # specify model and fields
     class Meta:
         model = Declaration
-        fields = ('title', 'comment')
+        fields = ('id', 'reference', 'title', 'status', 'comment', 'created_on')
 
 
 class EmployeeSerializer(serializers.ModelSerializer):

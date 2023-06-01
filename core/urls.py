@@ -15,14 +15,15 @@ from apps.paiement import apiviews
 from rest_framework import routers
 
 # define the router
-router = routers.DefaultRouter()
+# router = routers.DefaultRouter()
+router = routers.SimpleRouter()
 
 # define the router path and viewset to be used
 router.register(r'get-declarations', apiviews.DeclarationViewSet)
 
 urlpatterns = []
 
-# urlpatterns += router.urls
+urlpatterns += router.urls
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 

@@ -407,7 +407,7 @@ def bill_declaration_view(request, declaration_id):
 
         new_bill = Facture()
         new_bill.declaration_ref = declaration
-        new_bill.client = Profile.objects.get(account=request.user)
+        new_bill.client = request.user.profile
         new_bill.total_cadres = declaration.employee_declarations.filter(job_category=cadres).count()
         new_bill.total_agents = declaration.employee_declarations.filter(job_category=agents).count()
         new_bill.total_ouvriers = declaration.employee_declarations.filter(job_category=ouvriers).count()

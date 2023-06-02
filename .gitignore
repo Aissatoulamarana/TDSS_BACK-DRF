@@ -30,3 +30,9 @@ apps/static/assets/yarn.lock
 apps/static/assets/.temp
 
 media/*
+
+# Ignore files for docker prod
+Dockerfile
+manage.py
+docker-compose.yml
+requirements.txt

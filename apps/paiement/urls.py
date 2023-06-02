@@ -33,6 +33,7 @@ urlpatterns = [
     
     path('get-employees/', apiviews.employee_list, name="api_employees"),
     path('get-employees/<str:pid>/', apiviews.employee_detail, name="api_employee_detail"),
+    path('get-payments/', apiviews.payment_list, name="api_payments"),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

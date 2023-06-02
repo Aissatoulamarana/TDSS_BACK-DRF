@@ -41,9 +41,13 @@ def declaration_receipt_view(request, declaration_id):
     pdf.setPageSize(A4)
     width, height = A4
     pdf.setTitle("Déclarations")
-    # pdf.drawImage('apps/static/assets/img/brand/logo.jpg', 60, 750, 100, 80, showBoundary=False)
-    client_image = (client.picture.url)[1:]
+
+    if client.picture:
+        client_image = (client.picture.url)[1:]
+    else:
+        client_image = 'apps/static/assets/img/brand/logo.jpg'
     pdf.drawImage(client_image, 60, 750, 100, 80, showBoundary=False)
+    
     pdf.line(50, 750, 550, 750)
     pdf.drawString(200, 730, f"DECLARATION N° 00{declaration.id}/2023")
     pdf.line(50, 720, 550, 720)

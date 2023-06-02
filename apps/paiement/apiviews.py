@@ -4,8 +4,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
  
 # import local data
-from .serializers import DeclarationSerializer, EmployeeSerializer
-from .models import Declaration, Employee
+from .serializers import DeclarationSerializer, EmployeeSerializer, PaymentSerializer
+from .models import Declaration, Employee, Payment
 
  
 # Declaration viewsets
@@ -19,6 +19,18 @@ class DeclarationViewSet(viewsets.ModelViewSet):
      
     # specify serializer to be used
     serializer_class = DeclarationSerializer
+
+
+@api_view(['GET', 'POST'])
+def payment_list(request, format=None):
+    """
+    List all payments, or create a new payment.
+    """
+    
+    if request.method == 'GET':
+        payments = Payment.objects.all()
+        serializer = PaymentSerializer(payments, many=True)
+        return Response(serializer.data)
 
 
 @api_view(['GET', 'POST'])

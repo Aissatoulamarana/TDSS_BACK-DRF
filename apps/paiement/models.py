@@ -61,13 +61,16 @@ class Country(models.Model):
 
 class Declaration(models.Model):
     status_choices = [
-        ('unvalidated', "Non Validée"), 
+        ('unsubmitted', "Non soumise"),
+        ('submitted', "Soumise"),
+        ('rejected', "Rejetée"), 
         ('validated', "Validée"),
         ('billed', "Facturée")
     ]
     reference = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     title = models.CharField(max_length=100)
-    status = models.CharField(max_length=30, choices=status_choices, default="unvalidated")
+    status = models.CharField(max_length=30, choices=status_choices, default="unsubmitted")
+    reject_reason = models.CharField(max_length=255, blank=True, null=True)
     comment = models.TextField(max_length=255, blank=True, null=True)
     created_by = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
     created_on = models.DateTimeField(auto_now_add=True)
@@ -78,12 +81,17 @@ class Declaration(models.Model):
 
 
 class Employee(models.Model):
+    status_choices = [
+        ('unenrolled', "Non enrôlé"),
+        ('enrolled', "Enrôlé")
+    ]
     declaration = models.ForeignKey(Declaration, on_delete=models.PROTECT, related_name="employee_declarations")
     passport_number = models.CharField(max_length=50, unique=True)
-    first = models.CharField(max_length=100, verbose_name="first name")
+    first = models.CharField(max_length=100, verbose_name="first_name")
     last = models.CharField(max_length=50, verbose_name="last_name")
     email = models.EmailField(max_length=100, blank=True, null=True)
     phone = models.IntegerField()
+    status = models.CharField(max_length=30, choices=status_choices, default="unenrolled")
     job_category = models.ForeignKey(JobCategory, on_delete=models.PROTECT, blank=True, null=True, related_name="employee_job_categories")
     job = models.ForeignKey(Job, on_delete=models.PROTECT, blank=True, null=True, related_name="employee_jobs")
 

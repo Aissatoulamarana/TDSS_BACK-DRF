@@ -170,7 +170,7 @@ def bill_receipt_view(request, bill_id):
     date = DateFormat(facture.created_on)
     pdf.drawString(480, 700, f"Date: {date.format('d/m/y')}")
     # pdf.drawString(60, 730, f"- Informations du client -")
-    pdf.drawString(55, 680, f"Entreprise :  {facture.client}")
+    pdf.drawString(55, 680, f"Entreprise :  {facture.client.name}")
     pdf.drawString(55, 670, f"Téléphone : {facture.client.contact}")
     pdf.drawString(55, 660, f"Adresse : {facture.client.adresse}")
     pdf.drawString(55, 650, f"")

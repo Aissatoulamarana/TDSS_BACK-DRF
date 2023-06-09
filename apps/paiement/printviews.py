@@ -30,7 +30,10 @@ def declaration_receipt_view(request, declaration_id):
         messages.error(request, "Déclaration inexistante.")
         return redirect("paiement:declarations")
 
-    client = Facture.objects.get(declaration_ref=declaration).client
+    try:
+        client = Facture.objects.get(declaration_ref=declaration).client
+    except Facture.DoesNotExist:
+        client = declaration.created_by.profile
     employees = Employee.objects.filter(declaration=declaration)
     
     # Creating a buffer for the pdf
@@ -81,7 +84,7 @@ def declaration_receipt_view(request, declaration_id):
     LIST_STYLE = TableStyle(
         [
             ('VALIGN', (0,0), (-1,-1), 'TOP'),
-            # ('INNERGRID', (0,0), (-1,-1), 0.50, colors.black),
+            ('INNERGRID', (0,0), (-1,-1), 0.50, colors.black),
             # ('LINEBEFORE', (0,0), (-1,0), 1, colors.black),
             ('LINEABOVE', (0,0), (-1,-1), 1, colors.black),
             ('BOX', (0,0), (-1,-1), 1.5, colors.black),
@@ -167,7 +170,7 @@ def bill_receipt_view(request, bill_id):
     date = DateFormat(facture.created_on)
     pdf.drawString(480, 700, f"Date: {date.format('d/m/y')}")
     # pdf.drawString(60, 730, f"- Informations du client -")
-    pdf.drawString(55, 680, f"Entreprise :  {facture.client}")
+    pdf.drawString(55, 680, f"Entreprise :  {facture.client.name}")
     pdf.drawString(55, 670, f"Téléphone : {facture.client.contact}")
     pdf.drawString(55, 660, f"Adresse : {facture.client.adresse}")
     pdf.drawString(55, 650, f"")

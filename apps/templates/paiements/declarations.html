@@ -192,6 +192,14 @@
                                           <strong>{{declaration.get_status_display}}</strong>
                                         </div>
                                       </div>
+                                      {% if declaration.reject_reason and declaration.status == 'rejected' %}
+                                        <div class="row mb-3">
+                                          <div class="col">
+                                            <i class="ni education_hat mr-2"></i><span class="text-muted">Motif de rejet:</span> 
+                                            <strong>{{declaration.reject_reason}}</strong>
+                                          </div>
+                                        </div>
+                                      {% endif %}
                                      
                                       <div class="row mb-3">
                                         <div class="col">
@@ -225,6 +233,7 @@
                                               <th scope="col" class="sort" data-sort="name">Prénoms & Nom</th>
                                               <th scope="col" class="sort" data-sort="job">Fonction</th>
                                               <th scope="col" class="sort" data-sort="phone">Téléphone</th>
+                                              <!-- <th scope="col" class="sort" data-sort="status">Statut</th> -->
                                             </tr>
                                           </thead>
                                           <tbody class="list">
@@ -247,6 +256,9 @@
                                                 <td class="budget">
                                                   <span class="name">{{employee.phone}}</span>
                                                 </td>
+                                                <!-- <td class="status">
+                                                  <span class="name">{{employee.get_status_display}}</span>
+                                                </td> -->
                                               </tr>
                                             
                                             {% endfor %}
@@ -259,29 +271,69 @@
 
                                 </div>
                                 <div class="modal-footer justify-content-center">
-                                  <button type="button" class="btn btn-primary" data-dismiss="modal">Fermer</button>
+                                  {% if declaration.status == 'submitted' %}
+                                    {% if 'a-declarations-rejeter' in user.permissions.codes or user.is_staff %}
+                                      <button role="button" class="btn btn-danger" data-id="a-declarations-rejeter" data-toggle="modal" data-target="#modal-declaration-reject-{{declaration.id}}">Rejeter</button>
+                                    {% endif %}
+
+                                    {% if 'a-declarations-valider' in user.permissions.codes or user.is_staff %}
+                                    <button role="button" class="btn btn-success" data-id="a-declarations-valider" data-toggle="modal" data-target="#modal-declaration-validate-{{declaration.id}}">Valider</button>
+                                    {% endif %}
+
+                                  {% else %}
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal">Fermer</button>
+                                  {% endif %}
                                 </div>
                               </div>
                             </div>
                           </div>
+                          <!-- Validate and reject confirmation modals -->
+                          <div class="modal fade" id="modal-declaration-reject-{{declaration.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-declaration-reject-{{declaration.id}}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="dialog">
+                              <div class="modal-content">
+                                <div class="modal-header justify-content-center">
+                                  <h2>Confirmation </h2>
+                                </div>
+                                
+                                <form id="declaration-{{declaration.id}}-reject-form" role="form" action="{% url 'paiement:reject_declaration' declaration.id %}" method="post">
+                                  {% csrf_token %}
+                                  <div class="modal-body">
+      
+                                    <div class="card card-agency mt--4 mb--4">
+                                      
+                                      <div class="card-body">
+                                        <div class="row">
+                                          <div class="col">
+                                            <p> Veuillez saisir le motif de rejet pour confirmer. </p>
+                                          </div>
+                                        </div>
+                                        <div class="row">
+                                          <div class="col">
+                                            <div class="form-group">
+                                              <div class="input-group input-group-merge">
+                                                <div class="input-group-prepend">
+                                                  <span class="input-group-text"><i class="fas fa-file-signature"></i></span>
+                                                </div>
+                                                <input type="text" class="form-control" placeholder="Motif de rejet" id="reject_reason-{{declaration.id}}" name="reject_reason">
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+    
+                                  </div>
+                                  <div class="modal-footer justify-content-center">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                                    <input type="submit" onclick="$(this).closest('form').submit();" id="declaration-{{declaration.id}}-reject-form-submit-btn" class="btn btn-danger" value="Rejeter">
+                                    <!-- <button data-href="{% url 'paiement:reject_declaration' declaration.id %}" href="#" class="edit-link btn btn-danger" role="button">Rejeter</button> -->
+                                  </div>
+                                </form>
+                              </div>
+                            </div>
+                          </div>
 
-                          {% if 'a-declarations-modifier' in user.permissions.codes or user.is_staff %}
-                            {% if declaration.status == 'unvalidated' %}
-                              <span>
-                                <button data-href="{% url 'paiement:edit_declaration' declaration.id %}" data-id="a-declarations-modifier"  class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
-                              </span>
-                            {% endif %}
-                          {% endif %}
-
-                          {% if 'a-declarations-valider' in user.permissions.codes or user.is_staff %}
-                            {% if declaration.status == 'unvalidated' and declaration.employee_declarations.count > 0 %}
-                              <span>
-                                <button class="btn btn-sm btn-icon-only" role="button" data-id="a-declarations-valider" data-toggle="modal" data-target="#modal-declaration-validation-{{declaration.id}}">Val</button>
-                              </span>
-                            {% endif %}
-                          {% endif %}
-                            
-                          <div class="modal fade" id="modal-declaration-validation-{{declaration.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-declaration-validation-{{declaration.id}}" aria-hidden="true">
+                          <div class="modal fade" id="modal-declaration-validate-{{declaration.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-declaration-validate-{{declaration.id}}" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="dialog">
                               <div class="modal-content">
                                 <div class="modal-header justify-content-center">
@@ -295,13 +347,8 @@
                                     <div class="card-body">
                                       <div class="row">
                                         <div class="col">
-                                          <p class="text-muted">Attention !!! <br><span class="font-italic">Une fois validée, aucune modification n'est possible.</span></p>
-                                        </div>
-                                      </div>
-                                      <div class="row">
-                                        <div class="col">
                                           <i class="ni education_hat mr-2"></i><span class="text-muted"></span> 
-                                          <strong>Etes-vous sûr de vouloir valider la déclaration ?</strong>
+                                          <strong>Êtes-vous sûr de vouloir valider la déclaration ?</strong>
                                         </div>
                                       </div>
                                     </div>
@@ -310,14 +357,65 @@
                                 </div>
                                 <div class="modal-footer justify-content-center">
                                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Non</button>
-                                  <button data-href="{% url 'paiement:validate_declaration' declaration.id %}" href="#" class="edit-link btn btn-primary" role="button">Oui</button>
+                                  <button data-href="{% url 'paiement:validate_declaration' declaration.id %}" href="#" class="edit-link btn btn-success" role="button">Oui</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {% if 'a-declarations-modifier' in user.permissions.codes or user.is_staff %}
+                            {% if declaration.status == 'unsubmitted' or declaration.status == 'rejected' %}
+                              <span>
+                                <button data-href="{% url 'paiement:edit_declaration' declaration.id %}" data-id="a-declarations-modifier"  class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
+                              </span>
+                            {% endif %}
+                          {% endif %}
+
+                          {% if 'a-declarations-soumettre' in user.permissions.codes or user.is_staff %}
+                            {% if declaration.status == 'unsubmitted' and declaration.employee_declarations.count > 0 %}
+                              <span>
+                                <button class="btn btn-sm btn-icon-only" role="button" data-id="a-declarations-soumettre" data-toggle="modal" data-target="#modal-declaration-submit-{{declaration.id}}">Sbt</button>
+                              </span>
+                            {% endif %}
+                          {% endif %}
+                            
+                          <div class="modal fade" id="modal-declaration-submit-{{declaration.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-declaration-submit-{{declaration.id}}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="dialog">
+                              <div class="modal-content">
+                                <div class="modal-header justify-content-center">
+                                  <h2>Confirmation </h2>
+                                </div>
+                                
+                                <div class="modal-body">
+    
+                                  <div class="card card-agency mt--4 mb--4">
+                                    
+                                    <div class="card-body">
+                                      <div class="row">
+                                        <div class="col">
+                                          <p class="text-muted">Attention !!! <br><span class="font-italic">Une fois soumise, aucune modification n'est possible.</span></p>
+                                        </div>
+                                      </div>
+                                      <div class="row">
+                                        <div class="col">
+                                          <i class="ni education_hat mr-2"></i><span class="text-muted"></span> 
+                                          <strong>Êtes-vous sûr de vouloir soumettre la déclaration ?</strong>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+  
+                                </div>
+                                <div class="modal-footer justify-content-center">
+                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Non</button>
+                                  <button data-href="{% url 'paiement:submit_declaration' declaration.id %}" href="#" class="edit-link btn btn-primary" role="button">Oui</button>
                                 </div>
                               </div>
                             </div>
                           </div>
                           
                           {% if 'a-declarations-facturer' in user.permissions.codes or user.is_staff %}
-                            {% if declaration.status == 'validated' and declaration.status != 'billed' %}
+                            {% if declaration.status == 'validated' %}
                               <span>
                                 <button class="btn btn-sm btn-icon-only" role="button" data-id="a-declarations-facturer" data-toggle="modal" data-target="#modal-declaration-bill-{{declaration.id}}">Fct</button>
                               </span>
@@ -325,7 +423,7 @@
                           {% endif %}
 
                           {% if 'a-declarations-imprimer' in user.permissions.codes or user.is_staff %}
-                            {% if declaration.status == 'validated' or declaration.status == 'billed' %}
+                            {% if declaration.status != 'unsubmitted' %}
                             <span>
                               <button data-href="{% url 'paiement:declaration_receipt' declaration.id %}" data-id="a-declarations-imprimer" onclick="window.open($(this).data('href'), '_blank')" class="btn btn-sm btn-icon-only" role="button">Print</button>
                             </span>

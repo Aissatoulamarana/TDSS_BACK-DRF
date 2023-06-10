@@ -37,9 +37,13 @@ ALLOWED_HOSTS = [
         '192.168.237.4',
         '145.239.139.36',
         'devpay.tdss.com.gn',
-        'devenrol.tdss.com.gn',
         'tdss-dev.xeltoo.tech',
         'dev.tdss.com.gn',
+        'prod.tdss.com.gn',
+        'djangodev.xeltoo.tech:8089',
+        'devenrol.tdss.com.gn',
+        'workpermit.tdss.om.gn',
+        'aguipee.tdss.com.gn',
         ]
 
 CORS_ORIGIN_WHITELIST = [
@@ -50,6 +54,10 @@ CORS_ORIGIN_WHITELIST = [
 CSRF_TRUSTED_ORIGINS = [
     'https://tdss-dev.xeltoo.tech',
     'https://dev.tdss.com.gn',
+    'https://django.xeltoo.tech',
+    'https://prod.tdss.com.gn',
+    'https://aguipee.tdss.com.gn',
+    'https://workpermit.tdss.om.gn',
     'https://devenrol.tdss.com.gn',
     'https://devpay.tdss.com.gn',
     # Add other trusted origins if needed

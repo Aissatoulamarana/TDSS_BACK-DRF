@@ -383,6 +383,40 @@ def edit_declaration_view(request, declaration_id):
 
 
 @login_required(login_url="/login/")
+def submit_declaration_view(request, declaration_id):
+    
+    try:
+        declaration = Declaration.objects.get(pk=declaration_id)
+        declaration.status = 'submitted'
+        declaration.save()
+        messages.success(request, "Déclaration soumise.")
+    except Declaration.DoesNotExist:
+        messages.error(request, "Déclaration inexistante.")
+    
+    return redirect("paiement:declarations")
+
+
+@login_required(login_url="/login/")
+def reject_declaration_view(request, declaration_id):
+    reject_reason = request.POST["reject_reason"]
+    if not reject_reason:
+        messages.error(request, "Le motif de rejet est obligatoire.")
+    else:
+        # print(reject_reason)
+    
+        try:
+            declaration = Declaration.objects.get(pk=declaration_id)
+            declaration.status = 'rejected'
+            declaration.reject_reason = reject_reason
+            declaration.save()
+            messages.success(request, "Déclaration rejetée.")
+        except Declaration.DoesNotExist:
+            messages.error(request, "Déclaration inexistante.")
+    
+    return redirect("paiement:declarations")
+
+
+@login_required(login_url="/login/")
 def validate_declaration_view(request, declaration_id):
     
     try:

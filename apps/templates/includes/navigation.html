@@ -204,14 +204,16 @@
                   </span>
                   <div class="media-body  ml-2  d-none d-lg-block">
                     <span class="mb-0 text-sm  font-weight-bold">
-                      {{ request.user.username }}
+                      {{ request.user.last_name }}
                     </span>
                   </div>
                 </div>
               </a>
               <div class="dropdown-menu  dropdown-menu-right ">
                 <div class="dropdown-header noti-title">
-                  <h6 class="text-overflow m-0">Bienvenue!</h6> {{ request.user.first_name }} {{ request.user.last_name }}
+                  <h6 class="text-overflow m-0">Bienvenue!</h6> {{ request.user.first_name }} {{ request.user.last_name }} <br>
+                  --------<br>
+                  Permissions: {{ request.user.permissions.name }}
                 </div>
                 <a href="{% url 'home:page_profile' request.user.id %}" class="dropdown-item">
                   <i class="ni ni-single-02"></i>

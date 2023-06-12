@@ -75,7 +75,10 @@ def reset_password_view(request):
 
 
 def users_view(request):
-    users = CustomUser.objects.all()
+    if request.user.type.uid == 2:
+        users = CustomUser.objects.filter(created_by=request.user)
+    else:
+        users = CustomUser.objects.filter(created_by=request.user)
 
     return render(request, "accounts/users.html", {
         'users': users,

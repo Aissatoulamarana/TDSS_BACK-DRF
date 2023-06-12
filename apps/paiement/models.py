@@ -100,6 +100,10 @@ class Employee(models.Model):
 
 
 class Facture(models.Model):
+    status_choices = [
+        ('unpaid', "Impayée"),
+        ('paid', "Payée")
+    ]
     reference = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     declaration_ref = models.ForeignKey(Declaration, on_delete=models.PROTECT, related_name="declaration_factures")
     client = models.ForeignKey(Profile, on_delete=models.PROTECT)
@@ -107,6 +111,7 @@ class Facture(models.Model):
     total_agents = models.SmallIntegerField()
     total_ouvriers = models.SmallIntegerField()
     amount = models.DecimalField(max_digits=15, decimal_places=2)
+    status = models.CharField(max_length=30, choices=status_choices, default="unpaid")
     devise = models.ForeignKey(Devise, on_delete=models.PROTECT, related_name="facture_devises")
     comment = models.TextField(max_length=255, blank=True, null=True)
     created_by = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
@@ -136,7 +141,7 @@ class Payment(models.Model):
     facture_ref = models.ForeignKey(Facture, on_delete=models.PROTECT, blank=True, null=True)
     type = models.ForeignKey(Permit, on_delete=models.PROTECT, related_name="payment_permits_types")
     payer = models.ForeignKey(Payer, on_delete=models.PROTECT, related_name="payment_payers")
-    amount = models.DecimalField(max_digits=9, decimal_places=2)
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
     devise = models.ForeignKey(Devise, on_delete=models.PROTECT, related_name="payment_devises")
     comment = models.TextField(max_length=255, blank=True, null=True)
     created_by = models.ForeignKey(CustomUser, on_delete=models.PROTECT)

@@ -33,9 +33,9 @@ urlpatterns = [
     path("devises/<int:permit_id>/<int:devise_id>/value", views.get_devise_value, name="get_devise_value"),
     path("devises/<int:devise_id>/value", views.get_devise, name="get_devise"),
     
-    path('get-employees/', apiviews.employee_list, name="api_employees"),
-    path('get-employees/<str:pid>/', apiviews.employee_detail, name="api_employee_detail"),
-    path('get-payments/', apiviews.payment_list, name="api_payments"),
+    path('tdss-api/get-employees/', apiviews.employee_list, name="api_employees"),
+    path('tdss-api/get-employees/<str:pid>/', apiviews.employee_detail, name="api_employee_detail"),
+    path('tdss-api/get-payments/', apiviews.payment_list, name="api_payments"),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

@@ -372,7 +372,7 @@
                           {% endif %}
 
                           {% if 'a-declarations-soumettre' in user.permissions.codes or user.is_staff %}
-                            {% if declaration.status == 'unsubmitted' and declaration.employee_declarations.count > 0 %}
+                            {% if declaration.status == 'unsubmitted' and declaration.employee_declarations.count > 0 or declaration.status == 'rejected' and declaration.employee_declarations.count > 0 %}
                               <span>
                                 <button class="btn btn-sm btn-icon-only" role="button" data-id="a-declarations-soumettre" data-toggle="modal" data-target="#modal-declaration-submit-{{declaration.id}}">Sbt</button>
                               </span>

@@ -29,7 +29,10 @@ from .forms import DeviseForm, FactureForm, PayerForm, PaymentForm, EmployeeForm
 
 @login_required(login_url="/login/")
 def payments_view(request):
-    payments = Payment.objects.all()
+    if request.user.type.uid == 2:
+        payments = Payment.objects.filter(created_by=request.user)
+    else:
+        payments = Payment.objects.filter(created_by=request.user)
     form = PaymentForm()
     payerform = PayerForm()
 
@@ -276,7 +279,10 @@ def get_devise(request, devise_id):
 
 @login_required(login_url="/login/")
 def declarations_view(request):
-    declarations = Declaration.objects.all()
+    if request.user.type.uid == 2:
+        declarations = Declaration.objects.filter(created_by=request.user)
+    else:
+        declarations = Declaration.objects.filter(created_by=request.user)
     form = DeclarationForm()
 
     return render(request, "paiements/declarations.html", {
@@ -467,7 +473,10 @@ def bill_declaration_view(request, declaration_id):
 
 @login_required(login_url="/login/")
 def factures_view(request):
-    factures = Facture.objects.all()
+    if request.user.type.uid == 2:
+        factures = Facture.objects.filter(created_by=request.user)
+    else:
+        factures = Facture.objects.filter(created_by=request.user)
     job_categories = JobCategory.objects.all()
     form = FactureForm()
 

@@ -116,14 +116,13 @@
                 </div>
               </div>
               <!-- Light table -->
-              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "ref", "payer",  "type", "amount", "actions"]'>
+              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "ref", "payer", "amount", "actions"]'>
                 <table class="table align-items-center table-flush">
                   <thead class="thead-light">
                     <tr>
                       <th scope="col" class="sort" data-sort="n°">N°</th>
                       <th scope="col" class="sort" data-sort="ref">Référence</th>
                       <th scope="col" class="sort" data-sort="payer">Payeur</th>
-                      <th scope="col" class="sort" data-sort="type">Type</th>
                       <th scope="col" class="sort" data-sort="amount">Montant</th>
                       <th scope="col" class="sort" data-sort="Actions">Actions</th>
                     </tr>
@@ -139,9 +138,6 @@
                         </th>
                         <td class="payer">
                           {{payment.payer}}
-                        </td>
-                        <td class="type">
-                          {{payment.type}}
                         </td>
                         <td>
                             {{payment.amount}} {{payment.devise.sign}}
@@ -173,20 +169,20 @@
                                     <div class="card-body">
                                       <div class="row">
                                         <div class="col">
-                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Type:</span> 
-                                          <strong>{{payment.type}}</strong>
+                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Payeur:</span> 
+                                          <span class="heading"> <strong>{{payment.payer.first}} {{payment.payer.last}}</strong> </span>
                                         </div>
                                         <div class="col">
                                           <i class="ni education_hat mr-2"></i><span class="text-muted">Montant:</span>
-                                          <strong>{{payment.amount}} {{payment.devise.sign}}</strong>
+                                          <span class="heading"><strong>{{payment.amount}} {{payment.devise.sign}}</strong></span>
                                         </div>
                                       </div>
                                         
                                       <div class="row mt-3 mb-3">
                                         <div class="col">
                                           <div>
-                                            <i class="ni ni-education_hat mr-2"></i><span class="text-muted">Payeur:</span>
-                                            <span class="heading"> <h3>{{payment.payer.first}} {{payment.payer.last}}</h3> </span>
+                                            <!-- <i class="ni ni-education_hat mr-2"></i><span class="text-muted">Payeur:</span>
+                                            <span class="heading"> <h3>{{payment.payer.first}} {{payment.payer.last}}</h3> </span> -->
                                           </div>
                                         </div>
                                       </div>

@@ -41,18 +41,20 @@
       <div class="col-xl-12">
         {% if messages %}
           <!-- Alerts -->
-          <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <span class="alert-icon"><i class="ni ni-like-2"></i></span>
-            <span class="alert-text">
-              <strong>Success!</strong>
-              {% for message in messages %}
-                {{ message | safe }}
-              {% endfor %}
-            </span>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
+          {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'success' %}success{% else %}danger{% endif %} alert-dismissible fade show" role="alert">
+              <span class="alert-icon">
+                {% if message.tags == 'success' %}<i class="ni ni-like-2"></i>{% else %}<i class="fas fa-thumbs-down"></i>{% endif %}
+              </span>
+              <span class="alert-text">
+                <strong>{% if message.tags == 'success' %}Succès !{% else %}Erreur !{% endif %}</strong>
+                {{ message | safe }} <br>
+              </span>
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+          {% endfor %}
         {% endif %}
 
         <!-- Table -->

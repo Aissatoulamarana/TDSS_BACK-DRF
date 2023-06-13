@@ -182,7 +182,7 @@ def add_profile_view(request):
 
             send_mail(
                 "Creation de nouveau compte",
-                f"Bonjour, un compe a été créer pour vous sur le site de paiement. \nMot de Passe: {random_pwd}",
+                f"Bonjour {new_user.first_name} {new_user.last_name}, \n \nUn compte a été créer pour vous sur le portail de paiement. \nCi-dessous vos informations d'accès. \n \nEmail: {new_user.email}\nMot de Passe: {random_pwd}\n \nAller sur: https://devpay.tdss.com.gn pour vous connecter. \nCordialement",
                 "noreply.odiallo@gmail.com",
                 [new_user.email],
                 fail_silently=False
@@ -226,7 +226,7 @@ def add_user_view(request):
 
             send_mail(
                 "Creation de nouveau compte",
-                f"Bonjour, un compe a été créer pour vous sur le site de paiement. \nMot de Passe: {random_pwd}",
+                f"Bonjour {new_user.first_name} {new_user.last_name}, \n \nUn compte a été créer pour vous sur le portail de paiement. \nCi-dessous vos informations d'accès. \n \nEmail: {new_user.email}\nMot de Passe: {random_pwd}\n \nAller sur: https://devpay.tdss.com.gn pour vous connecter. \nCordialement",
                 "noreply.odiallo@gmail.com",
                 [new_user.email],
                 fail_silently=False
@@ -244,7 +244,11 @@ def add_user_view(request):
 
 @login_required(login_url="/login/")
 def edit_user_view(request, user_id):
-    user = CustomUser.objects.get(pk=user_id)
+    try:
+        user = CustomUser.objects.get(pk=user_id)
+    except CustomUser.DoesNotExist:
+        messages.error(request, "Utilisateur inexistant.")
+        return redirect("authentication:users")
     context_empty = {'userform': CustomUserForm(instance=user), 'user_id': user_id, 'segment': 'administration'}
 
     if request.method == "POST":
@@ -270,7 +274,11 @@ def edit_user_view(request, user_id):
 
 @login_required(login_url="/login/")
 def edit_profile_view(request, profile_id):
-    profile = Profile.objects.get(pk=profile_id)
+    try:
+        profile = Profile.objects.get(pk=profile_id)
+    except Profile.DoesNotExist:
+        messages.error(request, "Profil inexistant.")
+        return redirect("authentication:profiles")
     context_empty = {'profileform': ProfileForm(instance=profile), 'profile_id': profile_id, 'segment': 'administration'}
 
     if request.method == "POST":
@@ -316,7 +324,7 @@ def add_agency_view(request):
 
         if form.is_valid():
             new_agency = form.save()
-            messages.success(request, "Nouvelle agence ajoutée avec succès !")
+            messages.success(request, "Nouvelle agence ajoutée.")
             return redirect("authentication:agencies")
         else:
             context = {'form': form, 'ErrorMessage': "Formulaire invalid soumit.", 'segment': 'administration'}
@@ -327,7 +335,11 @@ def add_agency_view(request):
 
 @login_required(login_url="/login/")
 def edit_agency_view(request, agency_id):
-    agency = Agency.objects.get(pk=agency_id)
+    try:
+        agency = Agency.objects.get(pk=agency_id)
+    except Agency.DoesNotExist:
+        messages.error(request, "Agence inexistante.")
+        return redirect("authentication:agencies")
     context_empty = {'form': AgencyForm(instance=agency), 'agency_id': agency_id, 'segment': 'administration'}
 
     if request.method == "POST":
@@ -337,7 +349,7 @@ def edit_agency_view(request, agency_id):
             form.save()
             print("Agency updated!")
 
-            messages.success(request, "Agence modifiée avec succès !")
+            messages.success(request, "Agence modifiée.")
             return redirect("authentication:agencies")
 
         else:
@@ -372,7 +384,7 @@ def add_permission_view(request):
 
         if form.is_valid():
             new_permission = form.save()
-            messages.success(request, "Nouvelle permission ajoutée avec succès !")
+            messages.success(request, "Nouvelle permission ajoutée.")
             return redirect("authentication:permissions")
         else:
             context = {'form': form, 'menus': Menu.objects.all(), 'ErrorMessage': "Formulaire invalid soumit.", 'segment': 'administration'}
@@ -383,7 +395,11 @@ def add_permission_view(request):
 
 @login_required(login_url="/login/")
 def edit_permission_view(request, permission_id):
-    permission = Permission.objects.get(pk=permission_id)
+    try:
+        permission = Permission.objects.get(pk=permission_id)
+    except Permission.DoesNotExist:
+        messages.error(request, "Permission inexistante.")
+        return redirect("authentication:permissions")
     context_empty = {
         'form': PermissionForm(instance=permission), 
         'menus': Menu.objects.all(),
@@ -398,7 +414,7 @@ def edit_permission_view(request, permission_id):
             form.save()
             print("Permission updated!")
 
-            messages.success(request, "Permission modifiée avec succès !")
+            messages.success(request, "Permission modifiée.")
             return redirect("authentication:permissions")
 
         else:
@@ -416,8 +432,8 @@ def delete_permission_view(request, permission_id):
         permission = Permission.objects.get(pk=permission_id)
         permission.delete()
 
-        messages.success(request, "Permission supprimée !")
+        messages.success(request, "Permission supprimée.")
         return redirect("authentication:permissions")
     except Permission.DoesNotExist:
-        messages.error(request, "Permission inexistante !")
+        messages.error(request, "Permission inexistante.")
         return redirect("authentication:permissions")

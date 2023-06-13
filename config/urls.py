@@ -30,7 +30,7 @@ from rest_framework import routers
 router = routers.SimpleRouter()
 
 # define the router path and viewset to be used
-router.register(r'get-declarations', apiviews.DeclarationViewSet)
+router.register(r'tdss-api/get-declarations', apiviews.DeclarationViewSet)
 
 urlpatterns = []
 

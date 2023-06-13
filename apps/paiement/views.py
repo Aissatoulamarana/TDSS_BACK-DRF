@@ -78,12 +78,12 @@ def generate_payment_view(request):
 
         bill = request.POST.get('facture')
         facture = Facture.objects.get(reference=UUID(bill).hex)
-        print(facture.reference)
+        # print(facture.reference)
         
         paymentform = PaymentForm(request.POST, prefix= "payment")
         payerform = PayerForm(request.POST, prefix= "payer")
 
-        paymentform.fields["type"].required = False
+        # paymentform.fields["type"].required = False
         
         if paymentform.is_valid() and payerform.is_valid():
             # print("Valid forms submitted!")
@@ -96,12 +96,14 @@ def generate_payment_view(request):
 
             new_payment = paymentform.save(commit=False)
             new_payment.facture_ref = facture
-            new_payment.type = Permit.objects.first()
             new_payment.payer = new_payer
             new_payment.created_by = request.user
 
             new_payment.save()
             # print("Payment created!")
+
+            facture.status = 'paid'
+            facture.save()
 
             messages.success(request, "Nouveau paiement ajouté.")
             return redirect("paiement:payments")
@@ -328,7 +330,12 @@ def add_declaration_view(request):
 
 @login_required(login_url="/login/")
 def edit_declaration_view(request, declaration_id):
-    declaration = Declaration.objects.get(pk=declaration_id)
+    try:
+        declaration = Declaration.objects.get(pk=declaration_id)
+    except Declaration.DoesNotExist:
+        messages.error(request, "Déclaration inexistante.")
+        return redirect("paiement:declarations")
+    
     employees = Employee.objects.filter(declaration=declaration)
     context_empty = {
         'declarationform': DeclarationForm(instance=declaration, prefix= "declaration"),

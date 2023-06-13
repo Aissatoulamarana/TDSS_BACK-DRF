@@ -16,7 +16,7 @@ class DeclarationViewSet(viewsets.ModelViewSet):
 
     # Check if user is authenticated
     # authentication_classes = [SessionAuthentication, BasicAuthentication]
-    permission_classes = [HasAPIKey | IsAuthenticated]
+    permission_classes = [HasAPIKey]
 
     # define queryset
     queryset = Declaration.objects.all()
@@ -27,7 +27,7 @@ class DeclarationViewSet(viewsets.ModelViewSet):
 
 @api_view(['GET', 'POST'])
 # @authentication_classes([SessionAuthentication, BasicAuthentication])
-@permission_classes([HasAPIKey | IsAuthenticated])
+@permission_classes([HasAPIKey])
 def payment_list(request, format=None):
     """
     List all payments, or create a new payment.
@@ -41,7 +41,7 @@ def payment_list(request, format=None):
 
 @api_view(['GET', 'POST'])
 # @authentication_classes([SessionAuthentication, BasicAuthentication])
-@permission_classes([HasAPIKey | IsAuthenticated])
+@permission_classes([HasAPIKey])
 def employee_list(request, format=None):
     """
     List all employees, or create a new employee.
@@ -62,7 +62,7 @@ def employee_list(request, format=None):
 
 @api_view(['GET', 'PUT', 'DELETE'])
 # @authentication_classes([SessionAuthentication, BasicAuthentication])
-@permission_classes([HasAPIKey | IsAuthenticated])
+@permission_classes([HasAPIKey])
 def employee_detail(request, pid, format=None):
     """
     Retrieve, update or delete an employee.

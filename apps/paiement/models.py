@@ -139,7 +139,7 @@ class Payer(models.Model):
 class Payment(models.Model):
     reference = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     facture_ref = models.ForeignKey(Facture, on_delete=models.PROTECT, blank=True, null=True)
-    type = models.ForeignKey(Permit, on_delete=models.PROTECT, related_name="payment_permits_types")
+    type = models.ForeignKey(Permit, on_delete=models.PROTECT, blank=True, null=True, related_name="payment_permits_types")
     payer = models.ForeignKey(Payer, on_delete=models.PROTECT, related_name="payment_payers")
     amount = models.DecimalField(max_digits=15, decimal_places=2)
     devise = models.ForeignKey(Devise, on_delete=models.PROTECT, related_name="payment_devises")

@@ -281,10 +281,14 @@ def get_devise(request, devise_id):
 
 @login_required(login_url="/login/")
 def declarations_view(request):
-    if request.user.type.uid == 2:
-        declarations = Declaration.objects.filter(created_by=request.user)
+    if request.user.profile.type.uid == 1 or request.user.type.uid == 5:
+        declarations = Declaration.objects.all().order_by('-modified_on')
+    elif request.user.type.uid == 4:
+        declarations = Declaration.objects.filter(status='submitted').order_by('created_on')
+    elif request.user.type.uid == 2:
+        declarations = Declaration.objects.filter(created_by=request.user).order_by('-created_on')
     else:
-        declarations = Declaration.objects.filter(created_by=request.user)
+        declarations = Declaration.objects.filter(created_by__profile=request.user.profile)
     form = DeclarationForm()
 
     return render(request, "paiements/declarations.html", {

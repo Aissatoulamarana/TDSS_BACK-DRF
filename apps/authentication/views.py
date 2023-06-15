@@ -75,10 +75,12 @@ def reset_password_view(request):
 
 
 def users_view(request):
-    if request.user.type.uid == 2:
-        users = CustomUser.objects.filter(created_by=request.user)
+    if request.user.profile.type.uid == 1:
+        users = CustomUser.objects.all().order_by('-modified_on')
+    elif request.user.type.uid == 2:
+        users = CustomUser.objects.filter(created_by=request.user).order_by('-created_on')
     else:
-        users = CustomUser.objects.filter(created_by=request.user)
+        users = CustomUser.objects.filter(created_by__profile=request.user.profile)
 
     return render(request, "accounts/users.html", {
         'users': users,

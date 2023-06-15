@@ -262,7 +262,7 @@ def payment_receipt_view(request, payment_id):
     agents = JobCategory.objects.get(pk=2)
     ouvriers = JobCategory.objects.get(pk=3)
 
-    client = payment.facture_ref.declaration_ref.created_by.profile
+    client = payment.created_by.profile
 
     # Creating a buffer for the pdf
     buffer = io.BytesIO()

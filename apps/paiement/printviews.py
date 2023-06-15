@@ -30,10 +30,7 @@ def declaration_receipt_view(request, declaration_id):
         messages.error(request, "Déclaration inexistante.")
         return redirect("paiement:declarations")
 
-    try:
-        client = Facture.objects.get(declaration_ref=declaration).client
-    except Facture.DoesNotExist:
-        client = declaration.created_by.profile
+    client = declaration.created_by.profile
     employees = Employee.objects.filter(declaration=declaration)
     
     # Creating a buffer for the pdf
@@ -151,6 +148,8 @@ def bill_receipt_view(request, bill_id):
     except Payment.DoesNotExist:
         messages.error(request, "Facture inexistante.")
         return redirect("paiement:factures")
+    
+    client = facture.declaration_ref.created_by.profile
 
     # Creating a buffer for the pdf
     buffer = io.BytesIO()
@@ -170,9 +169,9 @@ def bill_receipt_view(request, bill_id):
     date = DateFormat(facture.created_on)
     pdf.drawString(480, 700, f"Date: {date.format('d/m/y')}")
     # pdf.drawString(60, 730, f"- Informations du client -")
-    pdf.drawString(55, 680, f"Entreprise :  {facture.client.name}")
-    pdf.drawString(55, 670, f"Téléphone : {facture.client.contact}")
-    pdf.drawString(55, 660, f"Adresse : {facture.client.adresse}")
+    pdf.drawString(55, 680, f"Entreprise :  {client.name}")
+    pdf.drawString(55, 670, f"Téléphone : {client.contact}")
+    pdf.drawString(55, 660, f"Adresse : {client.adresse}")
     pdf.drawString(55, 650, f"")
     pdf.drawString(55, 640, f"")
 
@@ -263,7 +262,7 @@ def payment_receipt_view(request, payment_id):
     agents = JobCategory.objects.get(pk=2)
     ouvriers = JobCategory.objects.get(pk=3)
 
-    client = payment.created_by.profile
+    client = payment.facture_ref.declaration_ref.created_by.profile
 
     # Creating a buffer for the pdf
     buffer = io.BytesIO()

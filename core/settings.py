@@ -145,21 +145,21 @@ AUTH_USER_MODEL = 'authentication.CustomUser'
 AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.AllowAllUsersModelBackend']
 
 # Settings for email configuration
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_USE_TLS = True
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'noreply.odiallo@gmail.com'
-EMAIL_HOST_PASSWORD = 'zmwfjvpvokhxhlwc'
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_USE_TLS = True
+# EMAIL_PORT = 587
+# EMAIL_HOST_USER = 'noreply.odiallo@gmail.com'
+# EMAIL_HOST_PASSWORD = 'zmwfjvpvokhxhlwc'
 
 
 # Settings for email configuration
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'mail.tdss.com.gn'
-# EMAIL_USE_TLS = False
-# EMAIL_PORT = 465
-# EMAIL_HOST_USER = 'noreply@tdss.com.gn'
-# EMAIL_HOST_PASSWORD = 't2)###gGd@$C'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'mail.tdss.com.gn'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'noreply@tdss.com.gn'
+EMAIL_HOST_PASSWORD = 'TDSS@workp@2023$'
 
 #############################################################
 #############################################################

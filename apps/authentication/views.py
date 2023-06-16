@@ -100,7 +100,7 @@ def reinit_password_view(request, user_id):
 
     send_mail(
         "Réinitialisation de mot de passe",
-        f"Bonjour, votre mot de passe vient d'être réinitialiser sur le site de paiement par l'Admin. Nouveau MDP: {new_password}",
+        f"Bonjour, \n \nVotre mot de passe vient d'être réinitialiser sur le portail de télédéclaration des employeés non-nationaux par l'Admin.  \nCi-dessous vos informations d'accès. \n \nEmail: {user.email}\nNouveau Mot de Passe: {new_password}\n \nAller sur: https://devpay.tdss.com.gn pour vous connecter. \nCordialement",
         "noreply@tdss.com.gn",
         [user.email],
         fail_silently=True
@@ -184,7 +184,7 @@ def add_profile_view(request):
 
             send_mail(
                 "Creation de nouveau compte",
-                f"Bonjour {new_user.first_name} {new_user.last_name}, \n \nUn compte a été créer pour vous sur le portail de paiement. \nCi-dessous vos informations d'accès. \n \nEmail: {new_user.email}\nMot de Passe: {random_pwd}\n \nAller sur: https://devpay.tdss.com.gn pour vous connecter. \nCordialement",
+                f"Bonjour {new_user.first_name} {new_user.last_name}, \n \nUn compte a été créer pour vous sur le portail de télédéclaration des employeés non-nationaux. \nCi-dessous vos informations d'accès. \n \nEmail: {new_user.email}\nMot de Passe: {random_pwd}\n \nAller sur: https://devpay.tdss.com.gn pour vous connecter. \nCordialement",
                 "noreply@tdss.com.gn",
                 [new_user.email],
                 fail_silently=True
@@ -228,7 +228,7 @@ def add_user_view(request):
 
             send_mail(
                 "Creation de nouveau compte",
-                f"Bonjour {new_user.first_name} {new_user.last_name}, \n \nUn compte a été créer pour vous sur le portail de paiement. \nCi-dessous vos informations d'accès. \n \nEmail: {new_user.email}\nMot de Passe: {random_pwd}\n \nAller sur: https://devpay.tdss.com.gn pour vous connecter. \nCordialement",
+                f"Bonjour {new_user.first_name} {new_user.last_name}, \n \nUn compte a été créer pour vous sur le portail de télédéclaration des employeés non-nationaux. \nCi-dessous vos informations d'accès. \n \nEmail: {new_user.email}\nMot de Passe: {random_pwd}\n \nAller sur: https://devpay.tdss.com.gn pour vous connecter. \nCordialement",
                 "noreply@tdss.com.gn",
                 [new_user.email],
                 fail_silently=True

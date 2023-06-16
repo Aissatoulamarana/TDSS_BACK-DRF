@@ -34,11 +34,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
         'localhost',
-        '192.168.237.6',
-        '145.239.139.38',
-        'devpay.tdss.com.gn',
-        'dev.tdss.com.gn',
-        'devenrol.tdss.com.gn',
+        '192.168.237.4',
+        '145.239.139.36',
+        'prod.tdss.com.gn',
+        'workpermit.tdss.com.gn',
+        'aguipee.tdss.com.gn',
         ]
 
 CORS_ORIGIN_WHITELIST = [
@@ -47,9 +47,9 @@ CORS_ORIGIN_WHITELIST = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://dev.tdss.com.gn',
-    'https://devenrol.tdss.com.gn',
-    'https://devpay.tdss.com.gn',
+    'https://prod.tdss.com.gn',
+    'https://workpermit.tdss.com.gn',
+    'https://aguipee.tdss.com.gn',
     # Add other trusted origins if needed
 ]
 

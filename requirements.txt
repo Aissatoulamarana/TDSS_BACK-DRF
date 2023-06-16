@@ -11,9 +11,10 @@ toml==0.10.2
 Unipath==1.1
 whitenoise==5.3.0
 pillow
-mysqlclient
+# mysqlclient
 psycopg2-binary
 reportlab
 qrcode
 djangorestframework
 djangorestframework-api-key
+django-environ==0.10.0

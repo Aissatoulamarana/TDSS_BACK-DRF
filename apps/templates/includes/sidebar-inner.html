@@ -21,7 +21,7 @@
             <!-- Collapse -->
             <div class="collapse navbar-collapse" id="sidenav-collapse-main">
             <!-- Nav items -->
-            <ul class="navbar-nav">
+            <ul class="navbar-nav mt-5">
                 {% if 'm-dashboards' in user.permissions.codes or user.is_staff %}
                     <li class="nav-item" data-id="m-dashboards">
                         <a class="nav-link {% if 'index' in segment %} active {% endif %}" 
@@ -52,7 +52,7 @@
                     </li>
                 {% endif %}
 
-                {% if 'm-enrollements' in user.permissions.codes or user.is_staff %}
+                <!-- {% if 'm-enrollements' in user.permissions.codes or user.is_staff %}
                     <li class="nav-item" data-id="m-enrollements">
                         <a class="nav-link {% if 'enrollement' in segment %} active {% endif %}" 
                         href="#navbar-enrollement" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="navbar-enrollement">
@@ -81,7 +81,7 @@
                             </ul>
                         </div>
                     </li>
-                {% endif %}
+                {% endif %} -->
                 
                 {% if 'm-facturation' in user.permissions.codes or user.is_staff %}
                     <li class="nav-item" data-id="m-facturation">

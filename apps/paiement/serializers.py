@@ -19,7 +19,7 @@ class FactureSerializer(serializers.ModelSerializer):
     devise = serializers.StringRelatedField(read_only=True)
     class Meta:
         model = Facture
-        fields = ('id', 'reference', 'client', 'amount', 'devise', 'created_on')
+        fields = ('id', 'reference', 'declaration_ref', 'client', 'status', 'amount', 'devise', 'created_on')
 
 
 class PayerSerializer(serializers.ModelSerializer):
@@ -51,9 +51,16 @@ class JobCategorySerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'permit')
 
 
+class JobSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Job
+        fields = ('id', 'name')
+
+
 class EmployeeSerializer(serializers.ModelSerializer):
     declaration = DeclarationSerializer(read_only=True)
     job_category = JobCategorySerializer(read_only=True)
+    job = JobSerializer(read_only=True)
 
     class Meta:
         model = Employee

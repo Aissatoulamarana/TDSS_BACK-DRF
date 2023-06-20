@@ -25,7 +25,7 @@ class RegionAdmin(admin.ModelAdmin):
     list_display = ('id', 'code', 'name')
 
 class AgencyAdmin(admin.ModelAdmin):
-    list_display = ('id', 'code', 'name')
+    list_display = ('id', 'code', 'name', 'region', 'created_by')
 
 class MenuAdmin(admin.ModelAdmin):
     list_display = ('id', 'uid', 'name', 'status')

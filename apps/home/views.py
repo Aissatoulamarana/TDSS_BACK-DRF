@@ -10,24 +10,40 @@ from django.template import loader
 from django.urls import reverse
 from django.contrib import messages
 from django.shortcuts import render, redirect
+from django.db.models import Sum
 
 from apps.authentication.models import CustomUser, Profile, ProfileType
-from apps.authentication.forms import CustomUserForm
-from apps.paiement.models import Declaration, Facture, Payment
+from apps.authentication.forms import CustomUserForm, Agency, Region
+from apps.paiement.models import Declaration, Facture, Payment, Devise, Employee
 
 
 @login_required(login_url="/login/")
 def index(request):
+
+    # if request.user.profile.type.uid == 1:
+    #     users = CustomUser.objects.all(),
+    #     profiles = Profile.objects.all(),
+    #     agencies = Agency.objects.all(),
+    # elif request.user.type.uid == 2:
+    #     users = CustomUser.objects.filter(created_by=request.user).order_by('-created_on')
+    # else:
+    #     users = CustomUser.objects.filter(created_by__profile=request.user.profile)
+
+
     context = {
         'segment': 'index',
-        'total_users': CustomUser.objects.all().count(),
-        'total_ministeres': Profile.objects.filter(type=ProfileType.objects.get(uid=3)).count(),
-        'total_banques': Profile.objects.filter(type=ProfileType.objects.get(uid=2)).count(),
-        'total_entreprise': Profile.objects.filter(type=ProfileType.objects.get(uid=4)).count(),
+        'total_users': CustomUser.objects.all(),
+        'total_profiles': Profile.objects.all(),
+        'total_agencies': Agency.objects.all(),
+        'agencies_conakry': Agency.objects.filter(region=Region.objects.get(code='GN-C')),
+        'agencies_interior': Agency.objects.exclude(region=Region.objects.get(code='GN-C')),
 
-        'total_declarations': Declaration.objects.all().count(),
-        'total_factures': Facture.objects.all().count(),
-        'total_paiements': Payment.objects.all().count()
+        'total_declarations': Declaration.objects.all(),
+        'total_employees': Employee.objects.all(),
+        'total_factures': Facture.objects.all(),
+        'total_paiements': Payment.objects.all(),
+        'paiement_GNF': Payment.objects.filter(devise=Devise.objects.get(pk=1)).aggregate(Sum('amount'))['amount__sum'],
+        'paiement_USD': Payment.objects.filter(devise=Devise.objects.get(pk=2)).aggregate(Sum('amount'))['amount__sum']
     }
 
     html_template = loader.get_template('home/index.html')

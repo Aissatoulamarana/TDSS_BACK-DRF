@@ -47,14 +47,15 @@ def declaration_receipt_view(request, declaration_id):
     else:
         client_image = 'apps/static/assets/img/brand/logo.jpg'
     pdf.drawImage(client_image, 60, 750, 100, 80, showBoundary=False)
+
+    date = DateFormat(declaration.created_on)
     
     pdf.line(50, 750, 550, 750)
-    pdf.drawString(200, 730, f"DECLARATION N° 00{declaration.id}/2023")
+    pdf.drawString(200, 730, f"DECLARATION N° 00{declaration.id}/{date.format('Y')}")
     pdf.line(50, 720, 550, 720)
     pdf.setFontSize(8, leading=None)
     pdf.drawString(55, 700, f"Référence: {declaration.reference}")
     
-    date = DateFormat(declaration.created_on)
     pdf.drawString(480, 700, f"Date: {date.format('d/m/y')}")
     # pdf.drawString(60, 730, f"- Informations du client -")
 
@@ -103,18 +104,18 @@ def declaration_receipt_view(request, declaration_id):
     table = Table(data, colWidths=design_width, splitByRow=1, style=LIST_STYLE)
 
     pdf.setFontSize(12)
-    pdf.drawString(60, 580, f"Liste des employé(e)s")
+    pdf.drawString(60, 600, f"LISTE DES EMPLOYES")
 
     pdf.setFontSize(8)
-    table.wrapOn(pdf, 25, 450)
-    table.drawOn(pdf, 25, 450)
+    table.wrapOn(pdf, 25, 500)
+    table.drawOn(pdf, 25, 500)
 
     # Creating the QR Code
     qr_data = {
         'ID': declaration.id, 
         'REF': declaration.reference, 
         'Client': client.name, 
-        'Total Employées': employees.count()
+        'Total Employés': employees.count()
     }
     qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L, border=4)
     qr.add_data(qr_data)
@@ -124,11 +125,11 @@ def declaration_receipt_view(request, declaration_id):
     
     pdf.drawImage('staticfiles/declaration_qr.png', 470, 610, 80, 80, showBoundary=False)
 
-    pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
-    pdf.setFont('Vera', 10)
-    # pdf.line(300, 550, 550, 550)
-    pdf.drawString(430, 350, f"Signature")
-    pdf.drawString(430, 270, f"Nom, Prénom et fonction")
+    # pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
+    # pdf.setFont('Vera', 10)
+    # # pdf.line(300, 550, 550, 550)
+    # pdf.drawString(430, 350, f"Signature")
+    # pdf.drawString(430, 270, f"Nom, Prénom et fonction")
 
     pdf.showPage()
     pdf.save()
@@ -150,6 +151,8 @@ def bill_receipt_view(request, bill_id):
         return redirect("paiement:factures")
     
     client = facture.declaration_ref.created_by.profile
+    
+    date = DateFormat(facture.created_on)
 
     # Creating a buffer for the pdf
     buffer = io.BytesIO()
@@ -161,12 +164,11 @@ def bill_receipt_view(request, bill_id):
     pdf.setTitle("Factures")
     pdf.drawImage('apps/static/assets/img/brand/logo.jpg', 60, 750, 100, 80, showBoundary=False)
     pdf.line(50, 750, 550, 750)
-    pdf.drawString(220, 730, f"FACTURE N° 00{facture.id}/2023")
+    pdf.drawString(220, 730, f"FACTURE N° 00{facture.id}/{date.format('Y')}")
     pdf.line(50, 720, 550, 720)
     pdf.setFontSize(8, leading=None)
     pdf.drawString(55, 700, f"Référence: {facture.reference}")
     
-    date = DateFormat(facture.created_on)
     pdf.drawString(480, 700, f"Date: {date.format('d/m/y')}")
     # pdf.drawString(60, 730, f"- Informations du client -")
     pdf.drawString(55, 680, f"Entreprise :  {client.name}")
@@ -217,7 +219,7 @@ def bill_receipt_view(request, bill_id):
     qr_data = {
         'ID': facture.id, 
         'REF': facture.reference, 
-        'Client': f"{facture.client}", 
+        'Client': f"{client.name}", 
         'Montant': f"{facture.amount} {facture.devise.sign}"
     }
     qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L, border=4)
@@ -236,8 +238,8 @@ def bill_receipt_view(request, bill_id):
     pdf.drawString(450, 500, f"{facture.amount} {facture.devise.sign}")
     pdf.line(310, 490, 540, 490)
 
-    pdf.setFontSize(10)
-    pdf.drawString(400, 450, f"Signature")
+    # pdf.setFontSize(10)
+    # pdf.drawString(400, 450, f"Signature")
 
     pdf.showPage()
     pdf.save()
@@ -278,14 +280,15 @@ def payment_receipt_view(request, payment_id):
     else:
         client_image = 'apps/static/assets/img/brand/logo.jpg'
     pdf.drawImage(client_image, 60, 750, 100, 80, showBoundary=False)
+
+    date = DateFormat(payment.created_on)
     
     pdf.line(50, 750, 550, 750)
-    pdf.drawString(200, 730, f"RECU DE PAIEMENT N° 00{payment.id}/2023")
+    pdf.drawString(200, 730, f"RECU DE PAIEMENT N° 00{payment.id}/{date.format('Y')}")
     pdf.line(50, 720, 550, 720)
     pdf.setFontSize(8, leading=None)
     pdf.drawString(55, 700, f"Référence: {payment.reference}")
 
-    date = DateFormat(payment.created_on)
     pdf.drawString(480, 700, f"Date: {date.format('d/m/y')}")
     # pdf.drawString(60, 730, f"- Informations du payeur -")
     pdf.drawString(55, 680, f"Facture N° : {payment.facture_ref.reference}")

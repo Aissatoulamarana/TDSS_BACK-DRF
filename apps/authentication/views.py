@@ -377,7 +377,7 @@ def permissions_view(request):
 def add_permission_view(request):
     context_empty = {
         'form': PermissionForm(),
-        'menus': Menu.objects.all(),
+        'menus': Menu.objects.filter(status='ON'),
         'segment': 'administration'
     }
 
@@ -389,7 +389,7 @@ def add_permission_view(request):
             messages.success(request, "Nouvelle permission ajoutée.")
             return redirect("authentication:permissions")
         else:
-            context = {'form': form, 'menus': Menu.objects.all(), 'ErrorMessage': "Formulaire invalid soumit.", 'segment': 'administration'}
+            context = {'form': form, 'menus': Menu.objects.filter(status='ON'), 'ErrorMessage': "Formulaire invalid soumit.", 'segment': 'administration'}
             return render(request, "accounts/add-permissions.html", context)
 
     return render(request, "accounts/add-permissions.html", context_empty)
@@ -402,9 +402,10 @@ def edit_permission_view(request, permission_id):
     except Permission.DoesNotExist:
         messages.error(request, "Permission inexistante.")
         return redirect("authentication:permissions")
+    
     context_empty = {
         'form': PermissionForm(instance=permission), 
-        'menus': Menu.objects.all(),
+        'menus': Menu.objects.filter(status='ON'),
         'permission_id': permission_id, 
         'segment': 'administration'
     }

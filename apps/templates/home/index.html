@@ -63,8 +63,8 @@
               <span class=" mr-2"><i class="ni ni-send"></i> Soumise: {{total_declarations | count_by_status:'submitted'}} </span>
               <span class="text-success mr-2"><i class="ni ni-check-bold"></i> Validée: {{total_declarations | count_by_status:'validated'}} </span>
               <span class="text-danger mr-2"><i class="ni ni-fat-remove"></i> Rejetée: {{total_declarations | count_by_status:'rejected'}} </span>
-              <!-- <span class=" mr-2"><i class="ni ni-send"></i> Soumise: {{total_declarations | count_by_status:'unsubmitted'}} </span> -->
-              <!-- <span class=" mr-2"><i class="ni ni-send"></i> Soumise: {{total_declarations | count_by_status:'billed'}} </span> -->
+              <span class=" mr-2"><i class="ni ni-send"></i> Non-Soumise: {{total_declarations | count_by_status:'unsubmitted'}} </span>
+              <span class=" mr-2"><i class="ni ni-send"></i> Facturée: {{total_declarations | count_by_status:'billed'}} </span>
             </p>
           </div>
         </div>
@@ -192,7 +192,7 @@
               <span class=" mr-2"><i class="fa fa-arrow-up"></i> ENTREPRISE: {{total_profiles | count_by_profile_type:4}} </span>
               <span class=" mr-2"><i class="fa fa-arrow-up"></i> BANQUE: {{total_profiles | count_by_profile_type:2}} </span>
               <span class=" mr-2"><i class="fa fa-arrow-up"></i> MINISTERE: {{total_profiles | count_by_profile_type:3}} </span>
-              <!-- <span class="text-warning mr-4"><i class="fa fa-arrow-up"></i> ADMIN: {{total_profiles | count_by_profile_type:1}} </span> -->
+              <span class="text-warning mr-4"><i class="fa fa-arrow-up"></i> ADMIN: {{total_profiles | count_by_profile_type:1}} </span>
             </p>
           </div>
         </div>

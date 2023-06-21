@@ -108,7 +108,7 @@ def declaration_receipt_view(request, declaration_id):
 
     pdf.setFontSize(8)
     table.wrapOn(pdf, 25, 500)
-    table.drawOn(pdf, 25, 500)
+    table.drawOn(pdf, 25, 580-table._height)
 
     # Creating the QR Code
     qr_data = {
@@ -214,6 +214,7 @@ def bill_receipt_view(request, bill_id):
 
     table.wrapOn(pdf, 55, 550)
     table.drawOn(pdf, 55, 550)
+    # table.drawOn(pdf, 25, 630-table._height)
 
     # Creating the QR Code
     qr_data = {
@@ -325,6 +326,7 @@ def payment_receipt_view(request, payment_id):
 
     table.wrapOn(pdf, 55, 560)
     table.drawOn(pdf, 55, 560)
+    # table.drawOn(pdf, 25, 620-table._height)
 
     # Creating the QR Code
     qr_data = {
@@ -343,11 +345,11 @@ def payment_receipt_view(request, payment_id):
 
     pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
     pdf.setFont('Vera', 12)
-    pdf.line(300, 535, 535, 535)
+    pdf.line(300, 535, 555, 535)
     pdf.drawString(320, 515, f"TOTAL TTC")
     pdf.line(420, 510, 420, 530)
-    pdf.drawString(450, 515, f"{payment.amount} {payment.devise.sign}")
-    pdf.line(300, 505, 535, 505)
+    pdf.drawString(430, 515, f"{payment.amount} {payment.devise.sign}")
+    pdf.line(300, 505, 555, 505)
 
     pdf.showPage()
     pdf.save()

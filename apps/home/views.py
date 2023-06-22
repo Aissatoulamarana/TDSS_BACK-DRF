@@ -20,31 +20,55 @@ from apps.paiement.models import Declaration, Facture, Payment, Devise, Employee
 @login_required(login_url="/login/")
 def index(request):
 
-    # if request.user.profile.type.uid == 1:
-    #     users = CustomUser.objects.all(),
-    #     profiles = Profile.objects.all(),
-    #     agencies = Agency.objects.all(),
-    # elif request.user.type.uid == 2:
-    #     users = CustomUser.objects.filter(created_by=request.user).order_by('-created_on')
-    # else:
-    #     users = CustomUser.objects.filter(created_by__profile=request.user.profile)
+    if request.user.profile.type.uid == 1:
+        context = {
+            'segment': 'index',
+            'total_users': CustomUser.objects.all(),
+            'total_profiles': Profile.objects.all(),
+            'total_agencies': Agency.objects.all(),
+            'agencies_conakry': Agency.objects.filter(region=Region.objects.get(code='GN-C')),
+            'agencies_interior': Agency.objects.exclude(region=Region.objects.get(code='GN-C')),
 
+            'total_declarations': Declaration.objects.all(),
+            'total_employees': Employee.objects.all(),
+            'total_factures': Facture.objects.all(),
+            'total_paiements': Payment.objects.all(),
+            'paiement_GNF': Payment.objects.filter(devise=Devise.objects.get(pk=1)).aggregate(Sum('amount'))['amount__sum'],
+            'paiement_USD': Payment.objects.filter(devise=Devise.objects.get(pk=2)).aggregate(Sum('amount'))['amount__sum']
+        }
+    else:
+        context = {
+            'segment': 'index',
+            'total_users': CustomUser.objects.filter(created_by=request.user).order_by('-created_on'),
+            'total_profiles': Profile.objects.all().order_by('-created_on'),
+            'total_agencies': Agency.objects.filter(created_by=request.user),
+            'agencies_conakry': Agency.objects.filter(region=Region.objects.get(code='GN-C'), created_by=request.user),
+            'agencies_interior': Agency.objects.exclude(region=Region.objects.get(code='GN-C'), created_by=request.user),
 
-    context = {
-        'segment': 'index',
-        'total_users': CustomUser.objects.all(),
-        'total_profiles': Profile.objects.all(),
-        'total_agencies': Agency.objects.all(),
-        'agencies_conakry': Agency.objects.filter(region=Region.objects.get(code='GN-C')),
-        'agencies_interior': Agency.objects.exclude(region=Region.objects.get(code='GN-C')),
+            'total_declarations': Declaration.objects.filter(created_by=request.user).order_by('-created_on'),
+            'total_employees': Employee.objects.filter(declaration__created_by=request.user),
+            'total_factures': Facture.objects.filter(created_by=request.user).order_by('-created_on'),
+            'total_paiements': Payment.objects.filter(created_by=request.user).order_by('-created_on'),
+            'paiement_GNF': Payment.objects.filter(devise=Devise.objects.get(pk=1), created_by=request.user).aggregate(Sum('amount'))['amount__sum'],
+            'paiement_USD': Payment.objects.filter(devise=Devise.objects.get(pk=2), created_by=request.user).aggregate(Sum('amount'))['amount__sum']
+        }
+        context['hello'] = "hello"
 
-        'total_declarations': Declaration.objects.all(),
-        'total_employees': Employee.objects.all(),
-        'total_factures': Facture.objects.all(),
-        'total_paiements': Payment.objects.all(),
-        'paiement_GNF': Payment.objects.filter(devise=Devise.objects.get(pk=1)).aggregate(Sum('amount'))['amount__sum'],
-        'paiement_USD': Payment.objects.filter(devise=Devise.objects.get(pk=2)).aggregate(Sum('amount'))['amount__sum']
-    }
+    # context = {
+    #     'segment': 'index',
+    #     'total_users': CustomUser.objects.all(),
+    #     'total_profiles': Profile.objects.all(),
+    #     'total_agencies': Agency.objects.all(),
+    #     'agencies_conakry': Agency.objects.filter(region=Region.objects.get(code='GN-C')),
+    #     'agencies_interior': Agency.objects.exclude(region=Region.objects.get(code='GN-C')),
+
+    #     'total_declarations': Declaration.objects.all(),
+    #     'total_employees': Employee.objects.all(),
+    #     'total_factures': Facture.objects.all(),
+    #     'total_paiements': Payment.objects.all(),
+    #     'paiement_GNF': Payment.objects.filter(devise=Devise.objects.get(pk=1)).aggregate(Sum('amount'))['amount__sum'],
+    #     'paiement_USD': Payment.objects.filter(devise=Devise.objects.get(pk=2)).aggregate(Sum('amount'))['amount__sum']
+    # }
 
     html_template = loader.get_template('home/index.html')
     return HttpResponse(html_template.render(context, request))

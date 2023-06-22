@@ -43,6 +43,7 @@
     <!-- Card stats -->
     <div class="row">
 
+      {% if request.user.profile.type.uid != 2 %}
       <!-- Déclarations -->
       <div class="col-xl-4 col-md-6">
         <div class="card card-stats">
@@ -60,15 +61,20 @@
               </div>
             </div>
             <p class="mt-3 mb-0 text-sm text-center">
-              <span class=" mr-2"><i class="ni ni-send"></i> Soumise: {{total_declarations | count_by_status:'submitted'}} </span>
-              <span class="text-success mr-2"><i class="ni ni-check-bold"></i> Validée: {{total_declarations | count_by_status:'validated'}} </span>
-              <span class="text-danger mr-2"><i class="ni ni-fat-remove"></i> Rejetée: {{total_declarations | count_by_status:'rejected'}} </span>
+              {% if request.user.profile.type.uid == 1 or request.user.profile.type.uid == 3 or request.user.profile.type.uid == 4 %}
+                <span class=" mr-2"><i class="ni ni-send"></i> Soumise: {{total_declarations | count_by_status:'submitted'}} </span>
+                <span class="text-success mr-2"><i class="ni ni-check-bold"></i> Validée: {{total_declarations | count_by_status:'validated'}} </span>
+                <span class="text-danger mr-2"><i class="ni ni-fat-remove"></i> Rejetée: {{total_declarations | count_by_status:'rejected'}} </span>
+              {% endif %}
+              {% if request.user.profile.type.uid == 1 %}
               <span class=" mr-2"><i class="ni ni-send"></i> Non-Soumise: {{total_declarations | count_by_status:'unsubmitted'}} </span>
               <span class=" mr-2"><i class="ni ni-send"></i> Facturée: {{total_declarations | count_by_status:'billed'}} </span>
+              {% endif %}
             </p>
           </div>
         </div>
       </div>
+      {% endif %}
 
       <!-- Factures -->
       <div class="col-xl-4 col-md-6">

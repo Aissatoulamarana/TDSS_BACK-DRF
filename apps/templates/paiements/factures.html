@@ -72,15 +72,16 @@
                 </h3>
               </div>
               <!-- Light table -->
-              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "ref", "company", "status", "amount", "actions"]'>
-                <table class="table align-items-center table-flush">
+              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "declaration", "company", "amount", "status", "date", "actions"]'>
+                <table class="table align-items-center table-flush" id="datatable-basic">
                   <thead class="thead-light">
                     <tr>
                       <th scope="col" class="sort" data-sort="n°">N°</th>
-                      <th scope="col" class="sort" data-sort="ref">Référence</th>
+                      <th scope="col" class="sort" data-sort="declaration">Titre déclaration</th>
                       <th scope="col" class="sort" data-sort="company">Entreprise</th>
-                      <th scope="col" class="sort" data-sort="status">Statut</th>
                       <th scope="col" class="sort" data-sort="amount">Montant</th>
+                      <th scope="col" class="sort" data-sort="status">Statut</th>
+                      <th scope="col" class="sort" data-sort="date">Date</th>
                       <th scope="col" class="sort" data-sort="Actions">Actions</th>
                     </tr>
                   </thead>
@@ -90,19 +91,22 @@
                         <td class="n°">
                           {{forloop.counter}}
                         </td>
+                        <td class="declaration">
+                          {{facture.declaration_ref.title}}
+                        </td>
                         <th scope="ref">
-                          {{facture.reference}}
-                        </th>
-                        <td class="company">
                           {{facture.client.name}}
+                        </th>
+                        <td>
+                            {{facture.amount}} {{facture.devise.sign}}
                         </td>
                         <td class="status">
                           {{facture.get_status_display}}
                         </td>
-                        <td>
-                            {{facture.amount}} {{facture.devise.sign}}
+                        <td class="date">
+                          {{facture.created_on|date:"d/m/y H:m"}}
                         </td>
-                        <td class="text-center justify-content-center">
+                        <td >
                           {% if 'a-factures-consulter' in user.permissions.codes or user.is_staff %}
                             <span>
                               <button class="btn btn-sm btn-icon-only" role="button" data-id="a-factures-consulter" data-toggle="modal" data-target="#modal-facture-{{facture.id}}">View</button>
@@ -123,10 +127,13 @@
                                         <div class="col">
                                           <i class="ni education_hat mr-2"></i><strong>Référence:</strong> {{facture.reference}}
                                         </div>
+                                        <div class="col text-right">
+                                          <i class="ni education_hat mr-2"></i><strong>Date:</strong> {{facture.created_on|date:"d/m/y H:m"}}
+                                        </div>
                                       </div>
                                         
                                     </div>
-                                    <div class="card-body">
+                                    <div class="card-body text-center">
                                       <div class="row mb-2">
                                         <div class="col">
                                           <div>
@@ -155,6 +162,7 @@
                                           </thead>
                                           <tbody class="list">
                                             
+                                              {% if facture.total_cadres > 0 %}  
                                               <tr>
                                                 <th scope="row">
                                                   <div class="media align-items-center">
@@ -171,8 +179,10 @@
                                                   <span class="name">{{job_categories.0.permit.price | multiply:facture.total_cadres}}</span>
                                                 </td>
                                               </tr>
+                                              {% endif %}
 
                                             
+                                              {% if facture.total_agents > 0 %}
                                               <tr>
                                                 <th scope="row">
                                                   <div class="media align-items-center">
@@ -189,8 +199,10 @@
                                                   <span class="name">{{job_categories.1.permit.price | multiply:facture.total_agents}}</span>
                                                 </td>
                                               </tr>
+                                              {% endif %}
 
                                             
+                                              {% if facture.total_ouvriers > 0 %}
                                               <tr>
                                                 <th scope="row">
                                                   <div class="media align-items-center">
@@ -207,6 +219,7 @@
                                                   <span class="name">{{job_categories.2.permit.price | multiply:facture.total_ouvriers}}</span>
                                                 </td>
                                               </tr>
+                                              {% endif %}
                                             
                                           </tbody>
                                           <tfoot>
@@ -297,7 +310,7 @@
                 </table>
               </div>
               <!-- Card footer -->
-              <div class="card-footer py-4">
+              <!-- <div class="card-footer py-4">
                 <nav aria-label="...">
                   <ul class="pagination justify-content-end mb-0">
                     <li class="page-item disabled">
@@ -321,7 +334,7 @@
                     </li>
                   </ul>
                 </nav>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
@@ -348,4 +361,20 @@
       window.location = $(this).data("href");
     })
   </script>
+
+   <!-- For tables purpose -->
+   <script src="/static/assets/vendor/datatables.net/js/jquery.dataTables.min.js"></script>
+   <script src="/static/assets/vendor/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
+   <script src="/static/assets/vendor/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+   <script src="/static/assets/vendor/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js"></script>
+   <script src="/static/assets/vendor/datatables.net-buttons/js/buttons.html5.min.js"></script>
+   <script src="/static/assets/vendor/datatables.net-buttons/js/buttons.flash.min.js"></script>
+   <script src="/static/assets/vendor/datatables.net-buttons/js/buttons.print.min.js"></script>
+   <script src="/static/assets/vendor/datatables.net-select/js/dataTables.select.min.js"></script>
+ 
+   <script>
+     // $(document).ready(function () {
+     //   console.log($('#datatable-basic_length').children().first()[0])
+     // });
+   </script>
 {% endblock javascripts %}

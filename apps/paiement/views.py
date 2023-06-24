@@ -30,11 +30,11 @@ from .forms import DeviseForm, FactureForm, PayerForm, PaymentForm, EmployeeForm
 @login_required(login_url="/login/")
 def payments_view(request):
     if request.user.profile.type.uid == 1 or request.user.type.uid == 5:
-        payments = Payment.objects.all().order_by('-modified_on')
+        payments = Payment.objects.all().order_by('created_on')
     elif request.user.type.uid == 2:
-        payments = Payment.objects.filter(created_by=request.user).order_by('-created_on')
+        payments = Payment.objects.filter(created_by=request.user).order_by('created_on')
     else:
-        payments = Payment.objects.filter(created_by__profile=request.user.profile)
+        payments = Payment.objects.filter(created_by__profile=request.user.profile).order_by('created_on')
     
     form = PaymentForm()
     payerform = PayerForm()
@@ -285,13 +285,13 @@ def get_devise(request, devise_id):
 @login_required(login_url="/login/")
 def declarations_view(request):
     if request.user.profile.type.uid == 1 or request.user.type.uid == 5:
-        declarations = Declaration.objects.all().order_by('-modified_on')
+        declarations = Declaration.objects.all().order_by('created_on')
     elif request.user.type.uid == 4:
         declarations = Declaration.objects.filter(status='submitted').order_by('created_on')
     elif request.user.type.uid == 2:
-        declarations = Declaration.objects.filter(created_by=request.user).order_by('-created_on')
+        declarations = Declaration.objects.filter(created_by=request.user).order_by('created_on')
     else:
-        declarations = Declaration.objects.filter(created_by__profile=request.user.profile)
+        declarations = Declaration.objects.filter(created_by__profile=request.user.profile).order_by('created_on')
     
     form = DeclarationForm()
 
@@ -489,13 +489,13 @@ def bill_declaration_view(request, declaration_id):
 @login_required(login_url="/login/")
 def factures_view(request):
     if request.user.profile.type.uid == 1 or request.user.type.uid == 5:
-        factures = Facture.objects.all().order_by('-modified_on')
+        factures = Facture.objects.all().order_by('created_on')
     elif request.user.type.uid == 2:
-        factures = Facture.objects.filter(status='unpaid').order_by('-created_on')
+        factures = Facture.objects.filter(status='unpaid').order_by('created_on')
     else:
-        factures = Facture.objects.filter(created_by__profile=request.user.profile)
+        factures = Facture.objects.filter(created_by__profile=request.user.profile).order_by('created_on')
     
-    job_categories = JobCategory.objects.all()
+    job_categories = JobCategory.objects.all().order_by("id")
     form = FactureForm()
 
     return render(request, "paiements/factures.html", {

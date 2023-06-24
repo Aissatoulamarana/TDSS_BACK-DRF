@@ -20,6 +20,10 @@ from django.contrib import messages
 
 from django.utils.dateformat import DateFormat
 
+# Function to format number to amount
+def to_amount(number):
+    return "{:0,.0f}".format(number).replace(','," ")
+
 
 @login_required(login_url="/login/")
 def declaration_receipt_view(request, declaration_id):
@@ -53,30 +57,29 @@ def declaration_receipt_view(request, declaration_id):
     pdf.line(50, 750, 550, 750)
     pdf.drawString(200, 730, f"DECLARATION N° 00{declaration.id}/{date.format('Y')}")
     pdf.line(50, 720, 550, 720)
-    pdf.setFontSize(8, leading=None)
-    pdf.drawString(55, 700, f"Référence: {declaration.reference}")
-    
-    pdf.drawString(480, 700, f"Date: {date.format('d/m/y')}")
+    pdf.setFontSize(11, leading=None)
+    pdf.drawString(55, 700, f"Titre :  {declaration.title}")
+    pdf.drawString(470, 700, f"Date : {date.format('d/m/y')}")
     # pdf.drawString(60, 730, f"- Informations du client -")
 
-    pdf.drawString(55, 680, f"Titre :  {declaration.title}")
-    pdf.drawString(55, 670, f"Entreprise :  {client.name}")
-    pdf.drawString(55, 660, f"Téléphone : {client.contact}")
-    pdf.drawString(55, 650, f"Adresse : {client.adresse}")
-    pdf.drawString(55, 640, f"Total employées : {employees.count()}")
-    pdf.drawString(55, 630, f"")
+    pdf.setFontSize(10, leading=None)
+    # pdf.drawString(55, 680, f"Titre :  {declaration.title}")
+    pdf.drawString(55, 670, f" {client.name}")
+    pdf.drawString(55, 657, f" Tél : {to_amount(client.contact)}")
+    pdf.drawString(55, 645, f" {client.adresse}")
+    # pdf.drawString(55, 625, f" Total employées : {employees.count()}")
 
     cadres = JobCategory.objects.get(pk=1)
     agents = JobCategory.objects.get(pk=2)
     ouvriers = JobCategory.objects.get(pk=3)
 
     data = [
-        ['N°','N° de passeport', 'Prénoms & Nom', 'Fonction', 'Catégorie', 'Téléphone'],
+        ['N°','N° de passeport', 'Prénoms & Nom', 'Catégorie', 'Fonction', 'Téléphone'],
     ]
 
     counter = 1
     for employee in employees:
-        data.append([f"{counter}", employee.passport_number, f"{employee.first} {employee.last}", f"{employee.job}", f"{employee.job_category}", f"{employee.phone}"])
+        data.append([f"{counter}", employee.passport_number, f"{employee.first} {employee.last}", f"{employee.job_category}", f"{employee.job}", f"{employee.phone}"])
         counter +=1
 
     LIST_STYLE = TableStyle(
@@ -86,8 +89,7 @@ def declaration_receipt_view(request, declaration_id):
             # ('LINEBEFORE', (0,0), (-1,0), 1, colors.black),
             ('LINEABOVE', (0,0), (-1,-1), 1, colors.black),
             ('BOX', (0,0), (-1,-1), 1.5, colors.black),
-            ('FONTSIZE', (0,1), (-1,counter), 8, colors.black),
-            ('FONTSIZE', (1,0), (0,-1), 10, colors.black),
+            ('FONTSIZE', (0,0), (-1,0), 12, colors.black),
             ('BACKGROUND', (0,0), (-1,0), colors.lightgrey),
         ]
     )
@@ -96,15 +98,17 @@ def declaration_receipt_view(request, declaration_id):
     table_style = getSampleStyleSheet()
     table_style = table_style["BodyText"]
     table_style.wordWrap = 'CJK'
+    table_style.fontSize = 9
     data2 = [[Paragraph(cell, table_style) for cell in row] for row in data]
 
     # Manage table cols width. --default is 83
     design_width = (0.3*inch, 1.2*inch, 2.5*inch, 1.2*inch, 1.2*inch, 1.2*inch)
 
-    table = Table(data, colWidths=design_width, splitByRow=1, style=LIST_STYLE)
+    table = Table(data2, colWidths=design_width, splitByRow=1, style=LIST_STYLE)
 
     pdf.setFontSize(12)
     pdf.drawString(60, 600, f"LISTE DES EMPLOYES")
+    pdf.drawString(480, 600, f"Total : {employees.count()}")
 
     pdf.setFontSize(8)
     table.wrapOn(pdf, 25, 500)
@@ -123,7 +127,7 @@ def declaration_receipt_view(request, declaration_id):
     img = qr.make_image()
     img.save('staticfiles/declaration_qr.png')
     
-    pdf.drawImage('staticfiles/declaration_qr.png', 470, 610, 80, 80, showBoundary=False)
+    pdf.drawImage('staticfiles/declaration_qr.png', 470, 615, 80, 80, showBoundary=False)
 
     # pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
     # pdf.setFont('Vera', 10)
@@ -143,11 +147,6 @@ def declaration_receipt_view(request, declaration_id):
 
 @login_required(login_url="/login/")
 def bill_receipt_view(request, bill_id):
-    # Function to format number to amount
-    def to_amount(number):
-        return "{:0,.0f}".format(number).replace(','," ")
-    
-
     # Getting the payment
     try:
         facture = Facture.objects.get(pk=bill_id)
@@ -184,7 +183,7 @@ def bill_receipt_view(request, bill_id):
     pdf.drawString(480, 630, f"{date.format('d/m/y')}")
 
     pdf.drawString(55, 630, f"{client.name}")
-    pdf.drawString(55, 615, f"Tél : {client.contact}")
+    pdf.drawString(55, 615, f"Tél : {to_amount(client.contact)}")
     pdf.drawString(55, 600, f"{client.adresse}")
 
     cadres = JobCategory.objects.get(pk=1)
@@ -309,24 +308,36 @@ def payment_receipt_view(request, payment_id):
     pdf.drawImage(client_image, 60, 750, 100, 80, showBoundary=False)
 
     date = DateFormat(payment.created_on)
+
+    pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
+    pdf.setFont('Vera', 14)
     
     pdf.line(50, 750, 550, 750)
     pdf.drawString(200, 730, f"RECU DE PAIEMENT N° 00{payment.id}/{date.format('Y')}")
     pdf.line(50, 720, 550, 720)
-    pdf.setFontSize(8, leading=None)
-    pdf.drawString(55, 700, f"Référence: {payment.reference}")
+    pdf.setFontSize(11, leading=None)
+    pdf.drawString(55, 700, f"Facture N° : 00{payment.facture_ref.id}/{DateFormat(payment.facture_ref.created_on).format('Y')}")
+    pdf.drawString(460, 700, f"Date: {date.format('d/m/y')}")
 
-    pdf.drawString(480, 700, f"Date: {date.format('d/m/y')}")
+    pdf.setFontSize(10, leading=None)
     # pdf.drawString(60, 730, f"- Informations du payeur -")
-    pdf.drawString(55, 680, f"Facture N° : {payment.facture_ref.reference}")
-    pdf.drawString(55, 670, f"Entreprise : {payment.payer.employer}")
-    pdf.drawString(55, 660, f"Payer Par :  {payment.payer.first} {payment.payer.last}")
-    pdf.drawString(55, 650, f"Fonction: {payment.payer.job}")
-    pdf.drawString(55, 640, f"Téléphone: {payment.payer.phone}")
+    # pdf.drawString(55, 680, f"Facture N° : {payment.facture_ref.reference}")
+    pdf.drawString(55, 675, f"CLIENT : {payment.facture_ref.client.name}")
+    pdf.drawString(55, 662, f"Tél : {to_amount(payment.facture_ref.client.contact)}")
+    pdf.drawString(55, 650, f"{payment.facture_ref.client.adresse}")
+    
+    permit_types = ""
+    if payment.facture_ref.total_cadres > 0:
+        permit_types += f"{cadres.permit} ({payment.facture_ref.total_cadres})"
+    if payment.facture_ref.total_agents > 0:
+        permit_types += f"\n{agents.permit} ({payment.facture_ref.total_agents})"
+    if payment.facture_ref.total_ouvriers > 0:
+        permit_types += f"\n{ouvriers.permit} ({payment.facture_ref.total_ouvriers})"
 
     data = [
         ['Description', 'Types de permis', 'Montant'],
-        ['Frais d\'acquisition', f"{cadres.permit} ({payment.facture_ref.total_cadres})\n{agents.permit} ({payment.facture_ref.total_agents})\n{ouvriers.permit} ({payment.facture_ref.total_ouvriers})", payment.amount]
+        # ['Frais d\'acquisition', f"{cadres.permit} ({payment.facture_ref.total_cadres})\n{agents.permit} ({payment.facture_ref.total_agents})\n{ouvriers.permit} ({payment.facture_ref.total_ouvriers})", to_amount(payment.amount) + f" {payment.devise.sign}"]
+        ['Frais d\'acquisition', permit_types, to_amount(payment.amount) + f" {payment.devise.sign}"]
     ]
 
     LIST_STYLE = TableStyle(
@@ -351,8 +362,7 @@ def payment_receipt_view(request, payment_id):
     table = Table(data, colWidths=design_width, style=LIST_STYLE)
 
     table.wrapOn(pdf, 55, 560)
-    table.drawOn(pdf, 55, 560)
-    # table.drawOn(pdf, 25, 620-table._height)
+    table.drawOn(pdf, 55, 620-table._height)
 
     # Creating the QR Code
     qr_data = {
@@ -367,15 +377,63 @@ def payment_receipt_view(request, payment_id):
     img = qr.make_image()
     img.save('staticfiles/payment_qr.png')
     
-    pdf.drawImage('staticfiles/payment_qr.png', 60, 465, 90, 90, showBoundary=False)
+    pdf.drawImage('staticfiles/payment_qr.png', 60, 480, 70, 70, showBoundary=False)
 
     pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
     pdf.setFont('Vera', 12)
     pdf.line(300, 535, 555, 535)
     pdf.drawString(320, 515, f"TOTAL TTC")
     pdf.line(420, 510, 420, 530)
-    pdf.drawString(430, 515, f"{payment.amount} {payment.devise.sign}")
+    pdf.drawString(430, 515, f"{to_amount(payment.amount)} {payment.devise.sign}")
     pdf.line(300, 505, 555, 505)
+
+    pdf.setFontSize(9, leading=None)
+    pdf.drawString(90, 470, f"Le Client")
+    pdf.drawString(80, 420, f"{payment.payer.first} {payment.payer.last}, {to_amount(payment.payer.phone)}")
+    pdf.drawString(420, 470, f"La Banque")
+    pdf.drawString(400, 420, f"{payment.created_by.profile.adresse}")
+
+    pdf.line(5, 400, 55, 400)
+    pdf.line(60, 400, 110, 400)
+    pdf.line(115, 400, 165, 400)
+    pdf.line(170, 400, 220, 400)
+    pdf.line(225, 400, 275, 400)
+    pdf.line(280, 400, 330, 400)
+    pdf.line(335, 400, 385, 400)
+    pdf.line(390, 400, 440, 400)
+    pdf.line(445, 400, 495, 400)
+    pdf.line(500, 400, 550, 400)
+    pdf.line(555, 400, 605, 400)
+
+    # ---------- Second part of the page ------------
+    pdf.drawImage(client_image, 60, 315, 100, 80, showBoundary=False)
+    pdf.line(50, 320, 550, 320)
+    pdf.setFontSize(14, leading=None)
+    pdf.drawString(200, 300, f"RECU DE PAIEMENT N° 00{payment.id}/{date.format('Y')}")
+    pdf.line(50, 290, 550, 290)
+    pdf.setFontSize(11, leading=None) #f"Facture N° 00{facture.id}/{date.format('Y')}"
+    pdf.drawString(55, 270, f"Facture N° : 00{payment.facture_ref.id}/{DateFormat(payment.facture_ref.created_on).format('Y')}")
+    pdf.drawString(460, 270, f"Date: {date.format('d/m/y')}")
+
+    pdf.setFontSize(10, leading=None)
+    pdf.drawString(55, 245, f"CLIENT : {payment.facture_ref.client.name}")
+    pdf.drawString(55, 232, f"Tél : {to_amount(payment.facture_ref.client.contact)}")
+    pdf.drawString(55, 220, f"{payment.facture_ref.client.adresse}")
+
+    table.drawOn(pdf, 55, 200-table._height)
+    pdf.drawImage('staticfiles/payment_qr.png', 60, 60, 70, 70, showBoundary=False)
+    pdf.setFont('Vera', 12)
+    pdf.line(300, 115, 555, 115)
+    pdf.drawString(320, 95, f"TOTAL TTC")
+    pdf.line(420, 90, 420, 110)
+    pdf.drawString(430, 95, f"{to_amount(payment.amount)} {payment.devise.sign}")
+    pdf.line(300, 85, 555, 85)
+
+    pdf.setFontSize(9, leading=None)
+    pdf.drawString(90, 50, f"Le Client")
+    pdf.drawString(80, 10, f"{payment.payer.first} {payment.payer.last}, {to_amount(payment.payer.phone)}")
+    pdf.drawString(420, 50, f"La Banque")
+    pdf.drawString(400, 10, f"{payment.created_by.profile.adresse}")
 
     pdf.showPage()
     pdf.save()

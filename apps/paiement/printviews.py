@@ -143,6 +143,11 @@ def declaration_receipt_view(request, declaration_id):
 
 @login_required(login_url="/login/")
 def bill_receipt_view(request, bill_id):
+    # Function to format number to amount
+    def to_amount(number):
+        return "{:0,.0f}".format(number).replace(','," ")
+    
+
     # Getting the payment
     try:
         facture = Facture.objects.get(pk=bill_id)
@@ -162,58 +167,77 @@ def bill_receipt_view(request, bill_id):
     pdf.setPageSize(A4)
     width, height = A4
     pdf.setTitle("Factures")
-    pdf.drawImage('apps/static/assets/img/brand/logo.jpg', 60, 750, 100, 80, showBoundary=False)
-    pdf.line(50, 750, 550, 750)
-    pdf.drawString(220, 730, f"FACTURE N° 00{facture.id}/{date.format('Y')}")
-    pdf.line(50, 720, 550, 720)
-    pdf.setFontSize(8, leading=None)
-    pdf.drawString(55, 700, f"Référence: {facture.reference}")
-    
-    pdf.drawString(480, 700, f"Date: {date.format('d/m/y')}")
-    # pdf.drawString(60, 730, f"- Informations du client -")
-    pdf.drawString(55, 680, f"Entreprise :  {client.name}")
-    pdf.drawString(55, 670, f"Téléphone : {client.contact}")
-    pdf.drawString(55, 660, f"Adresse : {client.adresse}")
-    pdf.drawString(55, 650, f"")
-    pdf.drawString(55, 640, f"")
+    # pdf.drawImage('apps/static/assets/img/brand/logo.jpg', 60, 750, 100, 80, showBoundary=False)
+    pdf.drawImage('apps/static/assets/img/bill/page_header.png', 0, 730, A4[0], 110, showBoundary=False)
+    pdf.drawImage('apps/static/assets/img/bill/page_footer.png', 0, 0, A4[0], 80, showBoundary=False)
+    pdf.drawImage('apps/static/assets/img/bill/banque_info.png', 55, 150, 280, 200, showBoundary=False)
+    # pdf.line(50, 750, 550, 750)
+    pdf.setFontSize(20, leading=None)
+    pdf.drawString(220, 700, f"Facture N° 00{facture.id}/{date.format('Y')}")
+    pdf.setFontSize(10, leading=None)
+    pdf.setFillColor(colors.darkblue)
+    pdf.drawString(55, 650, f"CLIENT")
+    pdf.line(55, 647, 90, 647)
+    pdf.setFillColor(colors.darkred)
+    pdf.drawString(480, 645, f"Date : ")
+    pdf.setFillColor(colors.black)
+    pdf.drawString(480, 630, f"{date.format('d/m/y')}")
+
+    pdf.drawString(55, 630, f"{client.name}")
+    pdf.drawString(55, 615, f"Tél : {client.contact}")
+    pdf.drawString(55, 600, f"{client.adresse}")
 
     cadres = JobCategory.objects.get(pk=1)
     agents = JobCategory.objects.get(pk=2)
     ouvriers = JobCategory.objects.get(pk=3)
 
     data = [
-        ['Catégorie de permis', 'Quantité', 'P.U', 'Montant'],
+        ['Catégorie de permis', 'Quantité', 'Prix Unitaire', 'Total ligne'],
     ]
 
     if facture.total_cadres > 0:
-        data.append(['Cadres', facture.total_cadres, cadres.permit.price, facture.total_cadres * cadres.permit.price])
+        data.append([f"{cadres.name} ({cadres.permit.name})", facture.total_cadres, to_amount(cadres.permit.price), to_amount(facture.total_cadres * cadres.permit.price) + f" {cadres.permit.devise.sign}"])
     if facture.total_agents > 0:
-        data.append(['Agent Administratif', facture.total_agents, agents.permit.price, facture.total_agents * agents.permit.price])
+        data.append([f"{agents.name} ({agents.permit.name})", facture.total_agents, to_amount(agents.permit.price), to_amount(facture.total_agents * agents.permit.price) + f" {agents.permit.devise.sign}"])
     if facture.total_ouvriers > 0:
-        data.append(['Ouvriers', facture.total_ouvriers, ouvriers.permit.price, facture.total_ouvriers * ouvriers.permit.price])
+        data.append([f"{ouvriers.name} ({ouvriers.permit.name})", facture.total_ouvriers, to_amount(ouvriers.permit.price), to_amount(facture.total_ouvriers * ouvriers.permit.price) + f" {ouvriers.permit.devise.sign}"])
+
+    data.append([' ', ' ', 'TOTAL GENERAL', f"{to_amount(facture.amount)} {facture.devise.sign}"])
 
     LIST_STYLE = TableStyle(
         [
-            ('VALIGN', (0,0), (-1,-1), 'TOP'),
-            ('INNERGRID', (0,0), (-1,-1), 0.50, colors.black),
-            # ('LINEBEFORE', (0,0), (-1,0), 1, colors.black),
-            # ('LINEABOVE', (0,0), (-1,-1), 1, colors.black),
-            ('BOX', (0,0), (-1,-1), 1.5, colors.black),
-            ('FONTSIZE', (0,1), (5,4), 9, colors.black),
-            ('FONTSIZE', (0,0), (0,5), 11, colors.black),
-            ('BACKGROUND', (0,0), (5,0), colors.lightgrey),
-            ('ALIGN', (0,0), (3,0), 'CENTER'),
-            ('ALIGN', (1,1), (3,3), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('FONTNAME', (0,0), (-1,0), 'Courier-Bold'),
+            ('FONTSIZE', (0,0), (-1,0), 12, colors.red),
+            ('TEXTCOLOR', (0,0), (-1,0), colors.darkred),
+            # ('INNERGRID', (0,0), (-1,-1), 0.50, colors.black),
+            # ('LINEBEFORE', (0,0), (-1,-1), 0.1, colors.black),
+            ('LINEABOVE', (0,0), (-1,-2), 0.1, colors.grey),
+            ('LINEABOVE', (0,1), (-1,1), 1.5, colors.black),
+            # Bottom
+            ('LINEABOVE', (0,-1), (-1,-1), 0.1, colors.grey),
+            ('BACKGROUND', (0,-1), (-1,-1), colors.Color(241/256, 234/256, 234/256)),
+            ('FONTNAME', (0,-1), (-1,-1), 'Courier-Bold'),
+            ('FONTSIZE', (0,-1), (-1,-1), 14, colors.red),
+            ('LINEBELOW', (0,-1), (-1,-1), 0.1, colors.grey),
+            # ('BOX', (0,0), (-1,-1), 0.1, colors.grey),
+
+            # ('FONTSIZE', (0,1), (5,4), 9, colors.black),
+            # ('FONTSIZE', (0,0), (0,5), 11, colors.black),
+            # ('BACKGROUND', (0,0), (5,0), colors.lightgrey),
+            # ('ALIGN', (1,0), (-1,-1), 'CENTER'),
+            ('ALIGN', (1,0), (-1,-1), 'CENTER'),
         ]
     )
-
+    
     # Manage table cols width. --default is 123
     design_width = (2.5*inch, 1.0*inch, 1.6*inch, 1.8*inch)
 
-    table = Table(data, colWidths=design_width, style=LIST_STYLE)
+    table = Table(data, colWidths=design_width, rowHeights=0.4*inch, style=LIST_STYLE)
 
     table.wrapOn(pdf, 55, 550)
-    table.drawOn(pdf, 55, 550)
+    # table.drawOn(pdf, 55, 480)
+    table.drawOn(pdf, 55, 580-table._height)
     # table.drawOn(pdf, 25, 630-table._height)
 
     # Creating the QR Code
@@ -229,15 +253,17 @@ def bill_receipt_view(request, bill_id):
     img = qr.make_image()
     img.save('staticfiles/bill_qr.png')
     
-    pdf.drawImage('staticfiles/bill_qr.png', 60, 450, 90, 90, showBoundary=False)
+    pdf.drawImage('staticfiles/bill_qr.png', 60, 350, 70, 70, showBoundary=False)
 
-    pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
-    pdf.setFont('Vera', 12)
-    pdf.line(310, 520, 540, 520)
-    pdf.drawString(320, 500, f"TOTAL TTC")
-    pdf.line(423, 495, 423, 515)
-    pdf.drawString(450, 500, f"{facture.amount} {facture.devise.sign}")
-    pdf.line(310, 490, 540, 490)
+    pdf.drawString(430, 370, f"La Direction")
+
+    # pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
+    # pdf.setFont('Vera', 12)
+    # pdf.line(310, 520, 540, 520)
+    # pdf.drawString(320, 500, f"TOTAL GENERAL")
+    # pdf.line(423, 495, 423, 515)
+    # pdf.drawString(450, 500, f"{facture.amount} {facture.devise.sign}")
+    # pdf.line(310, 490, 540, 490)
 
     # pdf.setFontSize(10)
     # pdf.drawString(400, 450, f"Signature")

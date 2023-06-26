@@ -16,6 +16,8 @@ from apps.authentication.models import CustomUser, Profile, ProfileType
 from apps.authentication.forms import CustomUserForm, Agency, Region
 from apps.paiement.models import Declaration, Facture, Payment, Devise, Employee
 
+# Global devises for all views
+devises = Devise.objects.all().order_by('id')
 
 @login_required(login_url="/login/")
 def index(request):
@@ -23,6 +25,7 @@ def index(request):
     if request.user.profile.type.uid == 1:
         context = {
             'segment': 'index',
+            'taux': devises,
             'total_users': CustomUser.objects.all(),
             'total_profiles': Profile.objects.all(),
             'total_agencies': Agency.objects.all(),
@@ -39,6 +42,7 @@ def index(request):
     else:
         context = {
             'segment': 'index',
+            'taux': devises,
             'total_users': CustomUser.objects.filter(created_by=request.user).order_by('-created_on'),
             'total_profiles': Profile.objects.all().order_by('-created_on'),
             'total_agencies': Agency.objects.filter(created_by=request.user),
@@ -52,7 +56,6 @@ def index(request):
             'paiement_GNF': Payment.objects.filter(devise=Devise.objects.get(pk=1), created_by=request.user).aggregate(Sum('amount'))['amount__sum'],
             'paiement_USD': Payment.objects.filter(devise=Devise.objects.get(pk=2), created_by=request.user).aggregate(Sum('amount'))['amount__sum']
         }
-        context['hello'] = "hello"
 
     # context = {
     #     'segment': 'index',
@@ -76,7 +79,7 @@ def index(request):
 
 @login_required(login_url="/login/")
 def graphs_view(request):
-    context = {'segment': 'index'}
+    context = {'segment': 'index', 'taux': devises,}
 
     html_template = loader.get_template('home/graphs.html')
     return HttpResponse(html_template.render(context, request))
@@ -85,7 +88,7 @@ def graphs_view(request):
 @login_required(login_url="/login/")
 def page_profile_view(request, user_id):
     user = CustomUser.objects.get(pk=user_id)
-    context = {'userform': CustomUserForm(instance=user), 'user_id': user_id, 'segment': 'index'}
+    context = {'userform': CustomUserForm(instance=user), 'user_id': user_id, 'segment': 'index', 'taux': devises}
 
     html_template = loader.get_template('home/page-profile.html')
     return HttpResponse(html_template.render(context, request))
@@ -94,7 +97,7 @@ def page_profile_view(request, user_id):
 @login_required(login_url="/login/")
 def edit_page_profile_view(request, user_id):
     user = CustomUser.objects.get(pk=user_id)
-    context_empty = {'userform': CustomUserForm(instance=user), 'user_id': user_id, 'segment': 'index'}
+    context_empty = {'userform': CustomUserForm(instance=user), 'user_id': user_id, 'segment': 'index', 'taux': devises}
     print(user.permissions)
 
     if request.method == "POST":

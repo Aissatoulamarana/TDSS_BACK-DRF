@@ -8,6 +8,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from .forms import LoginForm, SignUpForm, ProfileForm, CustomUserForm, ResetPwdForm, AgencyForm, PermissionForm
 from .models import CustomUser, ProfileType, Profile, Region, Agency, UserType, Menu, SubMenu, Action, Permission
+from apps.paiement.models import Devise
 import secrets, string
 from django.db import IntegrityError
 from django.core.mail import send_mail
@@ -15,6 +16,9 @@ from django.contrib import messages
 from django.forms import ValidationError
 
 # Create your views here.
+
+# Global devises for all views
+devises = Devise.objects.all().order_by('id')
 
 def login_view(request):
     form = LoginForm(request.POST or None)
@@ -84,6 +88,7 @@ def users_view(request):
 
     return render(request, "accounts/users.html", {
         'users': users,
+        'taux': devises,
         'segment': "administration"
     })
 
@@ -142,6 +147,7 @@ def profiles_view(request):
         'userform': userform,
         'profiles': profiles,
         'profile_types': profile_types,
+        'taux': devises,
         'segment': "administration"
     })
 
@@ -153,6 +159,7 @@ def add_profile_view(request):
     context_empty = {
         'profileform': ProfileForm(prefix= "profile", initial= initial_value), 
         'userform': CustomUserForm(prefix= "user"),
+        'taux': devises,
         'segment': 'administration'
     }
 
@@ -198,6 +205,7 @@ def add_profile_view(request):
                 'profileform': profileform, 
                 'userform': userform, 
                 'ErrorMessage': "Formulaire invalid soumit",
+                'taux': devises,
                 'segment': 'administration'
             }
             return render(request, "accounts/add-profile.html", context)
@@ -210,7 +218,7 @@ def add_user_view(request):
     default_region = Region.objects.first()
     default_agency = Agency.objects.first()
     initial_value = {'location': default_region, 'agency': default_agency}
-    context_empty = {'userform': CustomUserForm(initial= initial_value), 'segment': 'administration'}
+    context_empty = {'userform': CustomUserForm(initial= initial_value), 'segment': 'administration', 'taux': devises}
     
     if request.method == "POST":
         form = CustomUserForm(request.POST, request.FILES)
@@ -238,7 +246,7 @@ def add_user_view(request):
             messages.success(request, "Nouveau compte utilisateur ajouté. <br> Une notification a été envoyé par mail.")
             return redirect("authentication:users")
         else:
-            context = {'userform': form, 'ErrorMessage': "Formulaire invalid soumit.", 'segment': 'administration'}
+            context = {'userform': form, 'ErrorMessage': "Formulaire invalid soumit.", 'segment': 'administration', 'taux': devises,}
             return render(request, "accounts/add-user.html", context)
 
     return render(request, "accounts/add-user.html", context_empty)
@@ -251,7 +259,7 @@ def edit_user_view(request, user_id):
     except CustomUser.DoesNotExist:
         messages.error(request, "Utilisateur inexistant.")
         return redirect("authentication:users")
-    context_empty = {'userform': CustomUserForm(instance=user), 'user_id': user_id, 'segment': 'administration'}
+    context_empty = {'userform': CustomUserForm(instance=user), 'user_id': user_id, 'segment': 'administration', 'taux': devises}
 
     if request.method == "POST":
         
@@ -267,7 +275,7 @@ def edit_user_view(request, user_id):
             return redirect("authentication:users")
 
         else:
-            context = {'userform': form, 'ErrorMessage': "Formulaire invalid soumit.", 'user_id': user_id, 'segment': 'administration'}
+            context = {'userform': form, 'ErrorMessage': "Formulaire invalid soumit.", 'user_id': user_id, 'segment': 'administration', 'taux': devises}
             return render(request, "accounts/edit-user.html", context)
 
 
@@ -281,7 +289,7 @@ def edit_profile_view(request, profile_id):
     except Profile.DoesNotExist:
         messages.error(request, "Profil inexistant.")
         return redirect("authentication:profiles")
-    context_empty = {'profileform': ProfileForm(instance=profile), 'profile_id': profile_id, 'segment': 'administration'}
+    context_empty = {'profileform': ProfileForm(instance=profile), 'profile_id': profile_id, 'segment': 'administration', 'taux': devises}
 
     if request.method == "POST":
         
@@ -294,7 +302,7 @@ def edit_profile_view(request, profile_id):
             return redirect("authentication:profiles")
 
         else:
-            context = {'profileform': form, 'ErrorMessage': "Formulaire invalid soumit.", 'profile_id': profile_id, 'segment': 'administration'}
+            context = {'profileform': form, 'ErrorMessage': "Formulaire invalid soumit.", 'profile_id': profile_id, 'segment': 'administration', 'taux': devises}
             return render(request, "accounts/edit-profile.html", context)
 
 
@@ -311,6 +319,7 @@ def agencies_view(request):
         
         'form': form,
         'agencies': agencies,
+        'taux': devises,
         'segment': "administration"
     })
 
@@ -319,7 +328,7 @@ def agencies_view(request):
 def add_agency_view(request):
     default_region = Region.objects.first()
     initial_value = {'region': default_region}
-    context_empty = {'form': AgencyForm(initial= initial_value), 'segment': 'administration'}
+    context_empty = {'form': AgencyForm(initial= initial_value), 'segment': 'administration', 'taux': devises}
 
     if request.method == "POST":
         form = AgencyForm(request.POST)
@@ -329,7 +338,7 @@ def add_agency_view(request):
             messages.success(request, "Nouvelle agence ajoutée.")
             return redirect("authentication:agencies")
         else:
-            context = {'form': form, 'ErrorMessage': "Formulaire invalid soumit.", 'segment': 'administration'}
+            context = {'form': form, 'ErrorMessage': "Formulaire invalid soumit.", 'segment': 'administration', 'taux': devises}
             return render(request, "accounts/add-agency.html", context)
 
     return render(request, "accounts/add-agency.html", context_empty)
@@ -342,7 +351,7 @@ def edit_agency_view(request, agency_id):
     except Agency.DoesNotExist:
         messages.error(request, "Agence inexistante.")
         return redirect("authentication:agencies")
-    context_empty = {'form': AgencyForm(instance=agency), 'agency_id': agency_id, 'segment': 'administration'}
+    context_empty = {'form': AgencyForm(instance=agency), 'agency_id': agency_id, 'segment': 'administration', 'taux': devises}
 
     if request.method == "POST":
         
@@ -355,7 +364,7 @@ def edit_agency_view(request, agency_id):
             return redirect("authentication:agencies")
 
         else:
-            context = {'form': form, 'ErrorMessage': "Formulaire invalid soumit.", 'agency_id': agency_id, 'segment': 'administration'}
+            context = {'form': form, 'ErrorMessage': "Formulaire invalid soumit.", 'agency_id': agency_id, 'segment': 'administration', 'taux': devises}
             return render(request, "accounts/edit-agency.html", context)
 
 
@@ -369,6 +378,7 @@ def permissions_view(request):
     return render(request, "accounts/permissions.html", {
         
         'permissions': permissions,
+        'taux': devises,
         'segment': "administration"
     })
 
@@ -378,6 +388,7 @@ def add_permission_view(request):
     context_empty = {
         'form': PermissionForm(),
         'menus': Menu.objects.filter(status='ON'),
+        'taux': devises,
         'segment': 'administration'
     }
 
@@ -389,7 +400,7 @@ def add_permission_view(request):
             messages.success(request, "Nouvelle permission ajoutée.")
             return redirect("authentication:permissions")
         else:
-            context = {'form': form, 'menus': Menu.objects.filter(status='ON'), 'ErrorMessage': "Formulaire invalid soumit.", 'segment': 'administration'}
+            context = {'form': form, 'menus': Menu.objects.filter(status='ON'), 'ErrorMessage': "Formulaire invalid soumit.", 'segment': 'administration', 'taux': devises}
             return render(request, "accounts/add-permissions.html", context)
 
     return render(request, "accounts/add-permissions.html", context_empty)
@@ -406,7 +417,8 @@ def edit_permission_view(request, permission_id):
     context_empty = {
         'form': PermissionForm(instance=permission), 
         'menus': Menu.objects.filter(status='ON'),
-        'permission_id': permission_id, 
+        'permission_id': permission_id,
+        'taux': devises,
         'segment': 'administration'
     }
 
@@ -421,7 +433,7 @@ def edit_permission_view(request, permission_id):
             return redirect("authentication:permissions")
 
         else:
-            context = {'form': form, 'ErrorMessage': "Formulaire invalid soumit.", 'permission_id': permission_id, 'segment': 'administration'}
+            context = {'form': form, 'ErrorMessage': "Formulaire invalid soumit.", 'permission_id': permission_id, 'segment': 'administration', 'taux': devises}
             return render(request, "accounts/edit-permission.html", context)
 
 

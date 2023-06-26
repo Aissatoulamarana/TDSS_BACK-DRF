@@ -26,6 +26,9 @@ from .models import Devise, Facture, Payer, Payment, Permit, Employee, Declarati
 from apps.authentication.models import Profile, CustomUser
 from .forms import DeviseForm, FactureForm, PayerForm, PaymentForm, EmployeeForm, DeclarationForm
 
+# Global devises for all views
+devises = Devise.objects.all().order_by('id')
+
 
 @login_required(login_url="/login/")
 def payments_view(request):
@@ -44,6 +47,7 @@ def payments_view(request):
         'form': form,
         'payerform': payerform,
         'payments': payments,
+        'taux': devises,
         'segment': "paiements"
     })
 
@@ -51,6 +55,7 @@ def payments_view(request):
 @login_required(login_url="/login/")
 def generate_payment_view(request):
     context_empty = {
+        'taux': devises,
         'segment': 'paiements'
     }
 
@@ -67,6 +72,7 @@ def generate_payment_view(request):
                 'paymentform': PaymentForm(prefix= "payment", initial= initial_value), 
                 'payerform': PayerForm(prefix= "payer"),
                 'facture': facture,
+                'taux': devises,
                 'segment': 'paiements'
             }
             return render(request, "paiements/generate-payment.html", context_empty)
@@ -116,6 +122,7 @@ def generate_payment_view(request):
                 'payerform': payerform,
                 'facture': facture,
                 'ErrorMessage': "Formulaire invalid soumit",
+                'taux': devises,
                 'segment': 'paiements'
             }
             return render(request, "paiements/generate-payment.html", context)
@@ -131,6 +138,7 @@ def add_payment_view(request):
     context_empty = {
         'paymentform': PaymentForm(prefix= "payment", initial= initial_value), 
         'payerform': PayerForm(prefix= "payer"),
+        'taux': devises,
         'segment': 'paiements'
     }
 
@@ -161,6 +169,7 @@ def add_payment_view(request):
                 'paymentform': paymentform, 
                 'payerform': payerform, 
                 'ErrorMessage': "Formulaire invalid soumit",
+                'taux': devises,
                 'segment': 'paiements'
             }
             return render(request, "paiements/add-payment.html", context)
@@ -175,7 +184,8 @@ def edit_payment_view(request, payment_id):
     context_empty = {
         'paymentform': PaymentForm(instance=payment, prefix= "payment"),
         'payerform': PayerForm(instance=payer, prefix= "payer"),
-        'payment_id': payment_id, 
+        'payment_id': payment_id,
+        'taux': devises,
         'segment': 'paiements'
     }
 
@@ -199,7 +209,8 @@ def edit_payment_view(request, payment_id):
                 'paymentform': PaymentForm(instance=payment, prefix= "payment"),
                 'payerform': PayerForm(instance=payer, prefix= "payer"),
                 'ErrorMessage': "Formulaire invalid soumit.",
-                'payment_id': payment_id, 
+                'payment_id': payment_id,
+                'taux': devises,
                 'segment': 'paiements'
             }
             return render(request, "paiements/edit-payment.html", context)
@@ -210,7 +221,7 @@ def edit_payment_view(request, payment_id):
 
 @login_required(login_url="/login/")
 def devises_view(request):
-    devises = Devise.objects.all()
+    devises = Devise.objects.all().order_by('id')
     guinean_franc = Devise.objects.first()
     dollar = Devise.objects.get(pk=2)
     euro = Devise.objects.get(pk=3)
@@ -220,6 +231,7 @@ def devises_view(request):
         'dollar': dollar,
         'euro': euro,
         'devises': devises,
+        'taux': devises,
         'segment': "paiements"
     })
 
@@ -242,6 +254,7 @@ def devises_update_view(request):
             'dollar': Devise.objects.get(pk=2),
             'euro': Devise.objects.get(pk=3),
             'devises': devises,
+            'taux': devises,
             'segment': "paiements"
         })
     else:
@@ -298,6 +311,7 @@ def declarations_view(request):
     return render(request, "paiements/declarations.html", {
         'declarationform': form,
         'declarations': declarations,
+        'taux': devises,
         'segment': "facturation"
     })
 
@@ -307,6 +321,7 @@ def add_declaration_view(request):
     context_empty = {
         'declarationform': DeclarationForm(),
         'declarations': Declaration.objects.all(),
+        'taux': devises,
         'segment': 'facturation'
     }
 
@@ -329,6 +344,7 @@ def add_declaration_view(request):
             context = {
                 'declarationform': declarationform,
                 'ErrorMessage': "Formulaire invalid soumit",
+                'taux': devises,
                 'segment': 'Facturation'
             }
             return render(request, "paiements/declarations.html", context)
@@ -350,6 +366,7 @@ def edit_declaration_view(request, declaration_id):
         'employeeform': EmployeeForm(prefix= "employee"),
         'declaration_id': declaration_id,
         'employees': employees,
+        'taux': devises,
         'segment': 'facturation'
     }
 
@@ -372,6 +389,7 @@ def edit_declaration_view(request, declaration_id):
                 'declaration_id': declaration_id,
                 'employees': employees,
                 'segment': 'facturation',
+                'taux': devises,
                 'ErrorMessage': "Formulaire invalid soumit."
             }
             return render(request, "paiements/edit-declaration.html", context)
@@ -503,6 +521,7 @@ def factures_view(request):
         'form': form,
         'factures': factures,
         'job_categories': job_categories,
+        'taux': devises,
         'segment': "facturation"
     })
 
@@ -514,6 +533,7 @@ def add_facture_view(request):
     context_empty = {
         'factureform': FactureForm(initial= initial_value),
         'permits': Permit.objects.all(),
+        'taux': devises,
         'segment': 'facturation'
     }
 
@@ -537,6 +557,7 @@ def add_facture_view(request):
             context = {
                 'factureform': factureform,
                 'ErrorMessage': "Formulaire invalid soumit",
+                'taux': devises,
                 'segment': 'facturation'
             }
             return render(request, "paiements/add-facture.html", context)

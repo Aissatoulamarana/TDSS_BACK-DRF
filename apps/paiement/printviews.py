@@ -129,11 +129,8 @@ def declaration_receipt_view(request, declaration_id):
     
     pdf.drawImage('staticfiles/declaration_qr.png', 470, 615, 80, 80, showBoundary=False)
 
-    # pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
-    # pdf.setFont('Vera', 10)
-    # # pdf.line(300, 550, 550, 550)
-    # pdf.drawString(430, 350, f"Signature")
-    # pdf.drawString(430, 270, f"Nom, Prénom et fonction")
+    pdf.setFontSize(12, leading=None)
+    pdf.drawString(70, 550-table._height, f"L'employeur")
 
     pdf.showPage()
     pdf.save()
@@ -206,25 +203,17 @@ def bill_receipt_view(request, bill_id):
     LIST_STYLE = TableStyle(
         [
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-            ('FONTNAME', (0,0), (-1,0), 'Courier-Bold'),
-            ('FONTSIZE', (0,0), (-1,0), 12, colors.red),
+            # ('FONTNAME', (0,0), (-1,0), 'Courier-Bold'),
+            ('FONTSIZE', (0,0), (-1,0), 13, colors.red),
             ('TEXTCOLOR', (0,0), (-1,0), colors.darkred),
-            # ('INNERGRID', (0,0), (-1,-1), 0.50, colors.black),
-            # ('LINEBEFORE', (0,0), (-1,-1), 0.1, colors.black),
             ('LINEABOVE', (0,0), (-1,-2), 0.1, colors.grey),
             ('LINEABOVE', (0,1), (-1,1), 1.5, colors.black),
-            # Bottom
+            
             ('LINEABOVE', (0,-1), (-1,-1), 0.1, colors.grey),
             ('BACKGROUND', (0,-1), (-1,-1), colors.Color(241/256, 234/256, 234/256)),
-            ('FONTNAME', (0,-1), (-1,-1), 'Courier-Bold'),
             ('FONTSIZE', (0,-1), (-1,-1), 14, colors.red),
             ('LINEBELOW', (0,-1), (-1,-1), 0.1, colors.grey),
-            # ('BOX', (0,0), (-1,-1), 0.1, colors.grey),
-
-            # ('FONTSIZE', (0,1), (5,4), 9, colors.black),
-            # ('FONTSIZE', (0,0), (0,5), 11, colors.black),
-            # ('BACKGROUND', (0,0), (5,0), colors.lightgrey),
-            # ('ALIGN', (1,0), (-1,-1), 'CENTER'),
+            
             ('ALIGN', (1,0), (-1,-1), 'CENTER'),
         ]
     )
@@ -235,9 +224,7 @@ def bill_receipt_view(request, bill_id):
     table = Table(data, colWidths=design_width, rowHeights=0.4*inch, style=LIST_STYLE)
 
     table.wrapOn(pdf, 55, 550)
-    # table.drawOn(pdf, 55, 480)
     table.drawOn(pdf, 55, 580-table._height)
-    # table.drawOn(pdf, 25, 630-table._height)
 
     # Creating the QR Code
     qr_data = {
@@ -254,18 +241,8 @@ def bill_receipt_view(request, bill_id):
     
     pdf.drawImage('staticfiles/bill_qr.png', 60, 350, 70, 70, showBoundary=False)
 
-    pdf.drawString(430, 370, f"La Direction")
-
-    # pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
-    # pdf.setFont('Vera', 12)
-    # pdf.line(310, 520, 540, 520)
-    # pdf.drawString(320, 500, f"TOTAL GENERAL")
-    # pdf.line(423, 495, 423, 515)
-    # pdf.drawString(450, 500, f"{facture.amount} {facture.devise.sign}")
-    # pdf.line(310, 490, 540, 490)
-
-    # pdf.setFontSize(10)
-    # pdf.drawString(400, 450, f"Signature")
+    pdf.setFontSize(12, leading=None)
+    pdf.drawString(430, 410, f"La Direction")
 
     pdf.showPage()
     pdf.save()
@@ -305,7 +282,8 @@ def payment_receipt_view(request, payment_id):
         client_image = (client.picture.url)[1:]
     else:
         client_image = 'apps/static/assets/img/brand/logo.jpg'
-    pdf.drawImage(client_image, 60, 750, 100, 80, showBoundary=False)
+    pdf.drawImage(client_image, 60, 750, 90, 70, showBoundary=False)
+    pdf.drawImage('apps/static/assets/img/brand/logo.jpg', 450, 750, 90, 70, showBoundary=False)
 
     date = DateFormat(payment.created_on)
 
@@ -389,24 +367,24 @@ def payment_receipt_view(request, payment_id):
 
     pdf.setFontSize(9, leading=None)
     pdf.drawString(90, 470, f"Le Client")
-    pdf.drawString(80, 420, f"{payment.payer.first} {payment.payer.last}, {to_amount(payment.payer.phone)}")
     pdf.drawString(420, 470, f"La Banque")
-    pdf.drawString(400, 420, f"{payment.created_by.profile.adresse}")
 
-    pdf.line(5, 400, 55, 400)
-    pdf.line(60, 400, 110, 400)
-    pdf.line(115, 400, 165, 400)
-    pdf.line(170, 400, 220, 400)
-    pdf.line(225, 400, 275, 400)
-    pdf.line(280, 400, 330, 400)
-    pdf.line(335, 400, 385, 400)
-    pdf.line(390, 400, 440, 400)
-    pdf.line(445, 400, 495, 400)
-    pdf.line(500, 400, 550, 400)
-    pdf.line(555, 400, 605, 400)
+    pdf.line(5, 410, 55, 410)
+    pdf.line(60, 410, 110, 410)
+    pdf.line(115, 410, 165, 410)
+    pdf.line(170, 410, 220, 410)
+    pdf.line(225, 410, 275, 410)
+    pdf.line(280, 410, 330, 410)
+    pdf.line(335, 410, 385, 410)
+    pdf.line(390, 410, 440, 410)
+    pdf.line(445, 410, 495, 410)
+    pdf.line(500, 410, 550, 410)
+    pdf.line(555, 410, 605, 410)
 
     # ---------- Second part of the page ------------
-    pdf.drawImage(client_image, 60, 315, 100, 80, showBoundary=False)
+    pdf.drawImage(client_image, 60, 320, 90, 70, showBoundary=False)
+    pdf.drawImage('apps/static/assets/img/brand/logo.jpg', 450, 320, 90, 70, showBoundary=False)
+
     pdf.line(50, 320, 550, 320)
     pdf.setFontSize(14, leading=None)
     pdf.drawString(200, 300, f"RECU DE PAIEMENT N° 00{payment.id}/{date.format('Y')}")
@@ -431,9 +409,7 @@ def payment_receipt_view(request, payment_id):
 
     pdf.setFontSize(9, leading=None)
     pdf.drawString(90, 50, f"Le Client")
-    pdf.drawString(80, 10, f"{payment.payer.first} {payment.payer.last}, {to_amount(payment.payer.phone)}")
     pdf.drawString(420, 50, f"La Banque")
-    pdf.drawString(400, 10, f"{payment.created_by.profile.adresse}")
 
     pdf.showPage()
     pdf.save()

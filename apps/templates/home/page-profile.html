@@ -114,26 +114,16 @@
                 <h2 class="h2">
                   {{request.user.first_name}} {{request.user.last_name}}
                 </h2>
-                <div class="h5 mt-2">
-                  <i class="ni business_briefcase-24 mr-2"></i><strong>Email:</strong> {{request.user.email}} 
+                <div class="h5 mt-2 mb-5">
+                  <span class="float-left"><i class="fas fa-envelope mr-2"></i> {{request.user.email}}</span> 
+                  <span class="float-right"><i class="fas fa-phone mr-2"></i> {{request.user.phone}}</span>
                 </div>
                 <div>
-                  <i class="ni education_hat mr-2"></i><strong>Téléphone:</strong> {{request.user.phone}}
-                </div>
-                <div>
-                  <i class="ni education_hat mr-2"></i><strong>Permissions:</strong> {{request.user.permissions.list}}<br>
+                  <i class="ni education_hat mr-2"></i><strong>Permissions:</strong> {{request.user.permissions.name}}<br>
                   <!-- Persmissions Handles here -->
                 </div>
               </div>
-              <div class="row justify-content-center mt-2">
-                {% if request.user.is_active %} 
-                  <button data-href="{% url 'authentication:deactivate_user' request.user.id %}" class="edit-link btn btn-danger btn-sm" role="button">Bloquer</button>
-                  
-                {% else %}
-                  <button data-href="{% url 'authentication:activate_user' request.user.id %}" class="edit-link btn btn-success btn-sm" role="button">Activer</button>
-
-                {% endif %}
-              </div>
+              
             </div>
           </div>
           
@@ -330,28 +320,7 @@
                               </div>
                             </div>
                           </div>
-                          <div class="row">
-                            <div class="col-md-6">
-                              <div class="form-group">
-                                <div class="input-group input-group-merge">
-                                  <div class="input-group-prepend">
-                                    <span class="input-group-text"><i class="fas fa-tag"></i></span>
-                                  </div>
-                                  {{ userform.type }}
-                                </div>
-                              </div>
-                            </div>
-                            <div class="col-md-6">
-                              <div class="form-group">
-                                <div class="input-group input-group-merge">
-                                  <div class="input-group-prepend">
-                                    <span class="input-group-text"><i class="fas fa-briefcase"></i></span>
-                                  </div>
-                                  {{ userform.job }}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                          
                           <div class="row">
                             <div class="col-md-6">
                               <div class="form-group">
@@ -385,7 +354,20 @@
                                 </div>
                               </div>
                             </div>
+                            <div class="col-md-6">
+                              <div class="form-group">
+                                <div class="input-group input-group-merge">
+                                  <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-briefcase"></i></span>
+                                  </div>
+                                  {{ userform.job }}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row">
                             {{ userform.permissions.as_hidden }}
+                            {{ userform.type.as_hidden }}
                           </div>
                         </fieldset>
                         <div class="card-footer">

@@ -196,14 +196,12 @@
                                         <h2 class="h2">
                                           {{rowuser.first_name}} {{rowuser.last_name}}
                                         </h2>
-                                        <div class="h5 mt-2">
-                                          <i class="ni business_briefcase-24 mr-2"></i><strong>Email:</strong> {{rowuser.email}} 
+                                        <div class="h5 mt-2 mb-4">
+                                          <span class="float-left"><i class="fas fa-envelope mr-2"></i> {{rowuser.email}}</span> 
+                                          <span class="float-right"><i class="fas fa-phone mr-2"></i> {{rowuser.phone}}</span>
                                         </div>
                                         <div>
-                                          <i class="ni education_hat mr-2"></i><strong>Téléphone:</strong> {{rowuser.phone}}
-                                        </div>
-                                        <div>
-                                          <i class="ni education_hat mr-2"></i><strong>Permissions:</strong> {{rowuser.permissions.list}}<br>
+                                          <i class="ni education_hat mr-2"></i><strong>Permissions:</strong> {{rowuser.permissions.name}}<br>
                                           <!-- Persmissions Handles here -->
                                         </div>
                                       </div>

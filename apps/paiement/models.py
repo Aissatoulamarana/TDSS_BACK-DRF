@@ -12,7 +12,7 @@ from apps.authentication.models import CustomUser, Profile
 class Devise(models.Model):
     name = models.CharField(max_length=20)
     sign = models.CharField(max_length=3)
-    value = models.DecimalField(max_digits=7, decimal_places=2, default=1)
+    value = models.DecimalField(max_digits=15, decimal_places=2, default=1)
     comment = models.TextField(max_length=255, blank=True, null=True)
 
     def __str__(self):
@@ -22,7 +22,7 @@ class Devise(models.Model):
 class Permit(models.Model):
     name = models.CharField(max_length=50)
     type = models.CharField(max_length=30, choices=[('A', "A"), ('B', "B"), ('C', "C")], default="A")
-    price = models.DecimalField(max_digits=9, decimal_places=2)
+    price = models.DecimalField(max_digits=15, decimal_places=2)
     devise = models.ForeignKey(Devise, on_delete=models.PROTECT)
     comment = models.TextField(max_length=255, blank=True, null=True)
 

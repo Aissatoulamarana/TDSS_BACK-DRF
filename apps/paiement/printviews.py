@@ -79,7 +79,7 @@ def declaration_receipt_view(request, declaration_id):
 
     counter = 1
     for employee in employees:
-        data.append([f"{counter}", employee.passport_number, f"{employee.first} {employee.last}", f"{employee.job_category}", f"{employee.job}", f"{employee.phone}"])
+        data.append([f"{counter}", employee.passport_number, f"{employee.first} {employee.last}", f"{employee.job_category}", f"{employee.job}", f"{to_amount(employee.phone)}"])
         counter +=1
 
     LIST_STYLE = TableStyle(
@@ -91,20 +91,21 @@ def declaration_receipt_view(request, declaration_id):
             ('BOX', (0,0), (-1,-1), 1.5, colors.black),
             ('FONTSIZE', (0,0), (-1,0), 12, colors.black),
             ('BACKGROUND', (0,0), (-1,0), colors.lightgrey),
+            # ('ALIGN', (1,1), (1,5), 'CENTER'),
         ]
     )
 
     # Configure table style and word wrap
     table_style = getSampleStyleSheet()
     table_style = table_style["BodyText"]
-    table_style.wordWrap = 'CJK'
+    # table_style.wordWrap = 'CJK'
     table_style.fontSize = 9
     data2 = [[Paragraph(cell, table_style) for cell in row] for row in data]
 
     # Manage table cols width. --default is 83
-    design_width = (0.3*inch, 1.2*inch, 2.5*inch, 1.2*inch, 1.2*inch, 1.2*inch)
+    design_width = (0.4*inch, 1.2*inch, 2.5*inch, 1.2*inch, 1.4*inch, 0.9*inch)
 
-    table = Table(data2, colWidths=design_width, splitByRow=1, style=LIST_STYLE)
+    table = Table(data2, colWidths=design_width, repeatRows=1, splitByRow=1, style=LIST_STYLE)
 
     pdf.setFontSize(12)
     pdf.drawString(60, 600, f"LISTE DES EMPLOYES")
@@ -113,6 +114,7 @@ def declaration_receipt_view(request, declaration_id):
     pdf.setFontSize(8)
     table.wrapOn(pdf, 25, 500)
     table.drawOn(pdf, 25, 580-table._height)
+    # table.drawOn(pdf, 25, 50-table._height)
 
     # Creating the QR Code
     qr_data = {

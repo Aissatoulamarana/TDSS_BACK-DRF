@@ -3,7 +3,7 @@ from reportlab.pdfgen import canvas
 from reportlab.platypus import Table, TableStyle, Paragraph, SimpleDocTemplate, Image, HRFlowable
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.lib.styles import getSampleStyleSheet
@@ -28,7 +28,6 @@ def to_amount(number):
     return "{:0,.0f}".format(number).replace(','," ")
 
 
-# ##############
 @login_required(login_url="/login/")
 def declaration_receipt_view(request, declaration_id):
     # Getting the payment
@@ -44,22 +43,16 @@ def declaration_receipt_view(request, declaration_id):
     # Creating a buffer for the pdf
     buffer = io.BytesIO()
 
-    # pdf = canvas.Canvas(buffer)
-    pdf = SimpleDocTemplate(buffer, title="Déclarations", pagesize=A4, topMargin=0*inch, leftMargin=1*inch)
+    # Creating the pdf document
+    pdf = SimpleDocTemplate(buffer, title="Déclarations", pagesize=A4, topMargin=0.5*inch)
 
     elements = []
     styles=getSampleStyleSheet()
-    styleN = styles["Normal"]
-
-    # pdf.setPageSize(A4)
-    # width, height = A4
-    # pdf.setTitle("Déclarations")
 
     if client.picture:
         client_image = (client.picture.url)[1:]
     else:
         client_image = 'apps/static/assets/img/brand/logo.jpg'
-    # pdf.drawImage(client_image, 60, 750, 100, 80, showBoundary=False)
     elements.append(Image(client_image, width=100, height=80, hAlign="LEFT"))
 
     date = DateFormat(declaration.created_on)
@@ -74,18 +67,25 @@ def declaration_receipt_view(request, declaration_id):
     style_data.fontSize = 11 
     # style_data.fontName = 'Helvetica'
     style_data.alignment=TA_LEFT
+
+    style_sign = styleSheet['Normal']
+    style_sign.fontSize = 14 
+    # style_data.fontName = 'Helvetica'
+    style_sign.alignment=TA_LEFT
     
     d = Drawing(500, 50)
     elements.append(HRFlowable(width="100%", thickness=1, color=colors.black, hAlign='CENTER'))
     elements.append(Paragraph(f"DECLARATION N° 00{declaration.id}/{date.format('Y')}", style_title))
     elements.append(HRFlowable(width="100%", thickness=1, color=colors.black, hAlign='CENTER'))
 
-    elements.append(Paragraph("<br/>" + f"Titre :  {declaration.title}" + "<br/><br/><br/>"))
-    d.add(String(380, 125, f"Date : {date.format('d/m/Y')}", fontSize=11, fillColor=colors.black))
+    elements.append(Paragraph("<br/><br/>"))
+    d.add(String(10, 125, f"Titre :  {declaration.title}", fontSize=11, fontName='Helvetica', fillColor=colors.black))
+    d.add(String(350, 125, f"Date : {date.format('d/m/Y')}", fontSize=11, fontName='Helvetica', fillColor=colors.black))
 
-    elements.append(Paragraph(f" {client.name}"))
-    elements.append(Paragraph(f" Tél : {to_amount(client.contact)}"))
-    elements.append(Paragraph(f" {client.adresse}" + "<br/><br/>"))
+    d.add(String(10, 90, f" {client.name}", fontSize=11, fontName='Helvetica', fillColor=colors.black))
+    d.add(String(10, 75, f" Tél : {to_amount(client.contact)}", fontSize=11, fontName='Helvetica', fillColor=colors.black))
+    d.add(String(10, 60, f" {client.adresse}", fontSize=11, fontName='Helvetica', fillColor=colors.black))
+    # elements.append(Paragraph(f" {client.name}"))
 
     # Creating the QR Code
     qr_data = {
@@ -100,12 +100,10 @@ def declaration_receipt_view(request, declaration_id):
     img = qr.make_image()
     img.save('staticfiles/declaration_qr.png')
     
-    # pdf.drawImage('staticfiles/declaration_qr.png', 470, 615, 80, 80, showBoundary=False)
-    # elements.append(Image('staticfiles/declaration_qr.png', width=80, height=80, hAlign="RIGHT"))
+    elements.append(Image('staticfiles/declaration_qr.png', width=70, height=70, hAlign="RIGHT"))
 
-
-    d.add(String(20,10, f"LISTE DES EMPLOYES", fontSize=16, fillColor=colors.black))
-    d.add(String(400,10, f"Total : {employees.count()}", fontSize=12, fillColor=colors.black))
+    d.add(String(20, 10, f"LISTE DES EMPLOYES", fontSize=16, fontName='Helvetica', fillColor=colors.black))
+    d.add(String(380, 10, f"Total : {employees.count()}", fontSize=12, fontName='Helvetica', fillColor=colors.black))
     # elements.append(Paragraph(f"LISTE DES EMPLOYES"))
     elements.append(d)
     
@@ -144,19 +142,9 @@ def declaration_receipt_view(request, declaration_id):
 
     table = Table(data2, colWidths=design_width, repeatRows=1, splitByRow=1, style=LIST_STYLE)
 
-
-    # pdf.setFontSize(12, leading=None)
-    # pdf.drawString(70, 550-table._height, f"L'employeur")
-
-    # pdf.showPage()
-    # pdf.save()
-
     elements.append(table)
 
-    elements.append(Paragraph("<br/><br/>" + f"L'employeur"))
-
-
-
+    elements.append(Paragraph("<br/><br/>" + f"L'employeur", style_sign))
 
 
     pdf.build(elements)
@@ -164,8 +152,6 @@ def declaration_receipt_view(request, declaration_id):
     buffer.seek(0)
 
     return FileResponse(buffer, filename=f"recu_declaration_num{declaration.id}.pdf")
-
-# ##############
 
 
 @login_required(login_url="/login/")

@@ -1,12 +1,15 @@
 import io
 from reportlab.pdfgen import canvas
-from reportlab.platypus import Table, TableStyle, Paragraph
+from reportlab.platypus import Table, TableStyle, Paragraph, SimpleDocTemplate, Image, HRFlowable
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.utils import simpleSplit
+from reportlab.graphics.shapes import Drawing, Line, String
+from reportlab.lib.enums import TA_JUSTIFY, TA_CENTER,TA_LEFT,TA_RIGHT
 
 import qrcode
 
@@ -25,8 +28,148 @@ def to_amount(number):
     return "{:0,.0f}".format(number).replace(','," ")
 
 
+# ##############
 @login_required(login_url="/login/")
 def declaration_receipt_view(request, declaration_id):
+    # Getting the payment
+    try:
+        declaration = Declaration.objects.get(pk=declaration_id)
+    except Declaration.DoesNotExist:
+        messages.error(request, "Déclaration inexistante.")
+        return redirect("paiement:declarations")
+
+    client = declaration.created_by.profile
+    employees = Employee.objects.filter(declaration=declaration)
+    
+    # Creating a buffer for the pdf
+    buffer = io.BytesIO()
+
+    # pdf = canvas.Canvas(buffer)
+    pdf = SimpleDocTemplate(buffer, title="Déclarations", pagesize=A4, topMargin=0*inch, leftMargin=1*inch)
+
+    elements = []
+    styles=getSampleStyleSheet()
+    styleN = styles["Normal"]
+
+    # pdf.setPageSize(A4)
+    # width, height = A4
+    # pdf.setTitle("Déclarations")
+
+    if client.picture:
+        client_image = (client.picture.url)[1:]
+    else:
+        client_image = 'apps/static/assets/img/brand/logo.jpg'
+    # pdf.drawImage(client_image, 60, 750, 100, 80, showBoundary=False)
+    elements.append(Image(client_image, width=100, height=80, hAlign="LEFT"))
+
+    date = DateFormat(declaration.created_on)
+
+    styleSheet = getSampleStyleSheet()
+    style_title = styleSheet['Heading1']
+    style_title.fontSize = 20 
+    # style_title.fontName = 'Helvetica-Bold'
+    style_title.alignment=TA_CENTER
+
+    style_data = styleSheet['Normal']
+    style_data.fontSize = 11 
+    # style_data.fontName = 'Helvetica'
+    style_data.alignment=TA_LEFT
+    
+    d = Drawing(500, 50)
+    elements.append(HRFlowable(width="100%", thickness=1, color=colors.black, hAlign='CENTER'))
+    elements.append(Paragraph(f"DECLARATION N° 00{declaration.id}/{date.format('Y')}", style_title))
+    elements.append(HRFlowable(width="100%", thickness=1, color=colors.black, hAlign='CENTER'))
+
+    elements.append(Paragraph("<br/>" + f"Titre :  {declaration.title}" + "<br/><br/><br/>"))
+    d.add(String(380, 125, f"Date : {date.format('d/m/Y')}", fontSize=11, fillColor=colors.black))
+
+    elements.append(Paragraph(f" {client.name}"))
+    elements.append(Paragraph(f" Tél : {to_amount(client.contact)}"))
+    elements.append(Paragraph(f" {client.adresse}" + "<br/><br/>"))
+
+    # Creating the QR Code
+    qr_data = {
+        'ID': declaration.id, 
+        'REF': declaration.reference, 
+        'Client': client.name, 
+        'Total Employés': employees.count()
+    }
+    qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L, border=4)
+    qr.add_data(qr_data)
+    qr.make(fit=True)
+    img = qr.make_image()
+    img.save('staticfiles/declaration_qr.png')
+    
+    # pdf.drawImage('staticfiles/declaration_qr.png', 470, 615, 80, 80, showBoundary=False)
+    # elements.append(Image('staticfiles/declaration_qr.png', width=80, height=80, hAlign="RIGHT"))
+
+
+    d.add(String(20,10, f"LISTE DES EMPLOYES", fontSize=16, fillColor=colors.black))
+    d.add(String(400,10, f"Total : {employees.count()}", fontSize=12, fillColor=colors.black))
+    # elements.append(Paragraph(f"LISTE DES EMPLOYES"))
+    elements.append(d)
+    
+
+    data = [
+        ['N°','N° de passeport', 'Prénoms & Nom', 'Catégorie', 'Fonction', 'Téléphone'],
+    ]
+
+    counter = 1
+    for employee in employees:
+        data.append([f"{counter}", employee.passport_number, f"{employee.first} {employee.last}", f"{employee.job_category}", f"{employee.job}", f"{to_amount(employee.phone)}"])
+        counter +=1
+
+    LIST_STYLE = TableStyle(
+        [
+            ('VALIGN', (0,0), (-1,-1), 'TOP'),
+            ('INNERGRID', (0,0), (-1,-1), 0.50, colors.black),
+            # ('LINEBEFORE', (0,0), (-1,0), 1, colors.black),
+            ('LINEABOVE', (0,0), (-1,-1), 1, colors.black),
+            ('BOX', (0,0), (-1,-1), 1.5, colors.black),
+            ('FONTSIZE', (0,0), (-1,0), 12, colors.black),
+            ('BACKGROUND', (0,0), (-1,0), colors.lightgrey),
+            # ('ALIGN', (1,1), (1,5), 'CENTER'),
+        ]
+    )
+
+    # Configure table style and word wrap
+    table_style = getSampleStyleSheet()
+    table_style = table_style["BodyText"]
+    # table_style.wordWrap = 'CJK'
+    table_style.fontSize = 9
+    data2 = [[Paragraph(cell, table_style) for cell in row] for row in data]
+
+    # Manage table cols width. --default is 83
+    design_width = (0.4*inch, 1.2*inch, 2.5*inch, 1.2*inch, 1.4*inch, 0.9*inch)
+
+    table = Table(data2, colWidths=design_width, repeatRows=1, splitByRow=1, style=LIST_STYLE)
+
+
+    # pdf.setFontSize(12, leading=None)
+    # pdf.drawString(70, 550-table._height, f"L'employeur")
+
+    # pdf.showPage()
+    # pdf.save()
+
+    elements.append(table)
+
+    elements.append(Paragraph("<br/><br/>" + f"L'employeur"))
+
+
+
+
+
+    pdf.build(elements)
+
+    buffer.seek(0)
+
+    return FileResponse(buffer, filename=f"recu_declaration_num{declaration.id}.pdf")
+
+# ##############
+
+
+@login_required(login_url="/login/")
+def declaration_receipt_view_real(request, declaration_id):
     # Getting the payment
     try:
         declaration = Declaration.objects.get(pk=declaration_id)
@@ -107,14 +250,16 @@ def declaration_receipt_view(request, declaration_id):
 
     table = Table(data2, colWidths=design_width, repeatRows=1, splitByRow=1, style=LIST_STYLE)
 
+    # table = simpleSplit(table, 'Helvetica', 9, 83)
+
     pdf.setFontSize(12)
     pdf.drawString(60, 600, f"LISTE DES EMPLOYES")
     pdf.drawString(480, 600, f"Total : {employees.count()}")
 
     pdf.setFontSize(8)
     table.wrapOn(pdf, 25, 500)
-    table.drawOn(pdf, 25, 580-table._height)
-    # table.drawOn(pdf, 25, 50-table._height)
+    # table.drawOn(pdf, 25, 580-table._height)
+    table.drawOn(pdf, 25, 50-table._height)
 
     # Creating the QR Code
     qr_data = {

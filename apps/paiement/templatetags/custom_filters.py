@@ -35,3 +35,7 @@ def count_by_user_type(object, uid_user_type):
 def count_by_profile(object, id_profile):
     profile = Profile.objects.get(pk=id_profile)
     return object.filter(type=profile).count()
+
+@register.filter
+def to_amount(number):
+    return "{:0,.0f}".format(number).replace(','," ")

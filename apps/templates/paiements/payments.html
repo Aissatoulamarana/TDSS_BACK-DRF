@@ -1,4 +1,5 @@
 {% extends "layouts/base.html" %}
+{% load custom_filters %}
 
 {% block title %} Liste {% endblock %}
 
@@ -147,12 +148,12 @@
                           {{payment.payer}}
                         </td>
                         <td>
-                            {{payment.amount}} {{payment.devise.sign}}
+                            {{payment.amount | to_amount}} {{payment.devise.sign}}
                         </td>
                         <td class="date">
                           {{payment.created_on|date:"d/m/y H:m"}}
                         </td>
-                        <td >
+                        <td class="actions">
                           <span>
                             {% if 'a-paiements-consulter' in user.permissions.codes or user.is_staff %}
                             <button class="btn btn-sm btn-icon-only" role="button" data-id="a-paiements-consulter" data-toggle="modal" data-target="#modal-payment-{{payment.id}}">View</button>
@@ -185,7 +186,7 @@
                                         </div>
                                         <div class="col">
                                           <i class="ni education_hat mr-2"></i><span class="text-muted">Montant:</span>
-                                          <span class="heading"><strong>{{payment.amount}} {{payment.devise.sign}}</strong></span>
+                                          <span class="heading"><strong>{{payment.amount | to_amount}} {{payment.devise.sign}}</strong></span>
                                         </div>
                                       </div>
                                         
@@ -292,20 +293,10 @@
       window.location = $(this).data("href");
     })
   </script>
-
-   <!-- For tables purpose -->
-   <script src="/static/assets/vendor/datatables.net/js/jquery.dataTables.min.js"></script>
-   <script src="/static/assets/vendor/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
-   <script src="/static/assets/vendor/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
-   <script src="/static/assets/vendor/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js"></script>
-   <script src="/static/assets/vendor/datatables.net-buttons/js/buttons.html5.min.js"></script>
-   <script src="/static/assets/vendor/datatables.net-buttons/js/buttons.flash.min.js"></script>
-   <script src="/static/assets/vendor/datatables.net-buttons/js/buttons.print.min.js"></script>
-   <script src="/static/assets/vendor/datatables.net-select/js/dataTables.select.min.js"></script>
  
-   <script>
-     // $(document).ready(function () {
-     //   console.log($('#datatable-basic_length').children().first()[0])
-     // });
-   </script>
+  <script>
+    // $(document).ready(function () {
+    //   console.log($('#datatable-basic_length').children().first()[0])
+    // });
+  </script>
 {% endblock javascripts %}

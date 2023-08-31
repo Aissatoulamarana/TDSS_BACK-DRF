@@ -68,6 +68,9 @@
                   {% if 'a-agences-ajouter' in user.permissions.codes or user.is_staff %}
                     <a href="{% url 'authentication:add_agency' %}" data-id="a-agences-ajouter" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
                   {% endif %}
+                  {% if 'a-agences-ajouter' in user.permissions.codes or user.is_staff %}
+                    <a href="{% url 'paiement:print_agencies' %}" target="_blank" data-id="a-agences-exportpdf" class="btn btn-sm btn-danger mr-2 float-right">PDF</a>
+                  {% endif %}
                 </h3>
               </div>
               <!-- Light table -->

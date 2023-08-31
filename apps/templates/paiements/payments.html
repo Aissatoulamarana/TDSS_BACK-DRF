@@ -72,6 +72,9 @@
                   {% if 'a-paiements-generer' in user.permissions.codes or user.is_staff %}
                     <button class="btn btn-sm btn-neutral float-right" data-id="a-paiements-generer" role="button" data-toggle="modal" data-target="#modal-payment-generate">Generate</button>
                   {% endif %}
+                  {% if 'a-paiements-generer' in user.permissions.codes or user.is_staff %}
+                    <a href="{% url 'paiement:print_paiements' %}" target="_blank" class="btn btn-sm btn-danger mr-2 float-right" role="button" data-id="a-paiements-exportpdf">PDF</a>
+                  {% endif %}
                 </h3>
               </div>
               <div class="modal fade" id="modal-payment-generate" tabindex="-1" role="dialog" aria-labelledby="modal-payment-generate" aria-hidden="true">

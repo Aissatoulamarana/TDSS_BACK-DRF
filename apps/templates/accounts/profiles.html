@@ -111,6 +111,9 @@
                   {% if 'a-profiles-ajouter' in user.permissions.codes or user.is_staff %}
                     <a href="{% url 'authentication:add_profile' %}" data-id="a-profiles-ajouter" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
                   {% endif %}
+                  {% if 'a-profiles-ajouter' in user.permissions.codes or user.is_staff %}
+                  <a href="{% url 'paiement:print_profiles' %}" target="_blank" data-id="a-profiles-exportpdf" class="btn btn-sm btn-danger mr-2 float-right">PDF</a>
+                  {% endif %}
                 </h3>
               </div>
               <!-- Light table -->

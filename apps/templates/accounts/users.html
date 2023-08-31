@@ -66,6 +66,9 @@
                   {% if 'a-utilisateurs-ajouter' in user.permissions.codes or user.is_staff %}
                     <a href="{% url 'authentication:add_user' %}" data-id="a-utilisateurs-ajouter" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
                   {% endif %}
+                  {% if 'a-utilisateurs-ajouter' in user.permissions.codes or user.is_staff %}
+                    <a href="{% url 'paiement:print_users' %}" target="_blank" data-id="a-utilisateurs-exportpdf" class="btn btn-sm btn-danger mr-2 float-right">PDF</a>
+                  {% endif %}
                 </h3>
               </div>
               <!-- Light table -->
@@ -201,7 +204,7 @@
                                           <span class="float-right"><i class="fas fa-phone mr-2"></i> {{rowuser.phone}}</span>
                                         </div>
                                         <div>
-                                          <i class="ni education_hat mr-2"></i><strong>Permissions:</strong> {{rowuser.permissions.name}}<br>
+                                          <i class="ni education_hat"></i><strong>Permissions:</strong> {{rowuser.permissions.name}}<br>
                                           <!-- Persmissions Handles here -->
                                         </div>
                                       </div>

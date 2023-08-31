@@ -66,6 +66,9 @@
                   {% if 'a-permissions-ajouter' in user.permissions.codes or user.is_staff %}
                     <a href="{% url 'authentication:add_permissions' %}" data-id="a-permissions-ajouter" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
                   {% endif %}
+                  {% if 'a-permissions-ajouter' in user.permissions.codes or user.is_staff %}
+                  <a href="{% url 'paiement:print_permissions' %}" target="_blank" data-id="a-permissions-exportpdf" class="btn btn-sm btn-danger mr-2 float-right">PDF</a>
+                  {% endif %}
                 </h3>
               </div>
               <!-- Light table -->

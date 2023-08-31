@@ -70,6 +70,9 @@
                   {% if 'a-devises-actualiser' in user.permissions.codes or user.is_staff %}
                     <a href="#" class="btn btn-sm btn-neutral float-right" role="button" data-id="a-devises-actualiser" data-toggle="modal" data-target="#modal-devise-update">Actualiser</a>
                   {% endif %}
+                  {% if 'a-devises-actualiser' in user.permissions.codes or user.is_staff %}
+                    <a href="{% url 'paiement:print_devises' %}" target="_blank" class="btn btn-sm btn-danger mr-2 float-right" role="button" data-id="a-devises-exportpdf">PDF</a>
+                  {% endif %}
                 </h3>
                 
                 <div class="modal fade" id="modal-devise-update" tabindex="-1" role="dialog" aria-labelledby="modal-devise-update" aria-hidden="true">

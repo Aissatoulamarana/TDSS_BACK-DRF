@@ -210,16 +210,16 @@ def export_payments_view(request):
     name = "Paiements"
     payments = Payment.objects.all().order_by('id')
     data = [
-        ['N°','Banque', 'Entreprise', 'Payeur', 'Montant', 'Date'],
+        ['N°', 'Référence', 'Banque', 'Entreprise', 'Payeur', 'Montant', 'Date'],
     ]
     
     counter = 1
     for payment in payments:
         pay_date = DateFormat(payment.created_on)
-        data.append([f"{counter}", f"{payment.created_by.profile.name}", f"{payment.facture_ref.client.name}", f"{payment.payer}", f"{to_amount(payment.amount)} {payment.devise.sign}", f"{pay_date.format('d/m/Y H:m')}"])
+        data.append([f"{counter}", f"N° 00{payment.id}/{pay_date.format('Y')}", f"{payment.created_by.profile.name}", f"{payment.facture_ref.client.name}", f"{payment.payer}", f"{to_amount(payment.amount)} {payment.devise.sign}", f"{pay_date.format('d/m/Y H:m')}"])
         counter +=1
 
-    design_width = (0.4*inch, 1.2*inch, 1.2*inch, 1.5*inch, 2.0*inch, 1.2*inch)
+    design_width = (0.4*inch, 0.9*inch, 1.2*inch, 1.2*inch, 1.5*inch, 1.6*inch, 1.2*inch)
     
     file = export_pdf(name, data, design_width)
 
@@ -230,16 +230,16 @@ def export_bills_view(request):
     name = "Factures"
     bills = Facture.objects.all().order_by('id')
     data = [
-        ['N°', 'Titre déclaration', 'Entreprise', 'Montant', 'Statut', 'Date'],
+        ['N°', 'Référence', 'Titre déclaration', 'Entreprise', 'Montant', 'Statut', 'Date'],
     ]
     
     counter = 1
     for bill in bills:
         pay_date = DateFormat(bill.created_on)
-        data.append([f"{counter}", f"{bill.declaration_ref.title}", f"{bill.client.name}", f"{to_amount(bill.amount)} {bill.devise.sign}", f"{bill.get_status_display()}",  f"{pay_date.format('d/m/Y H:m')}"])
+        data.append([f"{counter}", f"N° 00{bill.id}/{pay_date.format('Y')}", f"{bill.declaration_ref.title}", f"{bill.client.name}", f"{to_amount(bill.amount)} {bill.devise.sign}", f"{bill.get_status_display()}",  f"{pay_date.format('d/m/Y H:m')}"])
         counter +=1
 
-    design_width = (0.4*inch, 2.0*inch, 1.2*inch, 2.0*inch, 1.0*inch, 1.2*inch)
+    design_width = (0.4*inch, 0.9*inch, 1.5*inch, 1.2*inch, 1.9*inch, 0.7*inch, 1.2*inch)
     
     file = export_pdf(name, data, design_width)
 
@@ -251,16 +251,16 @@ def export_declarations_view(request):
     name = "Déclarations"
     declarations = Declaration.objects.all().order_by('id')
     data = [
-        ['N°', 'Entreprise', 'Titre', 'Total employés', 'Statut', 'Date'],
+        ['N°', 'Référence', 'Entreprise', 'Titre', 'Total employés', 'Statut', 'Date'],
     ]
     
     counter = 1
     for declaration in declarations:
         pay_date = DateFormat(declaration.created_on)
-        data.append([f"{counter}", f"{declaration.created_by.profile.name}", f"{declaration.title}", f"{declaration.employee_declarations.count()}", f"{declaration.get_status_display()}",  f"{pay_date.format('d/m/Y H:m')}"])
+        data.append([f"{counter}", f"N° 00{declaration.id}/{pay_date.format('Y')}", f"{declaration.created_by.profile.name}", f"{declaration.title}", f"{declaration.employee_declarations.count()}", f"{declaration.get_status_display()}",  f"{pay_date.format('d/m/Y H:m')}"])
         counter +=1
 
-    design_width = (0.4*inch, 2.0*inch, 1.2*inch, 1.2*inch, 1.0*inch, 1.2*inch)
+    design_width = (0.4*inch, 0.9*inch, 1.7*inch, 1.4*inch, 1.1*inch, 1.0*inch, 1.2*inch)
     
     file = export_pdf(name, data, design_width)
 

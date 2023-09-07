@@ -75,11 +75,12 @@
                 </h3>
               </div>
               <!-- Light table -->
-              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "declaration", "company", "amount", "status", "date", "actions"]'>
+              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "ref", "declaration", "company", "amount", "status", "date", "actions"]'>
                 <table class="table align-items-center table-flush" id="datatable-basic">
                   <thead class="thead-light">
                     <tr>
                       <th scope="col" class="sort" data-sort="n°">N°</th>
+                      <th scope="col" class="sort" data-sort="ref">Référence</th>
                       <th scope="col" class="sort" data-sort="declaration">Titre déclaration</th>
                       <th scope="col" class="sort" data-sort="company">Entreprise</th>
                       <th scope="col" class="sort" data-sort="amount">Montant</th>
@@ -93,6 +94,9 @@
                       <tr>
                         <td class="n°">
                           {{forloop.counter}}
+                        </td>
+                        <td class="n°">
+                          {{facture|get_reference}}
                         </td>
                         <td class="declaration" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px;">
                           {{facture.declaration_ref.title}}

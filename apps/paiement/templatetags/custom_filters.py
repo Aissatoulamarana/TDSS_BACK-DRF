@@ -2,6 +2,8 @@ from django import template
 from apps.paiement.models import JobCategory
 from apps.authentication.models import Profile, ProfileType, UserType, CustomUser
 
+from django.utils.dateformat import DateFormat
+
 register = template.Library()
 
 @register.filter
@@ -36,6 +38,15 @@ def count_by_profile(object, id_profile):
     profile = Profile.objects.get(pk=id_profile)
     return object.filter(type=profile).count()
 
+
 @register.filter
 def to_amount(number):
     return "{:0,.0f}".format(number).replace(','," ")
+
+
+@register.filter
+def get_reference(element):
+    date = DateFormat(element.created_on)
+    reference = f"N° 00{element.id}/{date.format('Y')}"
+
+    return reference

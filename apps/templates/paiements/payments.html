@@ -122,11 +122,12 @@
                 </div>
               </div>
               <!-- Light table -->
-              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "banque", "client", "payer", "amount", "date", "actions"]'>
+              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "ref", "banque", "client", "payer", "amount", "date", "actions"]'>
                 <table class="table align-items-center table-flush" id="datatable-basic">
                   <thead class="thead-light">
                     <tr>
                       <th scope="col" class="sort" data-sort="n°">N°</th>
+                      <th scope="col" class="sort" data-sort="ref">Référence</th>
                       <th scope="col" class="sort" data-sort="banque">Banque</th>
                       <th scope="col" class="sort" data-sort="client">Entreprise</th>
                       <th scope="col" class="sort" data-sort="payer">Payeur</th>
@@ -140,6 +141,9 @@
                       <tr>
                         <td class="n°">
                           {{forloop.counter}}
+                        </td>
+                        <td class="n°">
+                          {{payment|get_reference}}
                         </td>
                         <td class="banque">
                           {{payment.created_by.profile.name}}

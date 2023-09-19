@@ -17,3 +17,4 @@ reportlab
 qrcode
 djangorestframework
 djangorestframework-api-key
+XlsxWriter

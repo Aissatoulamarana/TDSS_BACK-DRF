@@ -64,10 +64,13 @@
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des utilisateurs du système</em>
                   {% if 'a-utilisateurs-ajouter' in user.permissions.codes or user.is_staff %}
-                    <a href="{% url 'authentication:add_user' %}" data-id="a-utilisateurs-ajouter" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
+                    <a href="{% url 'paiement:print_users' %}" target="_blank" data-id="a-utilisateurs-exportpdf" class="btn btn-sm btn-danger float-right">PDF</a>
                   {% endif %}
                   {% if 'a-utilisateurs-ajouter' in user.permissions.codes or user.is_staff %}
-                    <a href="{% url 'paiement:print_users' %}" target="_blank" data-id="a-utilisateurs-exportpdf" class="btn btn-sm btn-danger mr-2 float-right">PDF</a>
+                    <a href="{% url 'paiement:export_users' %}" target="_blank" data-id="a-utilisateurs-exportxlsx" class="btn btn-sm btn-success ml-2 float-right">XLSX</a>
+                  {% endif %}
+                  {% if 'a-utilisateurs-ajouter' in user.permissions.codes or user.is_staff %}
+                    <a href="{% url 'authentication:add_user' %}" data-id="a-utilisateurs-ajouter" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
                   {% endif %}
                 </h3>
               </div>

@@ -1,4 +1,5 @@
 import io
+import xlsxwriter
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Table, TableStyle, Paragraph, SimpleDocTemplate, Image, HRFlowable
 from reportlab.pdfbase import pdfmetrics
@@ -106,7 +107,7 @@ def export_pdf(name, data, design_width):
 
 
 @login_required(login_url="/login/")
-def export_agencies_view(request):
+def exportpdf_agencies_view(request):
     name = "Agences"
     agencies = Agency.objects.all().order_by('id')
     data = [
@@ -126,7 +127,7 @@ def export_agencies_view(request):
 
 
 @login_required(login_url="/login/")
-def export_profiles_view(request):
+def exportpdf_profiles_view(request):
     name = "Profils"
     profiles = Profile.objects.all().order_by('uuid')
     data = [
@@ -146,7 +147,7 @@ def export_profiles_view(request):
 
 
 @login_required(login_url="/login/")
-def export_users_view(request):
+def exportpdf_users_view(request):
     name = "Utilisateurs"
     users = CustomUser.objects.all().order_by('id')
     data = [
@@ -166,7 +167,7 @@ def export_users_view(request):
 
 
 @login_required(login_url="/login/")
-def export_permissions_view(request):
+def exportpdf_permissions_view(request):
     name = "Permissions"
     permissions = Permission.objects.all().order_by('id')
     data = [
@@ -186,7 +187,7 @@ def export_permissions_view(request):
 
 
 @login_required(login_url="/login/")
-def export_devises_view(request):
+def exportpdf_devises_view(request):
     name = "Dévises"
     devises = Devise.objects.all().order_by('id')
     data = [
@@ -206,7 +207,7 @@ def export_devises_view(request):
 
 
 @login_required(login_url="/login/")
-def export_payments_view(request):
+def exportpdf_payments_view(request):
     name = "Paiements"
     payments = Payment.objects.all().order_by('id')
     data = [
@@ -226,7 +227,7 @@ def export_payments_view(request):
     return FileResponse(file, filename=f"export_pdf_{name}.pdf")
 
 @login_required(login_url="/login/")
-def export_bills_view(request):
+def exportpdf_bills_view(request):
     name = "Factures"
     bills = Facture.objects.all().order_by('id')
     data = [
@@ -247,7 +248,7 @@ def export_bills_view(request):
 
 
 @login_required(login_url="/login/")
-def export_declarations_view(request):
+def exportpdf_declarations_view(request):
     name = "Déclarations"
     declarations = Declaration.objects.all().order_by('id')
     data = [
@@ -265,3 +266,265 @@ def export_declarations_view(request):
     file = export_pdf(name, data, design_width)
 
     return FileResponse(file, filename=f"export_pdf_{name}.pdf")
+
+
+def export_xlsx(name, options, counter, col):
+    buffer = io.BytesIO()
+    workbook = xlsxwriter.Workbook(buffer)
+    worksheet = workbook.add_worksheet()
+
+    caption = f"LISTE DES {name.upper()}"
+    page_header = 'apps/static/assets/img/bill/header_aguipee_tdss.png'
+
+    bold = workbook.add_format({"bold": True})
+    worksheet.write_rich_string("C8",  bold, f"{caption}", " ")
+    # worksheet.write("C8", caption)
+
+    # worksheet.set_column("B:L", 20)
+    worksheet.insert_image("A1", page_header, {"x_scale": 0.5, "y_scale": 0.5})
+
+    worksheet.set_footer(f"&C{caption} &R&P")
+    
+    worksheet.add_table(f"B10:{col}{counter+9}", options)
+
+    worksheet.autofit()
+
+    workbook.close()
+    buffer.seek(0)
+
+    return buffer
+
+
+@login_required(login_url="/login/")
+def exportxlsx_agencies_view(request):
+
+    name = "Agences"
+    agencies = Agency.objects.all().order_by('id')
+    data = []
+    counter = 1
+    for agency in agencies:
+        data.append([f"{counter}", f"{agency.code}", f"{agency.region}", f"{agency.name}"])
+        counter +=1
+
+    options = {
+        "data": data, 
+        # "style": "Table Style Light 11", 
+        "columns": [
+            {"header": 'N°'}, 
+            {"header": 'Code'}, 
+            {"header": 'Région'}, 
+            {"header": 'Nom de l\'agence'},
+        ]
+    }
+
+    file = export_xlsx(name, options, counter, 'E')
+
+    return FileResponse(file, as_attachment=True, filename=f"export_excel_{name.lower()}.xlsx")
+
+
+@login_required(login_url="/login/")
+def exportxlsx_profiles_view(request):
+
+    name = "Profils"
+    profiles = Profile.objects.all().order_by('uuid')
+    data = []
+    counter = 1
+    for profile in profiles:
+        data.append([f"{counter}", f"{profile.name}", f"{profile.type}", f"{profile.get_status_display()}", f"{profile.contact}", f"{profile.adresse}"])
+        counter +=1
+
+    options = {
+        "data": data, 
+        # "style": "Table Style Light 11", 
+        "columns": [
+            {"header": 'N°'}, 
+            {"header": 'Nom'}, 
+            {"header": 'Type'}, 
+            {"header": 'Statut'},
+            {"header": 'Contact'},
+            {"header": 'Adresse'},
+        ]
+    }
+    
+    file = export_xlsx(name, options, counter, 'G')
+
+    return FileResponse(file, as_attachment=True, filename=f"export_excel_{name.lower()}.xlsx")
+
+
+@login_required(login_url="/login/")
+def exportxlsx_users_view(request):
+
+    name = "Utilisateurs"
+    users = CustomUser.objects.all().order_by('id')
+    data = []
+    counter = 1
+    for user in users:
+        data.append([f"{counter}", f"{user.first_name} {user.last_name}", f"{user.profile.type}", f"{user.email}", f"{user.phone}", f"{user.is_active}"])
+        counter +=1
+
+    options = {
+        "data": data, 
+        # "style": "Table Style Light 11", 
+        "columns": [
+            {"header": 'N°'}, 
+            {"header": 'Prénom(s) & Nom'}, 
+            {"header": 'Type de profil'}, 
+            {"header": 'Email'},
+            {"header": 'Téléphone'},
+            {"header": 'Actif'},
+        ]
+    }
+    
+    file = export_xlsx(name, options, counter, 'G')
+
+    return FileResponse(file, as_attachment=True, filename=f"export_excel_{name.lower()}.xlsx")
+
+
+@login_required(login_url="/login/")
+def exportxlsx_permissions_view(request):
+
+    name = "Permissions"
+    permissions = Permission.objects.all().order_by('id')
+    data = []
+    counter = 1
+    for permission in permissions:
+        data.append([f"{counter}", f"{permission.name}", f"{permission.profile_type}", f"{permission.list}"])
+        counter +=1
+
+    options = {
+        "data": data, 
+        # "style": "Table Style Light 11", 
+        "columns": [
+            {"header": 'N°'}, 
+            {"header": 'Nom'}, 
+            {"header": 'Type de profil'}, 
+            {"header": 'Autorisations'},
+        ]
+    }
+    
+    file = export_xlsx(name, options, counter, 'E')
+
+    return FileResponse(file, as_attachment=True, filename=f"export_excel_{name.lower()}.xlsx")
+
+
+@login_required(login_url="/login/")
+def exportxlsx_devises_view(request):
+
+    name = "Dévises"
+    devises = Devise.objects.all().order_by('id')
+    data = []
+    counter = 1
+    for devise in devises:
+        data.append([f"{counter}", f"{devise.name}", f"{devise.sign}", f"{devise.value}", f"{devise.comment}"])
+        counter +=1
+
+    options = {
+        "data": data, 
+        # "style": "Table Style Light 11", 
+        "columns": [
+            {"header": 'N°'}, 
+            {"header": 'Nom'}, 
+            {"header": 'Symbole'}, 
+            {"header": 'Valeur'},
+            {"header": 'Commentaires'},
+        ]
+    }
+    
+    file = export_xlsx(name, options, counter, 'F')
+
+    return FileResponse(file, as_attachment=True, filename=f"export_excel_{name.lower()}.xlsx")
+
+
+@login_required(login_url="/login/")
+def exportxlsx_payments_view(request):
+
+    name = "Paiements"
+    payments = Payment.objects.all().order_by('id')
+    data = []
+    counter = 1
+    for payment in payments:
+        pay_date = DateFormat(payment.created_on)
+        data.append([f"{counter}", f"N° 00{payment.id}/{pay_date.format('Y')}", f"{payment.created_by.profile.name}", f"{payment.facture_ref.client.name}", f"{payment.payer}", f"{payment.amount}", f"{payment.devise.sign}", f"{pay_date.format('d/m/Y H:m')}"])
+        counter +=1
+
+    options = {
+        "data": data, 
+        # "style": "Table Style Light 11", 
+        "columns": [
+            {"header": 'N°'}, 
+            {"header": 'Référence'}, 
+            {"header": 'Banque'}, 
+            {"header": 'Entreprise'},
+            {"header": 'Payeur'},
+            {"header": 'Montant'},
+            {"header": 'Dévise'},
+            {"header": 'Date'},
+        ]
+    }
+    
+    file = export_xlsx(name, options, counter, 'I')
+
+    return FileResponse(file, as_attachment=True, filename=f"export_excel_{name.lower()}.xlsx")
+
+
+@login_required(login_url="/login/")
+def exportxlsx_bills_view(request):
+
+    name = "Factures"
+    bills = Facture.objects.all().order_by('id')
+    data = []
+    counter = 1
+    for bill in bills:
+        pay_date = DateFormat(bill.created_on)
+        data.append([f"{counter}", f"N° 00{bill.id}/{pay_date.format('Y')}", f"{bill.declaration_ref.title}", f"{bill.client.name}", f"{bill.amount}", f"{bill.devise.sign}", f"{bill.get_status_display()}",  f"{pay_date.format('d/m/Y H:m')}"])
+        counter +=1
+
+    options = {
+        "data": data, 
+        # "style": "Table Style Light 11", 
+        "columns": [
+            {"header": 'N°'}, 
+            {"header": 'Référence'}, 
+            {"header": 'Titre déclaration'}, 
+            {"header": 'Entreprise'},
+            {"header": 'Montant', },
+            {"header": 'Dévise'},
+            {"header": 'Statut'},
+            {"header": 'Date'},
+        ]
+    }
+    
+    file = export_xlsx(name, options, counter, 'I')
+
+    return FileResponse(file, as_attachment=True, filename=f"export_excel_{name.lower()}.xlsx")
+
+
+@login_required(login_url="/login/")
+def exportxlsx_declarations_view(request):
+
+    name = "Déclarations"
+    declarations = Declaration.objects.all().order_by('id')
+    data = []
+    counter = 1
+    for declaration in declarations:
+        pay_date = DateFormat(declaration.created_on)
+        data.append([f"{counter}", f"N° 00{declaration.id}/{pay_date.format('Y')}", f"{declaration.created_by.profile.name}", f"{declaration.title}", f"{declaration.employee_declarations.count()}", f"{declaration.get_status_display()}",  f"{pay_date.format('d/m/Y H:m')}"])
+        counter +=1
+
+    options = {
+        "data": data, 
+        # "style": "Table Style Light 11", 
+        "columns": [
+            {"header": 'N°'}, 
+            {"header": 'Référence'}, 
+            {"header": 'Entreprise'}, 
+            {"header": 'Titre'},
+            {"header": 'Total employés'},
+            {"header": 'Statut'},
+            {"header": 'Date'},
+        ]
+    }
+    
+    file = export_xlsx(name, options, counter, 'H')
+
+    return FileResponse(file, as_attachment=True, filename=f"export_excel_{name.lower()}.xlsx")

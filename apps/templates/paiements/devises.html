@@ -68,10 +68,13 @@
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des dévises</em>
                   {% if 'a-devises-actualiser' in user.permissions.codes or user.is_staff %}
-                    <a href="#" class="btn btn-sm btn-neutral float-right" role="button" data-id="a-devises-actualiser" data-toggle="modal" data-target="#modal-devise-update">Actualiser</a>
+                    <a href="{% url 'paiement:print_devises' %}" target="_blank" class="btn btn-sm btn-danger float-right" role="button" data-id="a-devises-exportpdf">PDF</a>
                   {% endif %}
                   {% if 'a-devises-actualiser' in user.permissions.codes or user.is_staff %}
-                    <a href="{% url 'paiement:print_devises' %}" target="_blank" class="btn btn-sm btn-danger mr-2 float-right" role="button" data-id="a-devises-exportpdf">PDF</a>
+                    <a href="{% url 'paiement:export_devises' %}" target="_blank" class="btn btn-sm btn-success ml-2 float-right" role="button" data-id="a-devises-exportxlsx">XLSX</a>
+                  {% endif %}
+                  {% if 'a-devises-actualiser' in user.permissions.codes or user.is_staff %}
+                    <a href="#" class="btn btn-sm btn-neutral float-right" role="button" data-id="a-devises-actualiser" data-toggle="modal" data-target="#modal-devise-update">Actualiser</a>
                   {% endif %}
                 </h3>
                 

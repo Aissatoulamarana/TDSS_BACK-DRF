@@ -63,10 +63,10 @@
               <!-- Card header -->
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des utilisateurs du système</em>
-                  {% if 'a-utilisateurs-ajouter' in user.permissions.codes or user.is_staff %}
+                  {% if 'a-utilisateurs-exportpdf' in user.permissions.codes or user.is_staff %}
                     <a href="{% url 'paiement:print_users' %}" target="_blank" data-id="a-utilisateurs-exportpdf" class="btn btn-sm btn-danger float-right">PDF</a>
                   {% endif %}
-                  {% if 'a-utilisateurs-ajouter' in user.permissions.codes or user.is_staff %}
+                  {% if 'a-utilisateurs-exportxlsx' in user.permissions.codes or user.is_staff %}
                     <a href="{% url 'paiement:export_users' %}" target="_blank" data-id="a-utilisateurs-exportxlsx" class="btn btn-sm btn-success ml-2 float-right">XLSX</a>
                   {% endif %}
                   {% if 'a-utilisateurs-ajouter' in user.permissions.codes or user.is_staff %}

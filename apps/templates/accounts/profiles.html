@@ -108,10 +108,10 @@
               <!-- Card header -->
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des profils du système</em>
-                  {% if 'a-profiles-ajouter' in user.permissions.codes or user.is_staff %}
+                  {% if 'a-profiles-exportpdf' in user.permissions.codes or user.is_staff %}
                   <a href="{% url 'paiement:print_profiles' %}" target="_blank" data-id="a-profiles-exportpdf" class="btn btn-sm btn-danger float-right">PDF</a>
                   {% endif %}
-                  {% if 'a-profiles-ajouter' in user.permissions.codes or user.is_staff %}
+                  {% if 'a-profiles-exportxlsx' in user.permissions.codes or user.is_staff %}
                   <a href="{% url 'paiement:export_profiles' %}" target="_blank" data-id="a-profiles-exportxlsx" class="btn btn-sm btn-success ml-2 float-right">XLSX</a>
                   {% endif %}
                   {% if 'a-profiles-ajouter' in user.permissions.codes or user.is_staff %}

@@ -69,10 +69,10 @@
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des paiements</em>
                   <!-- <a href="{% url 'paiement:add_payment' %}" class="btn btn-sm btn-neutral float-right">+ Ajouter</a> -->
-                  {% if 'a-paiements-generer' in user.permissions.codes or user.is_staff %}
+                  {% if 'a-paiements-exportpdf' in user.permissions.codes or user.is_staff %}
                     <a href="{% url 'paiement:print_paiements' %}" target="_blank" class="btn btn-sm btn-danger float-right" role="button" data-id="a-paiements-exportpdf">PDF</a>
                   {% endif %}
-                  {% if 'a-paiements-generer' in user.permissions.codes or user.is_staff %}
+                  {% if 'a-paiements-exportxlsx' in user.permissions.codes or user.is_staff %}
                     <a href="{% url 'paiement:export_paiements' %}" target="_blank" class="btn btn-sm btn-success ml-2 float-right" role="button" data-id="a-paiements-exportxlsx">XLSX</a>
                   {% endif %}
                   {% if 'a-paiements-generer' in user.permissions.codes or user.is_staff %}

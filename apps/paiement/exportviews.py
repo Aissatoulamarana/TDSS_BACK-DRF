@@ -275,6 +275,7 @@ def export_xlsx(name, options, counter, col):
 
     caption = f"LISTE DES {name.upper()}"
     page_header = 'apps/static/assets/img/bill/header_aguipee_tdss.png'
+    number_format = workbook.add_format({"num_format": "$#,##0"})
 
     bold = workbook.add_format({"bold": True})
     worksheet.write_rich_string("C8",  bold, f"{caption}", " ")
@@ -487,7 +488,7 @@ def exportxlsx_bills_view(request):
             {"header": 'Référence'}, 
             {"header": 'Titre déclaration'}, 
             {"header": 'Entreprise'},
-            {"header": 'Montant', },
+            {"header": 'Montant'},
             {"header": 'Dévise'},
             {"header": 'Statut'},
             {"header": 'Date'},

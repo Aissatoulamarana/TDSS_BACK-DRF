@@ -69,12 +69,12 @@
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des factures</em>
                   <!-- <a href="{% url 'paiement:add_facture' %}" class="btn btn-sm btn-neutral float-right">+ Ajouter</a> -->
-                  <!-- {% if 'a-factures-consulter' in user.permissions.codes or user.is_staff %} -->
+                  {% if 'a-factures-exportpdf' in user.permissions.codes or user.is_staff %}
                   <a href="{% url 'paiement:print_bills' %}" target="_blank" class="btn btn-sm btn-danger float-right" role="button" data-id="a-paiements-exportpdf">PDF</a>
-                  <!-- {% endif %} -->
-                  <!-- {% if 'a-factures-consulter' in user.permissions.codes or user.is_staff %} -->
+                  {% endif %}
+                  {% if 'a-factures-exportxlsx' in user.permissions.codes or user.is_staff %}
                     <a href="{% url 'paiement:export_bills' %}" target="_blank" class="btn btn-sm btn-success mr-2 float-right" role="button" data-id="a-paiements-exportxlsx">XLSX</a>
-                  <!-- {% endif %} -->
+                  {% endif %}
                 </h3>
               </div>
               <!-- Light table -->

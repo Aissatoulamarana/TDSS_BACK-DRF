@@ -65,14 +65,21 @@
               <!-- Card header -->
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des agences du système</em>
+                  {% if 'a-agences-exportpdf' in user.permissions.codes or user.is_staff %}
+                    <a href="{% url 'paiement:print_agencies' %}" target="_blank" data-id="a-agences-exportpdf" class="btn btn-sm btn-danger float-right">PDF</a>
+                  {% endif %}
+                  {% if 'a-agences-exportxlsx' in user.permissions.codes or user.is_staff %}
+                    <a href="{% url 'paiement:export_agencies' %}" target="_blank" data-id="a-agences-exportxlsx" class="btn btn-sm btn-success ml-2 float-right">XLSX</a>
+                  {% endif %}
                   {% if 'a-agences-ajouter' in user.permissions.codes or user.is_staff %}
                     <a href="{% url 'authentication:add_agency' %}" data-id="a-agences-ajouter" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
                   {% endif %}
+                  
                 </h3>
               </div>
               <!-- Light table -->
               <div class="table-responsive" data-toggle="list" data-list-values='["n°", "code", "region", "name", "actions"]'>
-                <table class="table align-items-center table-flush">
+                <table class="table align-items-center table-flush" id="datatable-basic">
                   <thead class="thead-light">
                     <tr>
                       <th scope="col" class="sort" data-sort="row">N°</th>
@@ -101,7 +108,7 @@
                         <td class="name">
                           {{agency.name}}
                         </td>
-                        <td class="text-center justify-content-center">
+                        <td class="actions">
                           {% if 'a-agences-consulter' in user.permissions.codes or user.is_staff %}
                             <span>
                               <button class="btn btn-sm btn-icon-only" role="button" data-id="a-agences-consulter" data-toggle="modal" data-target="#modal-agency-{{agency.id}}">View</button>
@@ -132,7 +139,7 @@
                                           
                                         <div class="row">
                                           <div class="col">
-                                            <div>
+                                            <div class="text-center">
                                               <span class="heading"> <h2>{{agency.name}}</h2> </span>
                                               <!-- <span class="description">Titre</span> -->
                                             </div>
@@ -173,7 +180,7 @@
                 </table>
               </div>
               <!-- Card footer -->
-              <div class="card-footer py-4">
+              <!-- <div class="card-footer py-4">
                 <nav aria-label="...">
                   <ul class="pagination justify-content-end mb-0">
                     <li class="page-item disabled">
@@ -197,7 +204,7 @@
                     </li>
                   </ul>
                 </nav>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
@@ -219,6 +226,23 @@
 
     $(".edit-link").click(function() {
       window.location = $(this).data("href");
-    })
+    });
+    
+    $( document ).ready(function() {
+      // $('#datatable-basic').DataTable( {
+      //   destroy: true,
+      //   "language": {
+      //     "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json"
+      //   },
+      //   // "oLanguage": {
+      //   //   "sLengthMenu": "Display _MENU_ records per page",
+      //   //   "sZeroRecords": "Nothing found - sorry",
+      //   //   "sInfo": "Showing _START_ to _END_ of _TOTAL_ records",
+      //   //   "sInfoEmpty": "Showing 0 to 0 of 0 records",
+      //   //   "sInfoFiltered": "(filtered from _MAX_ total records)"
+      //   // }
+      // } );
+    });
   </script>
+    
 {% endblock javascripts %}

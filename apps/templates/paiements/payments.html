@@ -1,4 +1,5 @@
 {% extends "layouts/base.html" %}
+{% load custom_filters %}
 
 {% block title %} Liste {% endblock %}
 
@@ -68,6 +69,12 @@
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des paiements</em>
                   <!-- <a href="{% url 'paiement:add_payment' %}" class="btn btn-sm btn-neutral float-right">+ Ajouter</a> -->
+                  {% if 'a-paiements-exportpdf' in user.permissions.codes or user.is_staff %}
+                    <a href="{% url 'paiement:print_paiements' %}" target="_blank" class="btn btn-sm btn-danger float-right" role="button" data-id="a-paiements-exportpdf">PDF</a>
+                  {% endif %}
+                  {% if 'a-paiements-exportxlsx' in user.permissions.codes or user.is_staff %}
+                    <a href="{% url 'paiement:export_paiements' %}" target="_blank" class="btn btn-sm btn-success ml-2 float-right" role="button" data-id="a-paiements-exportxlsx">XLSX</a>
+                  {% endif %}
                   {% if 'a-paiements-generer' in user.permissions.codes or user.is_staff %}
                     <button class="btn btn-sm btn-neutral float-right" data-id="a-paiements-generer" role="button" data-toggle="modal" data-target="#modal-payment-generate">Generate</button>
                   {% endif %}
@@ -118,11 +125,12 @@
                 </div>
               </div>
               <!-- Light table -->
-              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "banque", "client", "payer", "amount", "date", "actions"]'>
+              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "ref", "banque", "client", "payer", "amount", "date", "actions"]'>
                 <table class="table align-items-center table-flush" id="datatable-basic">
                   <thead class="thead-light">
                     <tr>
                       <th scope="col" class="sort" data-sort="n°">N°</th>
+                      <th scope="col" class="sort" data-sort="ref">Référence</th>
                       <th scope="col" class="sort" data-sort="banque">Banque</th>
                       <th scope="col" class="sort" data-sort="client">Entreprise</th>
                       <th scope="col" class="sort" data-sort="payer">Payeur</th>
@@ -137,6 +145,9 @@
                         <td class="n°">
                           {{forloop.counter}}
                         </td>
+                        <td class="n°">
+                          {{payment|get_reference}}
+                        </td>
                         <td class="banque">
                           {{payment.created_by.profile.name}}
                         </td>
@@ -147,12 +158,12 @@
                           {{payment.payer}}
                         </td>
                         <td>
-                            {{payment.amount}} {{payment.devise.sign}}
+                            {{payment.amount | to_amount}} {{payment.devise.sign}}
                         </td>
                         <td class="date">
                           {{payment.created_on|date:"d/m/y H:m"}}
                         </td>
-                        <td >
+                        <td class="actions">
                           <span>
                             {% if 'a-paiements-consulter' in user.permissions.codes or user.is_staff %}
                             <button class="btn btn-sm btn-icon-only" role="button" data-id="a-paiements-consulter" data-toggle="modal" data-target="#modal-payment-{{payment.id}}">View</button>
@@ -185,7 +196,7 @@
                                         </div>
                                         <div class="col">
                                           <i class="ni education_hat mr-2"></i><span class="text-muted">Montant:</span>
-                                          <span class="heading"><strong>{{payment.amount}} {{payment.devise.sign}}</strong></span>
+                                          <span class="heading"><strong>{{payment.amount | to_amount}} {{payment.devise.sign}}</strong></span>
                                         </div>
                                       </div>
                                         
@@ -292,20 +303,10 @@
       window.location = $(this).data("href");
     })
   </script>
-
-   <!-- For tables purpose -->
-   <script src="/static/assets/vendor/datatables.net/js/jquery.dataTables.min.js"></script>
-   <script src="/static/assets/vendor/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
-   <script src="/static/assets/vendor/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
-   <script src="/static/assets/vendor/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js"></script>
-   <script src="/static/assets/vendor/datatables.net-buttons/js/buttons.html5.min.js"></script>
-   <script src="/static/assets/vendor/datatables.net-buttons/js/buttons.flash.min.js"></script>
-   <script src="/static/assets/vendor/datatables.net-buttons/js/buttons.print.min.js"></script>
-   <script src="/static/assets/vendor/datatables.net-select/js/dataTables.select.min.js"></script>
  
-   <script>
-     // $(document).ready(function () {
-     //   console.log($('#datatable-basic_length').children().first()[0])
-     // });
-   </script>
+  <script>
+    // $(document).ready(function () {
+    //   console.log($('#datatable-basic_length').children().first()[0])
+    // });
+  </script>
 {% endblock javascripts %}

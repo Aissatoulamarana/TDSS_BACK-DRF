@@ -63,6 +63,12 @@
               <!-- Card header -->
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des utilisateurs du système</em>
+                  {% if 'a-utilisateurs-exportpdf' in user.permissions.codes or user.is_staff %}
+                    <a href="{% url 'paiement:print_users' %}" target="_blank" data-id="a-utilisateurs-exportpdf" class="btn btn-sm btn-danger float-right">PDF</a>
+                  {% endif %}
+                  {% if 'a-utilisateurs-exportxlsx' in user.permissions.codes or user.is_staff %}
+                    <a href="{% url 'paiement:export_users' %}" target="_blank" data-id="a-utilisateurs-exportxlsx" class="btn btn-sm btn-success ml-2 float-right">XLSX</a>
+                  {% endif %}
                   {% if 'a-utilisateurs-ajouter' in user.permissions.codes or user.is_staff %}
                     <a href="{% url 'authentication:add_user' %}" data-id="a-utilisateurs-ajouter" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
                   {% endif %}
@@ -70,7 +76,7 @@
               </div>
               <!-- Light table -->
               <div class="table-responsive" data-toggle="list" data-list-values='["n°", "email", "prenons&nom", "phone", "statut", "actions"]'>
-                <table class="table align-items-center table-flush">
+                <table class="table align-items-center table-flush" id="datatable-basic">
                   <thead class="thead-light">
                     <tr>
                       <th scope="col" class="sort" data-sort="n°">N°</th>
@@ -116,7 +122,7 @@
                               </span>
                             {% endif %}
                         </td>
-                        <td class="text-center justify-content-center">
+                        <td class="actions">
                           {% if 'a-utilisateurs-consulter' in user.permissions.codes or user.is_staff %}
                             <span>
                               <button class="btn btn-sm btn-icon-only" role="button" data-id="a-utilisateurs-consulter" data-toggle="modal" data-target="#modal-user-{{rowuser.id}}">View</button>
@@ -201,7 +207,7 @@
                                           <span class="float-right"><i class="fas fa-phone mr-2"></i> {{rowuser.phone}}</span>
                                         </div>
                                         <div>
-                                          <i class="ni education_hat mr-2"></i><strong>Permissions:</strong> {{rowuser.permissions.name}}<br>
+                                          <i class="ni education_hat"></i><strong>Permissions:</strong> {{rowuser.permissions.name}}<br>
                                           <!-- Persmissions Handles here -->
                                         </div>
                                       </div>
@@ -287,31 +293,7 @@
                 </table>
               </div>
               <!-- Card footer -->
-              <div class="card-footer py-4">
-                <nav aria-label="...">
-                  <ul class="pagination justify-content-end mb-0">
-                    <li class="page-item disabled">
-                      <a class="page-link" href="#" tabindex="-1">
-                        <i class="fas fa-angle-left"></i>
-                        <span class="sr-only">Previous</span>
-                      </a>
-                    </li>
-                    <li class="page-item active">
-                      <a class="page-link" href="#">1</a>
-                    </li>
-                    <li class="page-item">
-                      <a class="page-link" href="#">2 <span class="sr-only">(current)</span></a>
-                    </li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item">
-                      <a class="page-link" href="#">
-                        <i class="fas fa-angle-right"></i>
-                        <span class="sr-only">Next</span>
-                      </a>
-                    </li>
-                  </ul>
-                </nav>
-              </div>
+              
             </div>
           </div>
         </div>

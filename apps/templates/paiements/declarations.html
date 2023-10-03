@@ -68,6 +68,12 @@
               <!-- Card header -->
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des déclarations</em>
+                  {% if 'a-declarations-exportpdf' in user.permissions.codes or user.is_staff %}
+                    <a href="{% url 'paiement:print_declarations' %}" target="_blank" class="btn btn-sm btn-danger float-right" role="button" data-id="a-declarations-exportpdf">PDF</a>
+                  {% endif %}
+                  {% if 'a-declarations-exportxlsx' in user.permissions.codes or user.is_staff %}
+                    <a href="{% url 'paiement:export_declarations' %}" target="_blank" class="btn btn-sm btn-success ml-2 float-right" role="button" data-id="a-declarations-exportxlsx">XLSX</a>
+                  {% endif %}
                   {% if 'a-declarations-ajouter' in user.permissions.codes or user.is_staff %}
                     <a href="#" class="btn btn-sm btn-neutral float-right" role="button" data-id="a-declarations-ajouter" data-toggle="modal" data-target="#modal-declaration-add">+Ajouter</a>
                   {% endif %}
@@ -123,11 +129,12 @@
                 </div>
               </div>
               <!-- Light table -->
-              <div class="table-responsive py-4" data-toggle="list" data-list-values='["n°", "client", "title",  "total_employee", "status", "date", "actions"]'>
+              <div class="table-responsive py-4" data-toggle="list" data-list-values='["n°", "ref", "client", "title",  "total_employee", "status", "date", "actions"]'>
                 <table class="table align-items-center table-flush" id="datatable-basic"> <!--  id="datatable-basic" -->
                   <thead class="thead-light">
                     <tr>
                       <th scope="col" class="sort" data-sort="n°">N°</th>
+                      <th scope="col" class="sort" data-sort="ref">Référence</th>
                       <th scope="col" class="sort" data-sort="client">Entreprise</th>
                       <th scope="col" class="sort" data-sort="title">Titre</th>
                       <th scope="col" class="sort" data-sort="total_employee">Total Employées</th>
@@ -141,6 +148,9 @@
                       <tr>
                         <td class="n°">
                           {{forloop.counter}}
+                        </td>
+                        <td class="n°">
+                          {{declaration|get_reference}}
                         </td>
                         <td scope="client" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px;">
                           {{declaration.created_by.profile.name}}
@@ -157,7 +167,7 @@
                         <td class="status">
                           {{declaration.created_on|date:"d/m/y H:m"}}
                       </td>
-                        <td >
+                        <td class="actions">
                           <span>
                             {% if 'a-declarations-consulter' in user.permissions.codes or user.is_staff %}
                               <button class="btn btn-sm btn-icon-only" role="button" data-id="a-declarations-consulter" data-toggle="modal" data-target="#modal-declaration-{{declaration.id}}">View</button>
@@ -529,21 +539,5 @@
     $(".edit-link").click(function() {
       window.location = $(this).data("href");
     });
-  </script>
-
-  <!-- For tables purpose -->
-  <script src="/static/assets/vendor/datatables.net/js/jquery.dataTables.min.js"></script>
-  <script src="/static/assets/vendor/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
-  <script src="/static/assets/vendor/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
-  <script src="/static/assets/vendor/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js"></script>
-  <script src="/static/assets/vendor/datatables.net-buttons/js/buttons.html5.min.js"></script>
-  <script src="/static/assets/vendor/datatables.net-buttons/js/buttons.flash.min.js"></script>
-  <script src="/static/assets/vendor/datatables.net-buttons/js/buttons.print.min.js"></script>
-  <script src="/static/assets/vendor/datatables.net-select/js/dataTables.select.min.js"></script>
-
-  <script>
-    // $(document).ready(function () {
-    //   console.log($('#datatable-basic_length').children().first()[0])
-    // });
   </script>
 {% endblock javascripts %}

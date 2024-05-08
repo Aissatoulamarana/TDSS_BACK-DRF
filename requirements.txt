@@ -10,3 +10,7 @@ psycopg2-binary==2.9.9
 reportlab==4.1.0
 qrcode==7.4.2
 djangorestframework==3.15.1
+djangorestframework-api-key==3.0.0
+django-environ==0.10.0
+XlsxWriter==3.2.0
+

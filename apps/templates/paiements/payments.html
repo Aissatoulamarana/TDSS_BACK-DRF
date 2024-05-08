@@ -1,4 +1,5 @@
 {% extends "layouts/base.html" %}
+{% load custom_filters %}
 
 {% block title %} Liste {% endblock %}
 
@@ -42,18 +43,20 @@
 
         {% if messages %}
           <!-- Alerts -->
-          <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <span class="alert-icon"><i class="ni ni-like-2"></i></span>
-            <span class="alert-text">
-              <strong>Success!</strong>
-              {% for message in messages %}
-                {{ message | safe }}
-              {% endfor %}
-            </span>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
+          {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'success' %}success{% else %}danger{% endif %} alert-dismissible fade show" role="alert">
+              <span class="alert-icon">
+                {% if message.tags == 'success' %}<i class="ni ni-like-2"></i>{% else %}<i class="fas fa-thumbs-down"></i>{% endif %}
+              </span>
+              <span class="alert-text">
+                <strong>{% if message.tags == 'success' %}Succès !{% else %}Erreur !{% endif %}</strong>
+                {{ message | safe }} <br>
+              </span>
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+          {% endfor %}
         {% endif %}
 
       
@@ -66,6 +69,12 @@
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des paiements</em>
                   <!-- <a href="{% url 'paiement:add_payment' %}" class="btn btn-sm btn-neutral float-right">+ Ajouter</a> -->
+                  {% if 'a-paiements-exportpdf' in user.permissions.codes or user.is_staff %}
+                    <a href="{% url 'paiement:print_paiements' %}" target="_blank" class="btn btn-sm btn-danger float-right" role="button" data-id="a-paiements-exportpdf">PDF</a>
+                  {% endif %}
+                  {% if 'a-paiements-exportxlsx' in user.permissions.codes or user.is_staff %}
+                    <a href="{% url 'paiement:export_paiements' %}" target="_blank" class="btn btn-sm btn-success ml-2 float-right" role="button" data-id="a-paiements-exportxlsx">XLSX</a>
+                  {% endif %}
                   {% if 'a-paiements-generer' in user.permissions.codes or user.is_staff %}
                     <button class="btn btn-sm btn-neutral float-right" data-id="a-paiements-generer" role="button" data-toggle="modal" data-target="#modal-payment-generate">Generate</button>
                   {% endif %}
@@ -95,7 +104,7 @@
                                 <div class="form-group">
                                   <div class="input-group input-group-merge">
                                     <div class="input-group-prepend">
-                                      <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                      <span class="input-group-text"><i class="fas fa-barcode"></i></span>
                                     </div>
                                     <input class="form-control" type="text" name="facture_ref" id="facture_ref" placeholder="N° de la référence" required>
                                   </div>
@@ -116,15 +125,17 @@
                 </div>
               </div>
               <!-- Light table -->
-              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "ref", "payer",  "type", "amount", "actions"]'>
-                <table class="table align-items-center table-flush">
+              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "ref", "banque", "client", "payer", "amount", "date", "actions"]'>
+                <table class="table align-items-center table-flush" id="datatable-basic">
                   <thead class="thead-light">
                     <tr>
                       <th scope="col" class="sort" data-sort="n°">N°</th>
                       <th scope="col" class="sort" data-sort="ref">Référence</th>
+                      <th scope="col" class="sort" data-sort="banque">Banque</th>
+                      <th scope="col" class="sort" data-sort="client">Entreprise</th>
                       <th scope="col" class="sort" data-sort="payer">Payeur</th>
-                      <th scope="col" class="sort" data-sort="type">Type</th>
                       <th scope="col" class="sort" data-sort="amount">Montant</th>
+                      <th scope="col" class="sort" data-sort="date">Date</th>
                       <th scope="col" class="sort" data-sort="Actions">Actions</th>
                     </tr>
                   </thead>
@@ -134,19 +145,25 @@
                         <td class="n°">
                           {{forloop.counter}}
                         </td>
-                        <th scope="ref">
-                          {{payment.reference}}
+                        <td class="n°">
+                          {{payment|get_reference}}
+                        </td>
+                        <td class="banque">
+                          {{payment.created_by.profile.name}}
+                        </td>
+                        <th scope="client" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px;">
+                          {{payment.facture_ref.client.name}}
                         </th>
-                        <td class="payer">
+                        <td class="amount">
                           {{payment.payer}}
                         </td>
-                        <td class="type">
-                          {{payment.type}}
-                        </td>
                         <td>
-                            {{payment.amount}} {{payment.devise.sign}}
+                            {{payment.amount | to_amount}} {{payment.devise.sign}}
                         </td>
-                        <td class="text-center justify-content-center">
+                        <td class="date">
+                          {{payment.created_on|date:"d/m/y H:m"}}
+                        </td>
+                        <td class="actions">
                           <span>
                             {% if 'a-paiements-consulter' in user.permissions.codes or user.is_staff %}
                             <button class="btn btn-sm btn-icon-only" role="button" data-id="a-paiements-consulter" data-toggle="modal" data-target="#modal-payment-{{payment.id}}">View</button>
@@ -162,10 +179,11 @@
                                 <div class="modal-body">
 
                                   <div class="card card-agency mt--4 mb--4">
-                                    <div class="card-header text-center">
-                                      <div class="row text-center">
+                                    <div class="card-header ">
+                                      <div class="row ">
                                         <div class="col">
-                                          <i class="ni education_hat mr-2"></i><strong>Référence:</strong> {{payment.reference}}
+                                          <span class="text-left"><strong>Date:</strong> {{payment.created_on|date:"d/m/y H:m"}}</span> <br>
+                                          <strong>Référence:</strong> {{payment.reference}}
                                         </div>
                                       </div>
                                         
@@ -173,34 +191,34 @@
                                     <div class="card-body">
                                       <div class="row">
                                         <div class="col">
-                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Type:</span> 
-                                          <strong>{{payment.type}}</strong>
+                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Payeur:</span> 
+                                          <span class="heading"> <strong>{{payment.payer.first}} {{payment.payer.last}}</strong> </span>
                                         </div>
                                         <div class="col">
                                           <i class="ni education_hat mr-2"></i><span class="text-muted">Montant:</span>
-                                          <strong>{{payment.amount}} {{payment.devise.sign}}</strong>
+                                          <span class="heading"><strong>{{payment.amount | to_amount}} {{payment.devise.sign}}</strong></span>
                                         </div>
                                       </div>
                                         
                                       <div class="row mt-3 mb-3">
                                         <div class="col">
                                           <div>
-                                            <i class="ni ni-education_hat mr-2"></i><span class="text-muted">Payeur:</span>
-                                            <span class="heading"> <h3>{{payment.payer.first}} {{payment.payer.last}}</h3> </span>
+                                            <!-- <i class="ni ni-education_hat mr-2"></i><span class="text-muted">Payeur:</span>
+                                            <span class="heading"> <h3>{{payment.payer.first}} {{payment.payer.last}}</h3> </span> -->
                                           </div>
                                         </div>
                                       </div>
-                                      <div class="row">
+                                      <div class="row text-center">
                                         <div class="col">
-                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Nationalité:</span><br> 
+                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Nationalité</span><br> 
                                           <strong>{{payment.payer.country_origin}}</strong>
                                         </div>
                                         <div class="col">
-                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Employeur:</span><br> 
+                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Employeur</span><br> 
                                           <strong>{{payment.payer.employer}}</strong>
                                         </div>
                                         <div class="col">
-                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Fonction:</span><br> 
+                                          <i class="ni education_hat mr-2"></i><span class="text-muted">Fonction</span><br> 
                                           <strong>{{payment.payer.job}}</strong>
                                         </div>
                                       </div>
@@ -234,7 +252,7 @@
                 </table>
               </div>
               <!-- Card footer -->
-              <div class="card-footer py-4">
+              <!-- <div class="card-footer py-4">
                 <nav aria-label="...">
                   <ul class="pagination justify-content-end mb-0">
                     <li class="page-item disabled">
@@ -258,7 +276,7 @@
                     </li>
                   </ul>
                 </nav>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
@@ -284,5 +302,11 @@
     $(".edit-link").click(function() {
       window.location = $(this).data("href");
     })
+  </script>
+ 
+  <script>
+    // $(document).ready(function () {
+    //   console.log($('#datatable-basic_length').children().first()[0])
+    // });
   </script>
 {% endblock javascripts %}

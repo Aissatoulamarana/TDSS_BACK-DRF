@@ -95,9 +95,8 @@ class PaymentForm(forms.ModelForm):
     class Meta:
         model = Payment
         fields = ('type', 'amount', 'devise', 'comment')
-        # Omitted fields: id, facture_ref, reference, payer, created_by, created_on, modified_on
+        # Omitted fields: id, type, facture_ref, reference, payer, created_by, created_on, modified_on
         widgets = {
-            'type': Select(attrs={'class': "form-control amount-param", 'placeholder': "Type de document"}),
             'amount': NumberInput(attrs={'class': "form-control", 'placeholder': "0.00", 'min': 0, 'type': "number", 'readonly': True}),
             'devise': Select(attrs={'class': "form-control amount-param"}),
             'comment': Textarea(attrs={'rows':3, 'placeholder': "Commentaire...", 'class': "form-control" })

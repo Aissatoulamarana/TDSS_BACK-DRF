@@ -12,7 +12,7 @@ from apps.authentication.models import CustomUser, Profile
 class Devise(models.Model):
     name = models.CharField(max_length=20)
     sign = models.CharField(max_length=3)
-    value = models.DecimalField(max_digits=7, decimal_places=2, default=1)
+    value = models.DecimalField(max_digits=15, decimal_places=2, default=1)
     comment = models.TextField(max_length=255, blank=True, null=True)
 
     def __str__(self):
@@ -22,7 +22,7 @@ class Devise(models.Model):
 class Permit(models.Model):
     name = models.CharField(max_length=50)
     type = models.CharField(max_length=30, choices=[('A', "A"), ('B', "B"), ('C', "C")], default="A")
-    price = models.DecimalField(max_digits=9, decimal_places=2)
+    price = models.DecimalField(max_digits=15, decimal_places=2)
     devise = models.ForeignKey(Devise, on_delete=models.PROTECT)
     comment = models.TextField(max_length=255, blank=True, null=True)
 
@@ -61,13 +61,16 @@ class Country(models.Model):
 
 class Declaration(models.Model):
     status_choices = [
-        ('unvalidated', "Non Validée"), 
+        ('unsubmitted', "Non soumise"),
+        ('submitted', "Soumise"),
+        ('rejected', "Rejetée"), 
         ('validated', "Validée"),
         ('billed', "Facturée")
     ]
     reference = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     title = models.CharField(max_length=100)
-    status = models.CharField(max_length=30, choices=status_choices, default="unvalidated")
+    status = models.CharField(max_length=30, choices=status_choices, default="unsubmitted")
+    reject_reason = models.CharField(max_length=255, blank=True, null=True)
     comment = models.TextField(max_length=255, blank=True, null=True)
     created_by = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
     created_on = models.DateTimeField(auto_now_add=True)
@@ -78,12 +81,17 @@ class Declaration(models.Model):
 
 
 class Employee(models.Model):
+    status_choices = [
+        ('unenrolled', "Non enrôlé"),
+        ('enrolled', "Enrôlé")
+    ]
     declaration = models.ForeignKey(Declaration, on_delete=models.PROTECT, related_name="employee_declarations")
     passport_number = models.CharField(max_length=50, unique=True)
-    first = models.CharField(max_length=100, verbose_name="first name")
+    first = models.CharField(max_length=100, verbose_name="first_name")
     last = models.CharField(max_length=50, verbose_name="last_name")
     email = models.EmailField(max_length=100, blank=True, null=True)
     phone = models.IntegerField()
+    status = models.CharField(max_length=30, choices=status_choices, default="unenrolled")
     job_category = models.ForeignKey(JobCategory, on_delete=models.PROTECT, blank=True, null=True, related_name="employee_job_categories")
     job = models.ForeignKey(Job, on_delete=models.PROTECT, blank=True, null=True, related_name="employee_jobs")
 
@@ -92,6 +100,10 @@ class Employee(models.Model):
 
 
 class Facture(models.Model):
+    status_choices = [
+        ('unpaid', "Impayée"),
+        ('paid', "Payée")
+    ]
     reference = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     declaration_ref = models.ForeignKey(Declaration, on_delete=models.PROTECT, related_name="declaration_factures")
     client = models.ForeignKey(Profile, on_delete=models.PROTECT)
@@ -99,6 +111,7 @@ class Facture(models.Model):
     total_agents = models.SmallIntegerField()
     total_ouvriers = models.SmallIntegerField()
     amount = models.DecimalField(max_digits=15, decimal_places=2)
+    status = models.CharField(max_length=30, choices=status_choices, default="unpaid")
     devise = models.ForeignKey(Devise, on_delete=models.PROTECT, related_name="facture_devises")
     comment = models.TextField(max_length=255, blank=True, null=True)
     created_by = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
@@ -126,9 +139,9 @@ class Payer(models.Model):
 class Payment(models.Model):
     reference = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     facture_ref = models.ForeignKey(Facture, on_delete=models.PROTECT, blank=True, null=True)
-    type = models.ForeignKey(Permit, on_delete=models.PROTECT, related_name="payment_permits_types")
+    type = models.ForeignKey(Permit, on_delete=models.PROTECT, blank=True, null=True, related_name="payment_permits_types")
     payer = models.ForeignKey(Payer, on_delete=models.PROTECT, related_name="payment_payers")
-    amount = models.DecimalField(max_digits=9, decimal_places=2)
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
     devise = models.ForeignKey(Devise, on_delete=models.PROTECT, related_name="payment_devises")
     comment = models.TextField(max_length=255, blank=True, null=True)
     created_by = models.ForeignKey(CustomUser, on_delete=models.PROTECT)

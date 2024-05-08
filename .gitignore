@@ -32,3 +32,9 @@ apps/static/assets/.temp
 media/*
 /data
 /*.sqlite*
+
+# Ignore files for docker prod
+Dockerfile
+manage.py
+docker-compose.yml
+requirements.txt

@@ -43,18 +43,20 @@
 
         {% if messages %}
           <!-- Alerts -->
-          <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <span class="alert-icon"><i class="ni ni-like-2"></i></span>
-            <span class="alert-text">
-              <strong>Success!</strong>
-              {% for message in messages %}
-                {{ message | safe }}
-              {% endfor %}
-            </span>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
+          {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'success' %}success{% else %}danger{% endif %} alert-dismissible fade show" role="alert">
+              <span class="alert-icon">
+                {% if message.tags == 'success' %}<i class="ni ni-like-2"></i>{% else %}<i class="fas fa-thumbs-down"></i>{% endif %}
+              </span>
+              <span class="alert-text">
+                <strong>{% if message.tags == 'success' %}Succès !{% else %}Erreur !{% endif %}</strong>
+                {{ message | safe }} <br>
+              </span>
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+          {% endfor %}
         {% endif %}
 
       
@@ -67,17 +69,26 @@
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des factures</em>
                   <!-- <a href="{% url 'paiement:add_facture' %}" class="btn btn-sm btn-neutral float-right">+ Ajouter</a> -->
+                  {% if 'a-factures-exportpdf' in user.permissions.codes or user.is_staff %}
+                  <a href="{% url 'paiement:print_bills' %}" target="_blank" class="btn btn-sm btn-danger float-right" role="button" data-id="a-paiements-exportpdf">PDF</a>
+                  {% endif %}
+                  {% if 'a-factures-exportxlsx' in user.permissions.codes or user.is_staff %}
+                    <a href="{% url 'paiement:export_bills' %}" target="_blank" class="btn btn-sm btn-success mr-2 float-right" role="button" data-id="a-paiements-exportxlsx">XLSX</a>
+                  {% endif %}
                 </h3>
               </div>
               <!-- Light table -->
-              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "ref", "company", "amount", "actions"]'>
-                <table class="table align-items-center table-flush">
+              <div class="table-responsive" data-toggle="list" data-list-values='["n°", "ref", "declaration", "company", "amount", "status", "date", "actions"]'>
+                <table class="table align-items-center table-flush" id="datatable-basic">
                   <thead class="thead-light">
                     <tr>
                       <th scope="col" class="sort" data-sort="n°">N°</th>
                       <th scope="col" class="sort" data-sort="ref">Référence</th>
+                      <th scope="col" class="sort" data-sort="declaration">Titre déclaration</th>
                       <th scope="col" class="sort" data-sort="company">Entreprise</th>
                       <th scope="col" class="sort" data-sort="amount">Montant</th>
+                      <th scope="col" class="sort" data-sort="status">Statut</th>
+                      <th scope="col" class="sort" data-sort="date">Date</th>
                       <th scope="col" class="sort" data-sort="Actions">Actions</th>
                     </tr>
                   </thead>
@@ -87,21 +98,30 @@
                         <td class="n°">
                           {{forloop.counter}}
                         </td>
+                        <td class="n°">
+                          {{facture|get_reference}}
+                        </td>
+                        <td class="declaration" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px;">
+                          {{facture.declaration_ref.title}}
+                        </td>
                         <th scope="ref">
-                          {{facture.reference}}
-                        </th>
-                        <td class="company">
                           {{facture.client.name}}
-                        </td>
+                        </th>
                         <td>
-                            {{facture.amount}} {{facture.devise.sign}}
+                            {{facture.amount | to_amount}} {{facture.devise.sign}}
                         </td>
-                        <td class="text-center justify-content-center">
-                          <span>
-                            {% if 'a-factures-consulter' in user.permissions.codes or user.is_staff %}
+                        <td class="status">
+                          {{facture.get_status_display}}
+                        </td>
+                        <td class="date">
+                          {{facture.created_on|date:"d/m/y H:m"}}
+                        </td>
+                        <td class="actions">
+                          {% if 'a-factures-consulter' in user.permissions.codes or user.is_staff %}
+                            <span>
                               <button class="btn btn-sm btn-icon-only" role="button" data-id="a-factures-consulter" data-toggle="modal" data-target="#modal-facture-{{facture.id}}">View</button>
-                            {% endif %}
-                          </span>
+                            </span>
+                          {% endif %}
                             
                           <div class="modal fade" id="modal-facture-{{facture.id}}" tabindex="-1" role="dialog" aria-labelledby="modal-facture-{{facture.id}}" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered modal-lg" role="dialog">
@@ -117,10 +137,13 @@
                                         <div class="col">
                                           <i class="ni education_hat mr-2"></i><strong>Référence:</strong> {{facture.reference}}
                                         </div>
+                                        <div class="col text-right">
+                                          <i class="ni education_hat mr-2"></i><strong>Date:</strong> {{facture.created_on|date:"d/m/y H:m"}}
+                                        </div>
                                       </div>
                                         
                                     </div>
-                                    <div class="card-body">
+                                    <div class="card-body text-center">
                                       <div class="row mb-2">
                                         <div class="col">
                                           <div>
@@ -149,6 +172,7 @@
                                           </thead>
                                           <tbody class="list">
                                             
+                                              {% if facture.total_cadres > 0 %}  
                                               <tr>
                                                 <th scope="row">
                                                   <div class="media align-items-center">
@@ -159,14 +183,16 @@
                                                   <span class="name">{{facture.total_cadres}}</span>
                                                 </td>
                                                 <td class="text-center">
-                                                  <span class="name">{{job_categories.0.permit.price}}</span>
+                                                  <span class="name">{{job_categories.0.permit.price | to_amount}}</span>
                                                 </td>
                                                 <td class="budget">
-                                                  <span class="name">{{job_categories.0.permit.price | multiply:facture.total_cadres}}</span>
+                                                  <span class="name">{{job_categories.0.permit.price | multiply:facture.total_cadres | to_amount}}</span>
                                                 </td>
                                               </tr>
+                                              {% endif %}
 
                                             
+                                              {% if facture.total_agents > 0 %}
                                               <tr>
                                                 <th scope="row">
                                                   <div class="media align-items-center">
@@ -177,14 +203,16 @@
                                                   <span class="name">{{facture.total_agents}}</span>
                                                 </td>
                                                 <td class="text-center">
-                                                  <span class="name">{{job_categories.1.permit.price}}</span>
+                                                  <span class="name">{{job_categories.1.permit.price | to_amount}}</span>
                                                 </td>
                                                 <td class="budget">
-                                                  <span class="name">{{job_categories.1.permit.price | multiply:facture.total_agents}}</span>
+                                                  <span class="name">{{job_categories.1.permit.price | multiply:facture.total_agents | to_amount}}</span>
                                                 </td>
                                               </tr>
+                                              {% endif %}
 
                                             
+                                              {% if facture.total_ouvriers > 0 %}
                                               <tr>
                                                 <th scope="row">
                                                   <div class="media align-items-center">
@@ -195,18 +223,19 @@
                                                   <span class="name">{{facture.total_ouvriers}}</span>
                                                 </td>
                                                 <td class="text-center">
-                                                  <span class="name">{{job_categories.2.permit.price}}</span>
+                                                  <span class="name">{{job_categories.2.permit.price | to_amount}}</span>
                                                 </td>
                                                 <td class="budget">
-                                                  <span class="name">{{job_categories.2.permit.price | multiply:facture.total_ouvriers}}</span>
+                                                  <span class="name">{{job_categories.2.permit.price | multiply:facture.total_ouvriers | to_amount}}</span>
                                                 </td>
                                               </tr>
+                                              {% endif %}
                                             
                                           </tbody>
                                           <tfoot>
                                             <tr class="border-top">
                                               <th class="text-left" colspan="3">TOTAL</th>
-                                              <th class="h2"><h2>{{facture.amount}} {{facture.devise.sign}}</h2></th>
+                                              <th class="h2"><h2>{{facture.amount | to_amount}} {{facture.devise.sign}}</h2></th>
                                             </tr>
                                           </tfoot>
                                         </table>
@@ -223,16 +252,65 @@
                             </div>
                           </div>
 
-                          <!-- <span>
-                            <button data-href="{% url 'paiement:edit_payment' facture.id %}" class="edit-link btn btn-sm btn-icon-only" role="button">Edit</button>
-                          </span> -->
+                          {% if 'a-factures-payer' in user.permissions.codes or user.is_staff %}
+                            {% if facture.status == 'unpaid' %}
+                            <span>
+                              <button class="btn btn-sm btn-icon-only" data-id="a-factures-payer" role="button" data-toggle="modal" data-target="#modal-factures-{{facture.id}}-payer">Pay</button>
+                            </span>
 
-                          <span>
-                            {% if 'a-factures-imprimer' in user.permissions.codes or user.is_staff %}
-                            <button data-href="{% url 'paiement:bill_receipt' facture.id %}" data-id="a-factures-imprimer" onclick="window.open($(this).data('href'), '_blank')" class="btn btn-sm btn-icon-only" role="button">Print</button>
+                            <div class="modal fade" id="modal-factures-{{facture.id}}-payer" tabindex="-1" role="dialog" aria-labelledby="modal-factures-{{facture.id}}-payer" aria-hidden="true">
+                              <div class="modal-dialog modal-dialog-centered" role="dialog">
+                                <div class="modal-content">
+                                  <div class="modal-header justify-content-center">
+                                    <h2>Confirmation</h2>
+                                  </div>
+                                  <form role="form" action="{% url 'paiement:generate_payment' %}" method="post">
+                                    {% csrf_token %}
+                                    <div class="modal-body">
+              
+                                      <div class="card card-agency mt--4 mb--4">
+                                        <div class="card-header text-center">
+                                          <div class="row text-center">
+                                            <div class="col">
+                                              Êtes-vous sûr de vouloir payer cette facture.
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div class="card-body">
+                                          <div class="row">
+                                            <div class="col">
+                                              <div class="form-group text-left">
+                                                <label for="facture_ref">Référence :</label>
+                                                <div class="input-group input-group-merge">
+                                                  <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="fas fa-barcode"></i></span>
+                                                  </div>
+                                                  <input class="form-control" type="text" name="facture_ref" id="facture_ref" value="{{facture.reference}}" placeholder="N° de la référence" readonly>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                
+                                    </div>
+                                    <div class="modal-footer justify-content-center">
+                                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Non</button>
+                                      <input type="button" onclick="$(this).closest('form').submit();" class="btn btn-primary" value="Oui">
+                                    </div>
+                                  </form>
+                                  
+                                </div>
+                              </div>
+                            </div>
                             {% endif %}
-                          </span>
-                          
+                          {% endif %}
+
+                          {% if 'a-factures-imprimer' in user.permissions.codes or user.is_staff %}
+                            <span>
+                              <button data-href="{% url 'paiement:bill_receipt' facture.id %}" data-id="a-factures-imprimer" onclick="window.open($(this).data('href'), '_blank')" class="btn btn-sm btn-icon-only" role="button">Print</button>
+                            </span>
+                          {% endif %}
                         </td>
                       </tr>
                     
@@ -242,7 +320,7 @@
                 </table>
               </div>
               <!-- Card footer -->
-              <div class="card-footer py-4">
+              <!-- <div class="card-footer py-4">
                 <nav aria-label="...">
                   <ul class="pagination justify-content-end mb-0">
                     <li class="page-item disabled">
@@ -266,7 +344,7 @@
                     </li>
                   </ul>
                 </nav>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>

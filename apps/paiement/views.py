@@ -26,10 +26,19 @@ from .models import Devise, Facture, Payer, Payment, Permit, Employee, Declarati
 from apps.authentication.models import Profile, CustomUser
 from .forms import DeviseForm, FactureForm, PayerForm, PaymentForm, EmployeeForm, DeclarationForm
 
+# Global devises for all views
+devises = Devise.objects.all().order_by('id')
+
 
 @login_required(login_url="/login/")
 def payments_view(request):
-    payments = Payment.objects.all()
+    if request.user.profile.type.uid == 1 or request.user.type.uid == 5:
+        payments = Payment.objects.all().order_by('created_on')
+    elif request.user.type.uid == 2:
+        payments = Payment.objects.filter(created_by=request.user).order_by('created_on')
+    else:
+        payments = Payment.objects.filter(created_by__profile=request.user.profile).order_by('created_on')
+    
     form = PaymentForm()
     payerform = PayerForm()
 
@@ -38,6 +47,7 @@ def payments_view(request):
         'form': form,
         'payerform': payerform,
         'payments': payments,
+        'taux': devises,
         'segment': "paiements"
     })
 
@@ -45,6 +55,7 @@ def payments_view(request):
 @login_required(login_url="/login/")
 def generate_payment_view(request):
     context_empty = {
+        'taux': devises,
         'segment': 'paiements'
     }
 
@@ -61,6 +72,7 @@ def generate_payment_view(request):
                 'paymentform': PaymentForm(prefix= "payment", initial= initial_value), 
                 'payerform': PayerForm(prefix= "payer"),
                 'facture': facture,
+                'taux': devises,
                 'segment': 'paiements'
             }
             return render(request, "paiements/generate-payment.html", context_empty)
@@ -75,12 +87,12 @@ def generate_payment_view(request):
 
         bill = request.POST.get('facture')
         facture = Facture.objects.get(reference=UUID(bill).hex)
-        print(facture.reference)
+        # print(facture.reference)
         
         paymentform = PaymentForm(request.POST, prefix= "payment")
         payerform = PayerForm(request.POST, prefix= "payer")
 
-        paymentform.fields["type"].required = False
+        # paymentform.fields["type"].required = False
         
         if paymentform.is_valid() and payerform.is_valid():
             # print("Valid forms submitted!")
@@ -93,12 +105,14 @@ def generate_payment_view(request):
 
             new_payment = paymentform.save(commit=False)
             new_payment.facture_ref = facture
-            new_payment.type = Permit.objects.first()
             new_payment.payer = new_payer
             new_payment.created_by = request.user
 
             new_payment.save()
             # print("Payment created!")
+
+            facture.status = 'paid'
+            facture.save()
 
             messages.success(request, "Nouveau paiement ajouté.")
             return redirect("paiement:payments")
@@ -108,6 +122,7 @@ def generate_payment_view(request):
                 'payerform': payerform,
                 'facture': facture,
                 'ErrorMessage': "Formulaire invalid soumit",
+                'taux': devises,
                 'segment': 'paiements'
             }
             return render(request, "paiements/generate-payment.html", context)
@@ -123,6 +138,7 @@ def add_payment_view(request):
     context_empty = {
         'paymentform': PaymentForm(prefix= "payment", initial= initial_value), 
         'payerform': PayerForm(prefix= "payer"),
+        'taux': devises,
         'segment': 'paiements'
     }
 
@@ -153,6 +169,7 @@ def add_payment_view(request):
                 'paymentform': paymentform, 
                 'payerform': payerform, 
                 'ErrorMessage': "Formulaire invalid soumit",
+                'taux': devises,
                 'segment': 'paiements'
             }
             return render(request, "paiements/add-payment.html", context)
@@ -167,7 +184,8 @@ def edit_payment_view(request, payment_id):
     context_empty = {
         'paymentform': PaymentForm(instance=payment, prefix= "payment"),
         'payerform': PayerForm(instance=payer, prefix= "payer"),
-        'payment_id': payment_id, 
+        'payment_id': payment_id,
+        'taux': devises,
         'segment': 'paiements'
     }
 
@@ -191,7 +209,8 @@ def edit_payment_view(request, payment_id):
                 'paymentform': PaymentForm(instance=payment, prefix= "payment"),
                 'payerform': PayerForm(instance=payer, prefix= "payer"),
                 'ErrorMessage': "Formulaire invalid soumit.",
-                'payment_id': payment_id, 
+                'payment_id': payment_id,
+                'taux': devises,
                 'segment': 'paiements'
             }
             return render(request, "paiements/edit-payment.html", context)
@@ -202,7 +221,7 @@ def edit_payment_view(request, payment_id):
 
 @login_required(login_url="/login/")
 def devises_view(request):
-    devises = Devise.objects.all()
+    devises = Devise.objects.all().order_by('id')
     guinean_franc = Devise.objects.first()
     dollar = Devise.objects.get(pk=2)
     euro = Devise.objects.get(pk=3)
@@ -212,6 +231,7 @@ def devises_view(request):
         'dollar': dollar,
         'euro': euro,
         'devises': devises,
+        'taux': devises,
         'segment': "paiements"
     })
 
@@ -234,6 +254,7 @@ def devises_update_view(request):
             'dollar': Devise.objects.get(pk=2),
             'euro': Devise.objects.get(pk=3),
             'devises': devises,
+            'taux': devises,
             'segment': "paiements"
         })
     else:
@@ -276,12 +297,21 @@ def get_devise(request, devise_id):
 
 @login_required(login_url="/login/")
 def declarations_view(request):
-    declarations = Declaration.objects.all()
+    if request.user.profile.type.uid == 1 or request.user.type.uid == 5:
+        declarations = Declaration.objects.all().order_by('created_on')
+    elif request.user.type.uid == 4:
+        declarations = Declaration.objects.filter(status='submitted').order_by('created_on')
+    elif request.user.type.uid == 2:
+        declarations = Declaration.objects.filter(created_by=request.user).order_by('created_on')
+    else:
+        declarations = Declaration.objects.filter(created_by__profile=request.user.profile).order_by('created_on')
+    
     form = DeclarationForm()
 
     return render(request, "paiements/declarations.html", {
         'declarationform': form,
         'declarations': declarations,
+        'taux': devises,
         'segment': "facturation"
     })
 
@@ -291,6 +321,7 @@ def add_declaration_view(request):
     context_empty = {
         'declarationform': DeclarationForm(),
         'declarations': Declaration.objects.all(),
+        'taux': devises,
         'segment': 'facturation'
     }
 
@@ -313,6 +344,7 @@ def add_declaration_view(request):
             context = {
                 'declarationform': declarationform,
                 'ErrorMessage': "Formulaire invalid soumit",
+                'taux': devises,
                 'segment': 'Facturation'
             }
             return render(request, "paiements/declarations.html", context)
@@ -322,13 +354,19 @@ def add_declaration_view(request):
 
 @login_required(login_url="/login/")
 def edit_declaration_view(request, declaration_id):
-    declaration = Declaration.objects.get(pk=declaration_id)
+    try:
+        declaration = Declaration.objects.get(pk=declaration_id)
+    except Declaration.DoesNotExist:
+        messages.error(request, "Déclaration inexistante.")
+        return redirect("paiement:declarations")
+    
     employees = Employee.objects.filter(declaration=declaration)
     context_empty = {
         'declarationform': DeclarationForm(instance=declaration, prefix= "declaration"),
         'employeeform': EmployeeForm(prefix= "employee"),
         'declaration_id': declaration_id,
         'employees': employees,
+        'taux': devises,
         'segment': 'facturation'
     }
 
@@ -351,6 +389,7 @@ def edit_declaration_view(request, declaration_id):
                 'declaration_id': declaration_id,
                 'employees': employees,
                 'segment': 'facturation',
+                'taux': devises,
                 'ErrorMessage': "Formulaire invalid soumit."
             }
             return render(request, "paiements/edit-declaration.html", context)
@@ -383,6 +422,40 @@ def edit_declaration_view(request, declaration_id):
 
 
 @login_required(login_url="/login/")
+def submit_declaration_view(request, declaration_id):
+    
+    try:
+        declaration = Declaration.objects.get(pk=declaration_id)
+        declaration.status = 'submitted'
+        declaration.save()
+        messages.success(request, "Déclaration soumise.")
+    except Declaration.DoesNotExist:
+        messages.error(request, "Déclaration inexistante.")
+    
+    return redirect("paiement:declarations")
+
+
+@login_required(login_url="/login/")
+def reject_declaration_view(request, declaration_id):
+    reject_reason = request.POST["reject_reason"]
+    if not reject_reason:
+        messages.error(request, "Le motif de rejet est obligatoire.")
+    else:
+        # print(reject_reason)
+    
+        try:
+            declaration = Declaration.objects.get(pk=declaration_id)
+            declaration.status = 'rejected'
+            declaration.reject_reason = reject_reason
+            declaration.save()
+            messages.success(request, "Déclaration rejetée.")
+        except Declaration.DoesNotExist:
+            messages.error(request, "Déclaration inexistante.")
+    
+    return redirect("paiement:declarations")
+
+
+@login_required(login_url="/login/")
 def validate_declaration_view(request, declaration_id):
     
     try:
@@ -407,7 +480,7 @@ def bill_declaration_view(request, declaration_id):
 
         new_bill = Facture()
         new_bill.declaration_ref = declaration
-        new_bill.client = request.user.profile
+        new_bill.client = declaration.created_by.profile
         new_bill.total_cadres = declaration.employee_declarations.filter(job_category=cadres).count()
         new_bill.total_agents = declaration.employee_declarations.filter(job_category=agents).count()
         new_bill.total_ouvriers = declaration.employee_declarations.filter(job_category=ouvriers).count()
@@ -433,8 +506,14 @@ def bill_declaration_view(request, declaration_id):
 
 @login_required(login_url="/login/")
 def factures_view(request):
-    factures = Facture.objects.all()
-    job_categories = JobCategory.objects.all()
+    if request.user.profile.type.uid == 1 or request.user.type.uid == 5:
+        factures = Facture.objects.all().order_by('created_on')
+    elif request.user.type.uid == 2:
+        factures = Facture.objects.filter(status='unpaid').order_by('created_on')
+    else:
+        factures = Facture.objects.filter(created_by__profile=request.user.profile).order_by('created_on')
+    
+    job_categories = JobCategory.objects.all().order_by("id")
     form = FactureForm()
 
     return render(request, "paiements/factures.html", {
@@ -442,6 +521,7 @@ def factures_view(request):
         'form': form,
         'factures': factures,
         'job_categories': job_categories,
+        'taux': devises,
         'segment': "facturation"
     })
 
@@ -453,6 +533,7 @@ def add_facture_view(request):
     context_empty = {
         'factureform': FactureForm(initial= initial_value),
         'permits': Permit.objects.all(),
+        'taux': devises,
         'segment': 'facturation'
     }
 
@@ -476,6 +557,7 @@ def add_facture_view(request):
             context = {
                 'factureform': factureform,
                 'ErrorMessage': "Formulaire invalid soumit",
+                'taux': devises,
                 'segment': 'facturation'
             }
             return render(request, "paiements/add-facture.html", context)

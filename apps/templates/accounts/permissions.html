@@ -63,6 +63,12 @@
               <!-- Card header -->
               <div class="card-header border-0">
                 <h3 class="mb-0"><em>Liste des permissions</em>
+                  {% if 'a-permissions-exportpdf' in user.permissions.codes or user.is_staff %}
+                  <a href="{% url 'paiement:print_permissions' %}" target="_blank" data-id="a-permissions-exportpdf" class="btn btn-sm btn-danger float-right">PDF</a>
+                  {% endif %}
+                  {% if 'a-permissions-exportxlsx' in user.permissions.codes or user.is_staff %}
+                  <a href="{% url 'paiement:export_permissions' %}" target="_blank" data-id="a-permissions-exportxlsx" class="btn btn-sm btn-success ml-2 float-right">XLSX</a>
+                  {% endif %}
                   {% if 'a-permissions-ajouter' in user.permissions.codes or user.is_staff %}
                     <a href="{% url 'authentication:add_permissions' %}" data-id="a-permissions-ajouter" class="btn btn-sm btn-neutral float-right">+ Ajouter</a>
                   {% endif %}
@@ -70,7 +76,7 @@
               </div>
               <!-- Light table -->
               <div class="table-responsive" data-toggle="list" data-list-values='["n°", "profile", "name", "autorisations", "actions"]'>
-                <table class="table align-items-center table-flush">
+                <table class="table align-items-center table-flush" id="datatable-basic">
                   <thead class="thead-light">
                     <tr>
                       <th scope="col" class="sort" data-sort="n°">N°</th>
@@ -99,7 +105,7 @@
                         <td class="autorisations" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px;">
                           {{permission.list}}
                         </td>
-                        <td class="text-center justify-content-center actions">
+                        <td class="actions">
                           {% if 'a-permissions-consulter' in user.permissions.codes or user.is_staff %}
                             <span>
                               <button class="btn btn-sm btn-icon-only" role="button" data-id="a-permissions-consulter" data-toggle="modal" data-target="#modal-permission-{{permission.id}}">View</button>
@@ -129,7 +135,9 @@
                                           <div class="col">
                                             <div>
                                               <span class="heading"> <h2>Liste des autorisations</h2> </span>
-                                              {{permission.list}}
+                                              <textarea cols="50" rows="5" readonly>
+                                                {{permission.list}}
+                                              </textarea>
                                               
                                             </div>
                                           </div>
@@ -210,31 +218,7 @@
                 </table>
               </div>
               <!-- Card footer -->
-              <div class="card-footer py-4">
-                <nav aria-label="...">
-                  <ul class="pagination justify-content-end mb-0">
-                    <li class="page-item disabled">
-                      <a class="page-link" href="#" tabindex="-1">
-                        <i class="fas fa-angle-left"></i>
-                        <span class="sr-only">Previous</span>
-                      </a>
-                    </li>
-                    <li class="page-item active">
-                      <a class="page-link" href="#">1</a>
-                    </li>
-                    <li class="page-item">
-                      <a class="page-link" href="#">2 <span class="sr-only">(current)</span></a>
-                    </li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item">
-                      <a class="page-link" href="#">
-                        <i class="fas fa-angle-right"></i>
-                        <span class="sr-only">Next</span>
-                      </a>
-                    </li>
-                  </ul>
-                </nav>
-              </div>
+              
             </div>
           </div>
         </div>

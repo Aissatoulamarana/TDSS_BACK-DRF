@@ -44,6 +44,7 @@ class Agency(models.Model):
     region = models.ForeignKey(Region, on_delete=models.PROTECT, related_name="region_agency")
     name = models.CharField(max_length=100)
     comment = models.TextField(max_length=255, blank=True, null=True)
+    created_by = models.ForeignKey('CustomUser', on_delete=models.SET_NULL, blank=True, null=True, related_name="agency_users")
 
     def __str__(self):
         return self.name

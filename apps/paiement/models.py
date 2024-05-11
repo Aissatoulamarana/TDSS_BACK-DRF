@@ -5,6 +5,7 @@ Copyright (c) 2022 - OD
 
 import uuid
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 from apps.authentication.models import CustomUser, Profile
 
 # Create your models here.
@@ -75,6 +76,8 @@ class Declaration(models.Model):
     created_by = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
+    employees = models.ManyToManyField("Employee", verbose_name=_("Employés"), through="DeclarationEmployee", related_name='alldeclarations',
+                                        related_query_name='alldeclaration')
 
     def __str__(self):
         return f"{self.title}"
@@ -85,7 +88,7 @@ class Employee(models.Model):
         ('unenrolled', "Non enrôlé"),
         ('enrolled', "Enrôlé")
     ]
-    declaration = models.ForeignKey(Declaration, on_delete=models.PROTECT, related_name="employee_declarations")
+    declaration = models.ForeignKey(Declaration, on_delete=models.PROTECT, related_name="employee_declarations") # sera supprimer pour garder seuelment le many-to-many
     passport_number = models.CharField(max_length=50, unique=True)
     first = models.CharField(max_length=100, verbose_name="first_name")
     last = models.CharField(max_length=50, verbose_name="last_name")
@@ -97,6 +100,20 @@ class Employee(models.Model):
 
     def __str__(self):
         return f"{self.first} {self.last}"
+
+
+class DeclarationEmployee(models.Model):
+    declaration = models.ForeignKey("Declaration", verbose_name=_("Déclaration"), on_delete=models.PROTECT,
+                                    related_name='declarationemployees', related_query_name='declarationemployee')
+    employee = models.ForeignKey("Employee", verbose_name=_("Employé"), on_delete=models.PROTECT,
+                                    related_name='declarationemployees', related_query_name='declarationemployee')
+    created_on = models.DateTimeField(auto_now_add=True)
+    modified_on = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = [
+            ['declaration', 'employee']
+        ]
 
 
 class Facture(models.Model):

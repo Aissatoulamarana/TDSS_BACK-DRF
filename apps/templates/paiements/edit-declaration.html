@@ -40,18 +40,20 @@
       <div class="col-xl-12">
         {% if messages %}
           <!-- Alerts -->
-          <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <span class="alert-icon"><i class="ni ni-like-2"></i></span>
-            <span class="alert-text">
-              <strong>Success!</strong>
-              {% for message in messages %}
-                {{ message | safe }}
-              {% endfor %}
-            </span>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
+          {% for message in messages %}
+            <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+              <span class="alert-icon"><i class="ni ni-like-2"></i></span>
+              <span class="alert-text">
+                {% comment %}  {% endcomment %}
+                {% for message in messages %}
+                  {{ message | safe }}
+                {% endfor %}
+              </span>
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+          {% endfor %}
         {% endif %}
 
         <div class="row">
@@ -134,111 +136,12 @@
 
                     <!-- Emplyee's management -->
                     <h3 class="mb-0"><em>Liste des employées</em>
-                        <a href="#" class="btn btn-sm btn-neutral float-right" role="button" data-toggle="modal" data-target="#modal-employee-add">+Ajouter</a>
+                        <a href="#" class="btn btn-sm btn-neutral float-right" role="button" data-toggle="modal" data-target="#modal-employee-add">+Nouveau</a>
+                        <a href="#" class="btn btn-sm btn-neutral float-right" role="button" data-toggle="modal" data-target="#modal-employee-renew">+Rénouvellement</a>
                     </h3>
                     
-                    <div class="modal fade" id="modal-employee-add" tabindex="-1" role="dialog" aria-labelledby="modal-employee-add" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered " role="dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h4 class="modal-title" id="modal-employee-add">Ajout d'employé</h4>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">×</span>
-                                    </button>
-                                </div>
-                                <hr>
-                                <div class="modal-body mt--6">
-                                    <form id="employee-form" action="{% url 'paiement:edit_declaration' declaration_id %}" method="post">
-                                        {% csrf_token %}
-                                        <fieldset>
-                                            <legend></legend>
-                                            <div class="row">
-                                                <div class="col">
-                                                    <div class="form-group">
-                                                        <div class="input-group input-group-merge">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text"><i class="fas fa-tag"></i></span>
-                                                        </div>
-                                                        {{ employeeform.job_category }}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col">
-                                                    <div class="form-group">
-                                                        <div class="input-group input-group-merge">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text"><i class="fas fa-briefcase"></i></span>
-                                                        </div>
-                                                        {{ employeeform.job }}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col">
-                                                    <div class="form-group">
-                                                        <div class="input-group input-group-merge">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text"><i class="fas fa-passport"></i></span>
-                                                        </div>
-                                                        {{ employeeform.passport_number }}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col">
-                                                    <div class="form-group">
-                                                        <div class="input-group input-group-merge">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text"><i class="fas fa-file-signature"></i></span>
-                                                        </div>
-                                                        {{ employeeform.first }}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col">
-                                                    <div class="form-group">
-                                                        <div class="input-group input-group-merge">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text"><i class="fas fa-file-signature"></i></span>
-                                                        </div>
-                                                        {{ employeeform.last }}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col">
-                                                    <div class="form-group">
-                                                        <div class="input-group input-group-merge">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                                        </div>
-                                                        {{ employeeform.email }}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col">
-                                                    <div class="form-group">
-                                                        <div class="input-group input-group-merge">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                                                        </div>
-                                                        {{ employeeform.phone }}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </fieldset>
-                                        <div class="modal-footer justify-content-center">
-                                          <input type="submit" name="employee-form-submit" class="btn btn-primary" value="Enregistrer">
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    {% include "paiements/includes/add-employee.html" %}
+                    {% include "paiements/includes/renouvellement.html" %}
 
                     <!-- Light table -->
                     <div class="table-responsive" data-toggle="list" data-list-values='["n°", "fonction", "passport", "name",  "phone", "actions"]'>

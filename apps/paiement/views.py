@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, FileResponse
 from django.template import loader
 from django.urls import reverse
+from django.db import transaction
 import json
 import io
 from reportlab.pdfgen import canvas
@@ -22,9 +23,11 @@ from reportlab.lib.pagesizes import letter, A4
 import qrcode
 
 
-from .models import Devise, Facture, Payer, Payment, Permit, Employee, Declaration, JobCategory, Job
+from .models import (Devise, Facture, Payer, Payment, Permit, Employee, Declaration,
+                     DeclarationEmployee, JobCategory, Job)
 from apps.authentication.models import Profile, CustomUser
-from .forms import DeviseForm, FactureForm, PayerForm, PaymentForm, EmployeeForm, DeclarationForm
+from .forms import (DeviseForm, FactureForm, PayerForm, PaymentForm, EmployeeForm,
+                    EmployeeRenewForm, DeclarationForm)
 
 # Global devises for all views
 devises = Devise.objects.all().order_by('id')
@@ -367,7 +370,8 @@ def edit_declaration_view(request, declaration_id):
         'declaration_id': declaration_id,
         'employees': employees,
         'taux': devises,
-        'segment': 'facturation'
+        'segment': 'facturation',
+        'employeerenew': EmployeeRenewForm()
     }
 
     if request.method == "POST" and 'declaration-form-submit' in request.POST:
@@ -401,10 +405,16 @@ def edit_declaration_view(request, declaration_id):
             new_employee = employeeform.save(commit=False)
             new_employee.declaration = declaration
 
-            new_employee.save()
+            with transaction.atomic():
+
+                new_employee.save()
+                DeclarationEmployee.objects.create(declaration=declaration, employee=new_employee)
+
             messages.success(request, "Employé ajouté.")
         else:
             print("Invalid form submitted")
+            
+            context_empty["employeeform"] = employeeform
             context_empty["ErrorMessage"] = "Formulaire invalid soumit."
     
     elif request.method == "POST" and 'delete-employee-form-submit' in request.POST:
@@ -419,6 +429,33 @@ def edit_declaration_view(request, declaration_id):
 
 
     return render(request, "paiements/edit-declaration.html", context_empty)
+
+@login_required(login_url="/login/")
+def declaration_employee_renew(request, declaration_id):
+    form = EmployeeRenewForm(request.POST)
+    if form.is_valid():
+        validated_data = form.cleaned_data
+        try:
+            employee = Employee.objects.get(passport_number=validated_data['passport_number'])
+            declaration = Declaration.objects.get(pk=declaration_id)
+            if (employee.declaration == declaration):
+                messages.error(request, "Il  a déjà été ajouté à cette déclaration")
+                return redirect('paiement:edit_declaration', declaration_id)
+            # ajouter l'employé a cette nouvelle declaration
+            employee.declaration = declaration
+            with transaction.atomic():
+                employee.save()
+                DeclarationEmployee.objects.create(employee=employee, declaration=declaration)
+            messages.success(request=request, message="L'employé a été ajouté avec succès")
+        except Employee.DoesNotExist as e:
+            messages.error(request, "Pas de correspondance trouvé")
+        except Declaration.DoesNotExist as e:
+            messages.error(request, "Cette déclaration n'existe pas")
+        
+    else:
+        messages.error(request, "Vous devez saisir un numéro valide de passport")
+    
+    return redirect('paiement:edit_declaration', declaration_id)
 
 
 @login_required(login_url="/login/")

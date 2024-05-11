@@ -20,6 +20,7 @@ urlpatterns = [
     path("declarations/", views.declarations_view, name="declarations"),
     path("declarations/add/", views.add_declaration_view, name="add_declaration"),
     path("declarations/<int:declaration_id>/edit", views.edit_declaration_view, name="edit_declaration"),
+    path("declarations/<int:declaration_id>/employee-renew", views.declaration_employee_renew, name="employee-renew"),
     path("declarations/<int:declaration_id>/submit", views.submit_declaration_view, name="submit_declaration"),
     path("declarations/<int:declaration_id>/reject", views.reject_declaration_view, name="reject_declaration"),
     path("declarations/<int:declaration_id>/validate", views.validate_declaration_view, name="validate_declaration"),

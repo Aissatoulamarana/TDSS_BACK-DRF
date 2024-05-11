@@ -107,3 +107,8 @@ class PaymentForm(forms.ModelForm):
         self.fields['devise'].empty_label = None
         # self.fields['amount'].required = False
         
+
+class EmployeeRenewForm(forms.Form):
+    passport_number = forms.CharField(max_length=20, min_length=3, required=True, widget=TextInput(attrs={'class': "form-control", 'placeholder': "N° de psseport"}))
+
+    

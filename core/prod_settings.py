@@ -5,7 +5,9 @@ Copyright (c) 2022 - OD
 
 import os
 from decouple import config
-from unipath import Path
+from pathlib import Path
+
+from django.contrib.messages import constants as messages
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).parent
@@ -148,3 +150,12 @@ EMAIL_HOST_PASSWORD = 'zmwfjvpvokhxhlwc'
 
 #############################################################
 #############################################################
+#  Messages customize
+
+MESSAGE_TAGS = {
+    messages.DEBUG: "alert-info",
+    messages.INFO: "alert-info",
+    messages.SUCCESS: "alert-success",
+    messages.WARNING: "alert-warning",
+    messages.ERROR: "alert-danger",
+}

@@ -1,0 +1,39 @@
+<div class="modal fade" id="modal-employee-renew" tabindex="-1" role="dialog" aria-labelledby="modal-employee-renew" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered " role="dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="title-renew">Ajout d'employé</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <hr>
+            <div class="modal-body mt--6">
+                <form id="employee-form" action="{% url 'paiement:employee-renew' declaration_id %}" method="post">
+                    {% csrf_token %}
+                    <span style="font-style: italic; font-size: 10px;">Rechercher un employé par son numéro de passport</span>
+                    <fieldset>
+                        
+                        
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group">
+                                    <div class="input-group input-group-merge">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fas fa-passport"></i></span>
+                                    </div>
+                                    {{ employeerenew.passport_number }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                      
+                    </fieldset>
+                    <div class="modal-footer justify-content-center">
+                      <input type="submit" name="employee-form-submit" class="btn btn-primary" value="Rechercher">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -48,7 +48,7 @@ def employee_list(request, format=None):
     """
     
     if request.method == 'GET':
-        employees = Employee.objects.all()
+        employees = Employee.objects.select_related('declaration').all()
         serializer = EmployeeSerializer(employees, many=True)
         return Response(serializer.data)
 
@@ -68,7 +68,7 @@ def employee_detail(request, pid, format=None):
     Retrieve, update or delete an employee.
     """
     try:
-        employee = Employee.objects.get(passport_number=pid)
+        employee = Employee.objects.select_related('declaration').get(passport_number=pid)
     except Employee.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 

@@ -302,13 +302,13 @@ def get_devise(request, devise_id):
 @login_required(login_url="/login/")
 def declarations_view(request):
     if request.user.profile.type.uid == 1 or request.user.type.uid == 5:
-        declarations = Declaration.objects.annotate(nb_employees=Count('declarationemployee')).all().order_by('created_on')
+        declarations = Declaration.objects.prefetch_related('employees').annotate(nb_employees=Count('declarationemployee')).all().order_by('created_on')
     elif request.user.type.uid == 4:
-        declarations = Declaration.objects.annotate(nb_employees=Count('declarationemployee')).filter(status='submitted').order_by('created_on')
+        declarations = Declaration.objects.prefetch_related('employees').annotate(nb_employees=Count('declarationemployee')).filter(status='submitted').order_by('created_on')
     elif request.user.type.uid == 2:
-        declarations = Declaration.objects.annotate(nb_employees=Count('declarationemployee')).filter(created_by=request.user).order_by('created_on')
+        declarations = Declaration.objects.prefetch_related('employees').annotate(nb_employees=Count('declarationemployee')).filter(created_by=request.user).order_by('created_on')
     else:
-        declarations = Declaration.objects.annotate(nb_employees=Count('declarationemployee')).filter(created_by__profile=request.user.profile).order_by('created_on')
+        declarations = Declaration.objects.prefetch_related('employees').annotate(nb_employees=Count('declarationemployee')).filter(created_by__profile=request.user.profile).order_by('created_on')
     
     form = DeclarationForm()
 

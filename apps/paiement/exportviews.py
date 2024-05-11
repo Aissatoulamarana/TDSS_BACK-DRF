@@ -258,7 +258,7 @@ def exportpdf_declarations_view(request):
     counter = 1
     for declaration in declarations:
         pay_date = DateFormat(declaration.created_on)
-        data.append([f"{counter}", f"N° 00{declaration.id}/{pay_date.format('Y')}", f"{declaration.created_by.profile.name}", f"{declaration.title}", f"{declaration.employee_declarations.count()}", f"{declaration.get_status_display()}",  f"{pay_date.format('d/m/Y H:m')}"])
+        data.append([f"{counter}", f"N° 00{declaration.id}/{pay_date.format('Y')}", f"{declaration.created_by.profile.name}", f"{declaration.title}", f"{declaration.employees.count()}", f"{declaration.get_status_display()}",  f"{pay_date.format('d/m/Y H:m')}"])
         counter +=1
 
     design_width = (0.4*inch, 0.9*inch, 1.7*inch, 1.4*inch, 1.1*inch, 1.0*inch, 1.2*inch)
@@ -509,7 +509,7 @@ def exportxlsx_declarations_view(request):
     counter = 1
     for declaration in declarations:
         pay_date = DateFormat(declaration.created_on)
-        data.append([f"{counter}", f"N° 00{declaration.id}/{pay_date.format('Y')}", f"{declaration.created_by.profile.name}", f"{declaration.title}", f"{declaration.employee_declarations.count()}", f"{declaration.get_status_display()}",  f"{pay_date.format('d/m/Y H:m')}"])
+        data.append([f"{counter}", f"N° 00{declaration.id}/{pay_date.format('Y')}", f"{declaration.created_by.profile.name}", f"{declaration.title}", f"{declaration.employees.count()}", f"{declaration.get_status_display()}",  f"{pay_date.format('d/m/Y H:m')}"])
         counter +=1
 
     options = {

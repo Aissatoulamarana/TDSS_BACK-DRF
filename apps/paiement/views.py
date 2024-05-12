@@ -519,9 +519,9 @@ def bill_declaration_view(request, declaration_id):
         new_bill = Facture()
         new_bill.declaration_ref = declaration
         new_bill.client = declaration.created_by.profile
-        new_bill.total_cadres = declaration.employee_declarations.filter(job_category=cadres).count()
-        new_bill.total_agents = declaration.employee_declarations.filter(job_category=agents).count()
-        new_bill.total_ouvriers = declaration.employee_declarations.filter(job_category=ouvriers).count()
+        new_bill.total_cadres = declaration.employees.filter(job_category=cadres).count()
+        new_bill.total_agents = declaration.employees.filter(job_category=agents).count()
+        new_bill.total_ouvriers = declaration.employees.filter(job_category=ouvriers).count()
 
         new_bill.amount = (new_bill.total_cadres * cadres.permit.price) + (new_bill.total_agents * agents.permit.price) + (
                             new_bill.total_ouvriers * ouvriers.permit.price)

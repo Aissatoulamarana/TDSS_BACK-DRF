@@ -61,7 +61,8 @@ class EmployeeSerializer(serializers.ModelSerializer):
     declaration = DeclarationSerializer(read_only=True)
     job_category = JobCategorySerializer(read_only=True)
     job = JobSerializer(read_only=True)
+    nb_enrollements = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Employee
-        fields = ['id', 'declaration', 'job_category', 'job', 'passport_number', 'first', 'last', 'email', 'phone']
+        fields = ['id', 'declaration', 'job_category', 'job', 'passport_number', 'first', 'last', 'email', 'phone', 'nb_enrollements']

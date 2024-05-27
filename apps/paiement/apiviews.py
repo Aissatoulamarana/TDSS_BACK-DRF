@@ -1,3 +1,5 @@
+from django.db.models import Count
+
 # import viewsets
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
@@ -68,7 +70,9 @@ def employee_detail(request, pid, format=None):
     Retrieve, update or delete an employee.
     """
     try:
-        employee = Employee.objects.select_related('declaration').get(passport_number=pid)
+        employee = Employee.objects.select_related('declaration') \
+            .annotate(nb_enrollements=Count('declarationemployee'))  \
+            .get(passport_number=pid, declaration__declaration_factures__status='paid')
     except Employee.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 

@@ -1,0 +1,17 @@
+services:
+  back:
+    build:
+      context: .
+      dockerfile: ./dockerfiles/back.Dockerfile
+      args:
+        - DEV=true
+    volumes:
+      - ./:/app
+      - ./mydatabase.sqlite:/app/mydatabase.sqlite
+      - ./data:/app/data
+    ports:
+      - 8004:8004
+    command: >
+      sh -c "python manage.py migrate &&
+            python manage.py runserver 0.0.0.0:8004"
+ 

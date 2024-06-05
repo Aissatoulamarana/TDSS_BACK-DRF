@@ -6,7 +6,7 @@ services:
       args:
         - DEV=true
     volumes:
-      - ./:/app
+      # - ./:/app
       - ./mydatabase.sqlite:/app/mydatabase.sqlite
       - ./data:/app/data
     ports:

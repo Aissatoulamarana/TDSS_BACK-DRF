@@ -5,7 +5,7 @@ Copyright (c) 2022 - OD
 
 from django import forms
 from django.forms import TextInput, NumberInput, Select, Textarea, FileInput, DateTimeInput, DateInput, EmailInput, RadioSelect, TimeInput, ClearableFileInput
-from .models import Devise, Facture, Payer, Payment, Employee, Declaration
+from .models import Devise, Facture, Job, JobCategory, Payer, Payment, Employee, Declaration
 
 # My forms here
 
@@ -40,6 +40,8 @@ class EmployeeForm(forms.ModelForm):
         super(EmployeeForm, self).__init__(*args, **kwargs)
         self.fields['job_category'].empty_label = "Sélectionner la catégorie"
         self.fields['job'].empty_label = "Sélectionner la fonction"
+        self.fields['job'].queryset = Job.objects.order_by('name').all()
+        self.fields['job_category'].queryset = JobCategory.objects.order_by('name').all()
 
 
 class DeclarationForm(forms.ModelForm):

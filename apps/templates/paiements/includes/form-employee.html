@@ -1,0 +1,84 @@
+<fieldset>
+    <legend></legend>
+    <div class="row">
+        <div class="col">
+            <div class="form-group">
+                <div class="input-group input-group-merge">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                </div>
+                {{ employeeform.job_category }}
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="form-group">
+                <div class="input-group input-group-merge">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-briefcase"></i></span>
+                </div>
+                {{ employeeform.job }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="form-group">
+                <div class="input-group input-group-merge">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-passport"></i></span>
+                </div>
+                {{ employeeform.passport_number }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="form-group">
+                <div class="input-group input-group-merge">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-file-signature"></i></span>
+                </div>
+                {{ employeeform.first }}
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="form-group">
+                <div class="input-group input-group-merge">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-file-signature"></i></span>
+                </div>
+                {{ employeeform.last }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="form-group">
+                <div class="input-group input-group-merge">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                </div>
+                {{ employeeform.email }}
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="form-group">
+                <div class="input-group input-group-merge">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                </div>
+                {{ employeeform.phone }}
+                </div>
+            </div>
+        </div>
+    </div>
+</fieldset>
+<div class="modal-footer justify-content-center">
+  <input type="submit" name="employee-form-submit" class="btn btn-primary" value="Enregistrer">
+</div>

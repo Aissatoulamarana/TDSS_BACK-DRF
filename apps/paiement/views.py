@@ -363,13 +363,17 @@ def edit_declaration_view(request, declaration_id):
     except Declaration.DoesNotExist:
         messages.error(request, "Déclaration inexistante.")
         return redirect("paiement:declarations")
-    
     employees = Employee.objects.filter(declaration=declaration)
+    list_edit_forms = []
+    for employee in employees:
+        t = (employee, EmployeeForm(instance=employee))
+        list_edit_forms.append(t)
     context_empty = {
-        'declarationform': DeclarationForm(instance=declaration, prefix= "declaration"),
-        'employeeform': EmployeeForm(prefix= "employee"),
+        'declarationform': DeclarationForm(instance=declaration, prefix="declaration"),
+        'employeeform': EmployeeForm(prefix="employee"),
         'declaration_id': declaration_id,
         'employees': employees,
+        'employees_edit_forms': list_edit_forms,
         'taux': devises,
         'segment': 'facturation',
         'employeerenew': EmployeeRenewForm()
@@ -430,6 +434,39 @@ def edit_declaration_view(request, declaration_id):
 
 
     return render(request, "paiements/edit-declaration.html", context_empty)
+
+
+@login_required(login_url="/login/")
+def employee_edit(request, declaration_id, employee_id):
+    try:
+        declaration = Declaration.objects.get(pk=declaration_id)
+        employee = Employee.objects.get(pk=employee_id, declaration=declaration)
+        employees = Employee.objects.filter(passport_number=employee.passport_number).order_by('-created_on')
+    except Declaration.DoesNotExist:
+        messages.error(request, "Déclaration inexistante.")
+        return redirect("paiement:declarations")
+    except Employee.DoesNotExist:
+        messages.error(request, "Employé inexistante.")
+        return redirect("paiement:edit_declaration", declaration.id)
+    if request.method == 'POST':
+        data = request.POST
+        if employees.count() > 1:  # pour eviter que le nom d'un employé soit modifié lors d'un renouvelement
+            emp = employees.first()
+            data['first'] = emp.first
+            data['passport_number'] = emp.passport_number
+            data['last'] = emp.last
+        form = EmployeeForm(instance=employee, data=data)
+        if form.is_valid():
+
+            form.save()
+            messages.success(
+                request,
+                f"L'employé {form.cleaned_data.get('passport_number')} a été modifié avec succès"
+                )
+        else:
+            messages.error(request, "Une erreur est survenue veuillez réessayer")
+    return redirect("paiement:edit_declaration", declaration.id)
+
 
 @login_required(login_url="/login/")
 def declaration_employee_renew(request, declaration_id):

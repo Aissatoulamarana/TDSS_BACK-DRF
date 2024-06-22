@@ -26,6 +26,7 @@ urlpatterns = [
     path("declarations/<int:declaration_id>/validate", views.validate_declaration_view, name="validate_declaration"),
     path("declarations/<int:declaration_id>/bill", views.bill_declaration_view, name="bill_declaration"),
     path("declarations/<int:declaration_id>/print", printviews.declaration_receipt_view, name="declaration_receipt"),
+    path("declarations/<int:declaration_id>/<int:employee_id>/edit", views.employee_edit, name="employee_edit"),
     path("factures/", views.factures_view, name="factures"),
     path("factures/add/", views.add_facture_view, name="add_facture"),
     path("factures/<int:bill_id>/print", printviews.bill_receipt_view, name="bill_receipt"),

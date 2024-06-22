@@ -61,12 +61,17 @@ class Country(models.Model):
 
 
 class Declaration(models.Model):
+    UNSUBMITTED = 'unsubmitted'
+    SUBMITTED = 'submitted'
+    REJECTED = 'rejected'
+    VALIDATED = 'validated'
+    BILLED = 'billed'
     status_choices = [
-        ('unsubmitted', "Non soumise"),
-        ('submitted', "Soumise"),
-        ('rejected', "Rejetée"), 
-        ('validated', "Validée"),
-        ('billed', "Facturée")
+        (UNSUBMITTED, "Non soumise"),
+        (SUBMITTED, "Soumise"),
+        (REJECTED, "Rejetée"), 
+        (VALIDATED, "Validée"),
+        (BILLED, "Facturée")
     ]
     reference = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     title = models.CharField(max_length=100)
@@ -97,6 +102,8 @@ class Employee(models.Model):
     status = models.CharField(max_length=30, choices=status_choices, default="unenrolled")
     job_category = models.ForeignKey(JobCategory, on_delete=models.PROTECT, blank=True, null=True, related_name="employee_job_categories")
     job = models.ForeignKey(Job, on_delete=models.PROTECT, blank=True, null=True, related_name="employee_jobs")
+    created_on = models.DateTimeField(auto_now_add=True, null=True)
+    modified_on = models.DateTimeField(auto_now=True, null=True)
 
     def __str__(self):
         return f"{self.first} {self.last}"

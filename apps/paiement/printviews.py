@@ -377,11 +377,11 @@ def bill_receipt_view(request, bill_id):
     img = qr.make_image()
     img.save('staticfiles/bill_qr.png')
     
-    pdf.drawImage('staticfiles/bill_qr.png', 60, 350, 70, 70, showBoundary=False)
+    pdf.drawImage('staticfiles/bill_qr.png', 60, 370, 70, 70, showBoundary=False)
 
     pdf.setFontSize(14, leading=None)
-    pdf.drawString(430, 370, f"La Direction")
-    pdf.line(430, 367, 505, 367)
+    pdf.drawString(430, 440, f"La Direction")
+    pdf.line(430, 435, 505, 435)
 
     pdf.showPage()
     pdf.save()

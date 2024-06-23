@@ -4,27 +4,18 @@ Copyright (c) 2022 - OD
 """
 
 from uuid import UUID
-from django import template
+import copy
+
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, FileResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.template import loader
 from django.urls import reverse
 from django.db import transaction
 from django.db.models import Count
-import json
-import io
-from reportlab.pdfgen import canvas
-from reportlab.platypus import Table
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.lib.pagesizes import letter, A4
 
-import qrcode
-
-
-from .models import (Devise, Facture, Payer, Payment, Permit, Employee, Declaration,
+from apps.paiement.models import (Devise, Facture, Payer, Payment, Permit, Employee, Declaration,
                      DeclarationEmployee, JobCategory, Job)
 from apps.authentication.models import Profile, CustomUser
 from .forms import (DeviseForm, FactureForm, PayerForm, PaymentForm, EmployeeForm,
@@ -359,11 +350,11 @@ def add_declaration_view(request):
 @login_required(login_url="/login/")
 def edit_declaration_view(request, declaration_id):
     try:
-        declaration = Declaration.objects.get(pk=declaration_id)
+        declaration = Declaration.objects.get(pk=declaration_id, created_by=request.user)
     except Declaration.DoesNotExist:
         messages.error(request, "Déclaration inexistante.")
         return redirect("paiement:declarations")
-    employees = Employee.objects.filter(declaration=declaration)
+    employees = Employee.objects.filter(declarationemployee__declaration=declaration)
     list_edit_forms = []
     for employee in employees:
         t = (employee, EmployeeForm(instance=employee))
@@ -380,21 +371,17 @@ def edit_declaration_view(request, declaration_id):
     }
 
     if request.method == "POST" and 'declaration-form-submit' in request.POST:
-        
-        declarationform = DeclarationForm(request.POST, instance=declaration, prefix= "declaration")
+        declarationform = DeclarationForm(request.POST, instance=declaration, prefix="declaration")
         if declarationform.is_valid():
-            
             # print("Update form submited !")
             declaration_updated = declarationform.save()
-            
             declaration_updated.save()
-
             messages.success(request, "Déclaration modifiée.")
             return redirect("paiement:declarations")
         else:
             context = {
                 'declarationform': declarationform,
-                'employeeform': EmployeeForm(prefix= "employee"),
+                'employeeform': EmployeeForm(prefix="employee"),
                 'declaration_id': declaration_id,
                 'employees': employees,
                 'segment': 'facturation',
@@ -414,14 +401,12 @@ def edit_declaration_view(request, declaration_id):
 
                 new_employee.save()
                 DeclarationEmployee.objects.create(declaration=declaration, employee=new_employee)
-
             messages.success(request, "Employé ajouté.")
+            return redirect("paiement:edit_declaration", declaration_id)
         else:
             print("Invalid form submitted")
-            
             context_empty["employeeform"] = employeeform
             context_empty["ErrorMessage"] = "Formulaire invalid soumit."
-    
     elif request.method == "POST" and 'delete-employee-form-submit' in request.POST:
         employee_id = request.POST["employee-id"]
         # print(f"Employee with id:{employee_id} is submitted for delete")
@@ -431,17 +416,16 @@ def edit_declaration_view(request, declaration_id):
             messages.success(request, "Employé supprimé.")
         except Employee.DoesNotExist:
             messages.error(request, "Employé inexistant.")
-
-
     return render(request, "paiements/edit-declaration.html", context_empty)
 
 
 @login_required(login_url="/login/")
 def employee_edit(request, declaration_id, employee_id):
     try:
-        declaration = Declaration.objects.get(pk=declaration_id)
-        employee = Employee.objects.get(pk=employee_id, declaration=declaration)
-        employees = Employee.objects.filter(passport_number=employee.passport_number).order_by('-created_on')
+        declaration = Declaration.objects.get(pk=declaration_id, created_by=request.user)
+        employee = Employee.objects.get(pk=employee_id, declarationemployee__declaration=declaration)
+        declarationEmployees_count = DeclarationEmployee.objects.filter(employee=employee).count()
+        print(declarationEmployees_count)
     except Declaration.DoesNotExist:
         messages.error(request, "Déclaration inexistante.")
         return redirect("paiement:declarations")
@@ -449,23 +433,51 @@ def employee_edit(request, declaration_id, employee_id):
         messages.error(request, "Employé inexistante.")
         return redirect("paiement:edit_declaration", declaration.id)
     if request.method == 'POST':
-        data = request.POST
-        if employees.count() > 1:  # pour eviter que le nom d'un employé soit modifié lors d'un renouvelement
-            emp = employees.first()
-            data['first'] = emp.first
-            data['passport_number'] = emp.passport_number
-            data['last'] = emp.last
-        form = EmployeeForm(instance=employee, data=data)
+        employee_copy = copy.copy(employee)  # pour garder une copie non modifiée par le formulaire
+        form = EmployeeForm(instance=employee, data=request.POST)
         if form.is_valid():
+            if declarationEmployees_count == 1:  # pour eviter que le nom d'un employé soit modifié lors d'un renouvelement
+                form.save()
+            else:
+                # les autres champs ont ete inserer par le modelform automatiquement
+                employee.first = employee_copy.first
+                employee.last = employee_copy.last
+                employee.passport_number = employee_copy.passport_number
+                employee.save()
 
-            form.save()
             messages.success(
                 request,
                 f"L'employé {form.cleaned_data.get('passport_number')} a été modifié avec succès"
                 )
         else:
             messages.error(request, "Une erreur est survenue veuillez réessayer")
-    return redirect("paiement:edit_declaration", declaration.id)
+    return redirect("paiement:edit_declaration", declaration_id)
+
+
+@login_required(login_url="/login/")
+def employee_delete(request, declaration_id, employee_id):
+    try:
+        declaration = Declaration.objects.get(pk=declaration_id, created_by=request.user)
+        employee = Employee.objects.get(pk=employee_id, declarationemployee__declaration=declaration)
+        declarationEmployees = DeclarationEmployee.objects.filter(employee=employee).order_by('-created_on')
+    except Declaration.DoesNotExist:
+        messages.error(request, "Déclaration inexistante.")
+        return redirect("paiement:declarations")
+    except Employee.DoesNotExist:
+        messages.error(request, "Employé inexistante.")
+        return redirect("paiement:edit_declaration", declaration.id)
+    if request.method == 'POST':
+        de = declarationEmployees.filter(declaration=declaration).first()
+        if de is not None:
+            de.delete()
+        if declarationEmployees.count() == 1:  # si c'etait la premiere declaration 
+            employee.delete()
+        messages.success(
+            request,
+            "employé(e) supprimé(e) avec succès"
+            )
+        return redirect("paiement:edit_declaration", declaration_id)
+    # return HttpResponse('ok')
 
 
 @login_required(login_url="/login/")
@@ -476,6 +488,7 @@ def declaration_employee_renew(request, declaration_id):
         try:
             employee = Employee.objects.get(passport_number=validated_data['passport_number'])
             declaration = Declaration.objects.get(pk=declaration_id)
+            # print(validated_data['passport_number'], employee.passport_number)
             if (employee.declaration == declaration):
                 messages.error(request, "Il  a déjà été ajouté à cette déclaration")
                 return redirect('paiement:edit_declaration', declaration_id)
@@ -489,10 +502,8 @@ def declaration_employee_renew(request, declaration_id):
             messages.error(request, "Pas de correspondance trouvé")
         except Declaration.DoesNotExist as e:
             messages.error(request, "Cette déclaration n'existe pas")
-        
     else:
         messages.error(request, "Vous devez saisir un numéro valide de passport")
-    
     return redirect('paiement:edit_declaration', declaration_id)
 
 

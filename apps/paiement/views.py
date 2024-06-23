@@ -168,7 +168,6 @@ def add_payment_view(request):
                 'segment': 'paiements'
             }
             return render(request, "paiements/add-payment.html", context)
-        
     return render(request, "paiements/add-payment.html", context_empty)
 
 
@@ -470,7 +469,7 @@ def employee_delete(request, declaration_id, employee_id):
         de = declarationEmployees.filter(declaration=declaration).first()
         if de is not None:
             de.delete()
-        if declarationEmployees.count() == 1:  # si c'etait la premiere declaration 
+        if declarationEmployees.count() == 0:  # si c'etait la premiere declaration apres le delete le count vaudra 0
             employee.delete()
         messages.success(
             request,

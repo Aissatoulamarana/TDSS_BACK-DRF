@@ -299,7 +299,7 @@ def bill_receipt_view(request, bill_id):
     # pdf.drawImage('apps/static/assets/img/brand/logo.jpg', 60, 750, 100, 80, showBoundary=False)
     pdf.drawImage('apps/static/assets/img/bill/header_aguipee_tdss.png', 0, 730, A4[0], 100, showBoundary=False)
     pdf.drawImage('apps/static/assets/img/bill/footer_aguipee_tdss.png', 0, 0, A4[0], 75, showBoundary=False)
-    pdf.drawImage('apps/static/assets/img/bill/conditions_banque.png', 95, 170, 400, 190, showBoundary=False)
+    pdf.drawImage('apps/static/assets/img/bill/conditions_banque.png', 95, 120, 400, 190, showBoundary=False)
     # pdf.line(50, 750, 550, 750)
     pdf.setFontSize(20, leading=None)
     pdf.drawString(220, 700, f"Facture N° 00{facture.id}/{date.format('Y')}")
@@ -366,9 +366,9 @@ def bill_receipt_view(request, bill_id):
 
     # Creating the QR Code
     qr_data = {
-        'ID': facture.id, 
-        'REF': facture.reference, 
-        'Client': f"{client.name}", 
+        'ID': facture.id,
+        'REF': facture.reference,
+        'Client': f"{client.name}",
         'Montant': f"{facture.amount} {facture.devise.sign}"
     }
     qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L, border=4)
@@ -377,11 +377,11 @@ def bill_receipt_view(request, bill_id):
     img = qr.make_image()
     img.save('staticfiles/bill_qr.png')
     
-    pdf.drawImage('staticfiles/bill_qr.png', 60, 390, 70, 70, showBoundary=False)
+    pdf.drawImage('staticfiles/bill_qr.png', 60, 350, 70, 70, showBoundary=False)
 
     pdf.setFontSize(14, leading=None)
-    pdf.drawString(430, 440, f"La Direction")
-    pdf.line(430, 435, 505, 435)
+    pdf.drawString(430, 400, f"La Direction")
+    pdf.line(430, 395, 505, 395)
 
     pdf.showPage()
     pdf.save()

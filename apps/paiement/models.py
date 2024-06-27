@@ -106,7 +106,7 @@ class Employee(models.Model):
     modified_on = models.DateTimeField(auto_now=True, null=True)
 
     def __str__(self):
-        return f"{self.first} {self.last}"
+        return f"{self.passport_number}-{self.first} {self.last}"
 
 
 class DeclarationEmployee(models.Model):
@@ -121,6 +121,9 @@ class DeclarationEmployee(models.Model):
         unique_together = [
             ['declaration', 'employee']
         ]
+
+    def __str__(self):
+        return f"{self.employee} {self.created_on}"
 
 
 class Facture(models.Model):

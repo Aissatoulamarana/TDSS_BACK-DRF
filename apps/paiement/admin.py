@@ -10,13 +10,26 @@ from .models import (Devise, Facture, Payer, Payment,
 class DeviseAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'sign', 'value', 'comment')
 
+class DeclarationEmployeInline(admin.TabularInline):
+    # list_display = ('employee', 'declaration', 'created_on')
+    fields = ('employee', 'declaration', )
+    model = DeclarationEmployee
+
 
 class DeclarationAdmin(admin.ModelAdmin):
+    search_fields = ('title', 'reference',)
+    list_filter = ('status', )
     list_display = ('id', 'reference', 'title', 'status', 'comment', 'created_by')
+    list_display_links = ('id', 'reference', 'title')
+    inlines = [DeclarationEmployeInline,]
+    extra = 2
+
 
 
 class EmployeeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'declaration', 'job_category', 'job', 'passport_number', 'first', 'last', 'phone')
+    search_fields = ('passport_number', 'phone', 'first', 'last')
+    list_display = ('id', 'declaration', 'passport_number', 'first', 'last', 'phone', 'job_category', 'job')
+    inlines = [DeclarationEmployeInline,]
 
 
 class DeclarationEmployeAdmin(admin.ModelAdmin):

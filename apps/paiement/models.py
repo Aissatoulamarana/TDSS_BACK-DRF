@@ -85,7 +85,7 @@ class Declaration(models.Model):
                                         related_query_name='alldeclaration')
 
     def __str__(self):
-        return f"{self.title}"
+        return f"{self.title}-{self.created_on}"
 
 
 class Employee(models.Model):

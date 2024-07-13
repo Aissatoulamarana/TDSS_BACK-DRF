@@ -5,13 +5,21 @@ Copyright (c) 2022 - OD
 
 import uuid
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
 
 
 class ProfileType(models.Model):
+    ADMIN = 'admin'  # 1
+    BANK = 'bank'   # 2
+    ENTREPRISE = 'entreprise'  # 4
+    MINISTRY = 'ministry'  # 3
+    AGUIPE = 'aguipe'  # 5
+
     uid = models.SmallIntegerField(unique=True)
+    code = models.CharField(verbose_name=_('Code'), max_length=30, unique=True, null=True)
     name = models.CharField(verbose_name="type name", max_length=100)
     status = models.CharField(max_length=30, choices=[('ON', "Actif"), ('OFF', "Inactif")], default="ON")
     comment = models.TextField(max_length=255, blank=True, null=True)
@@ -21,14 +29,21 @@ class ProfileType(models.Model):
 
 
 class UserType(models.Model):
+    ADMIN = 'admin'  # 1
+    AGENT = 'agent'  # 2
+    SUPERVISOR = 'supervisor'  # 3
+    AGUIPE = 'aguipe'  # 4
+    TDSS = 'tdss'  # 5
+    MINISTRY = 'ministry'  # 6
+
     uid = models.SmallIntegerField(unique=True)
+    code = models.CharField(verbose_name=_('Code'), max_length=30, unique=True, null=True)
     name = models.CharField(verbose_name="type name", max_length=100)
     status = models.CharField(max_length=30, choices=[('ON', "Actif"), ('OFF', "Inactif")], default="ON")
     comment = models.TextField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return self.name
-
 
 
 class Region(models.Model):

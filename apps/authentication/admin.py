@@ -13,10 +13,10 @@ class CustomUserAdmin(admin.ModelAdmin):
     list_display = ('id', 'username', 'email', 'profile', 'first_name', 'last_name', 'created_on', 'modified_on')
 
 class UserTypeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'uid', 'name', 'status', 'comment')
+    list_display = ('id', 'uid', 'name', 'code', 'status', 'comment')
 
 class ProfileTypeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'uid', 'name', 'status', 'comment')
+    list_display = ('id', 'uid', 'name', 'code', 'status', 'comment')
 
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('uuid', 'name', 'type', 'status', 'picture', 'created_on', 'modified_on')

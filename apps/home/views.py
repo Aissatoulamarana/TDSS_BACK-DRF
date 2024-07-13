@@ -12,7 +12,7 @@ from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.db.models import Sum
 
-from apps.authentication.models import CustomUser, Profile, ProfileType
+from apps.authentication.models import CustomUser, Profile, ProfileType, UserType
 from apps.authentication.forms import CustomUserForm, Agency, Region
 from apps.paiement.models import Declaration, Facture, Payment, Devise, Employee
 
@@ -22,7 +22,7 @@ devises = Devise.objects.all().order_by('id')
 @login_required(login_url="/login/")
 def index(request):
 
-    if request.user.profile.type.uid == 1 or request.user.profile.type.uid == 3:
+    if request.user.profile.type.code in (ProfileType.ADMIN, ProfileType.AGUIPE, ProfileType.MINISTRY):
         context = {
             'segment': 'index',
             'taux': devises,
@@ -31,7 +31,6 @@ def index(request):
             'total_agencies': Agency.objects.all(),
             'agencies_conakry': Agency.objects.filter(region=Region.objects.get(code='GN-C')),
             'agencies_interior': Agency.objects.exclude(region=Region.objects.get(code='GN-C')),
-
             'total_declarations': Declaration.objects.all(),
             'total_employees': Employee.objects.all(),
             'total_factures': Facture.objects.all(),
@@ -40,7 +39,7 @@ def index(request):
             'paiement_USD': Payment.objects.filter(devise=Devise.objects.get(pk=2)).aggregate(Sum('amount'))['amount__sum']
         }
     else:
-        if request.user.type.uid == 1 or request.user.type.uid == 3:
+        if request.user.type.code in [UserType.ADMIN, UserType.SUPERVISOR]:
             context = {
                 'segment': 'index',
                 'taux': devises,
@@ -119,7 +118,6 @@ def edit_page_profile_view(request, user_id):
     print(user.permissions)
 
     if request.method == "POST":
-        
         form = CustomUserForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
             updated_user = form.save(commit=False)

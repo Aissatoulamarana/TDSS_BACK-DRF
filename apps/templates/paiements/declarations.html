@@ -61,7 +61,7 @@
                   class="btn btn-sm btn-success ml-2 float-right" role="button"
                   data-id="a-declarations-exportxlsx">XLSX</a>
                 {% endif %}
-                {% if 'a-declarations-ajouter' in user.permissions.codes or user.is_staff %}
+                {% if 'a-declarations-ajouter' in user.type.code in can_add or user.is_staff %}
                 <a href="#" class="btn btn-sm btn-neutral float-right" role="button" data-id="a-declarations-ajouter"
                   data-toggle="modal" data-target="#modal-declaration-add">+Ajouter</a>
                 {% endif %}

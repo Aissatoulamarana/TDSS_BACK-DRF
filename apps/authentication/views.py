@@ -169,7 +169,6 @@ def add_profile_view(request):
         userform = CustomUserForm(request.POST, prefix= "user")
 
         userform.fields["type"].required = False
-        
         if profileform.is_valid() and userform.is_valid():
             print("Valid forms submitted!")
 
@@ -218,8 +217,7 @@ def add_user_view(request):
     default_region = Region.objects.first()
     default_agency = Agency.objects.first()
     initial_value = {'location': default_region, 'agency': default_agency}
-    context_empty = {'userform': CustomUserForm(initial= initial_value), 'segment': 'administration', 'taux': devises}
-    
+    context_empty = {'userform': CustomUserForm(initial=initial_value), 'segment': 'administration', 'taux': devises}
     if request.method == "POST":
         form = CustomUserForm(request.POST, request.FILES)
         if form.is_valid():
@@ -292,7 +290,6 @@ def edit_profile_view(request, profile_id):
     context_empty = {'profileform': ProfileForm(instance=profile), 'profile_id': profile_id, 'segment': 'administration', 'taux': devises}
 
     if request.method == "POST":
-        
         form = ProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
@@ -300,12 +297,9 @@ def edit_profile_view(request, profile_id):
 
             messages.success(request, "Profil modifié.")
             return redirect("authentication:profiles")
-
         else:
             context = {'profileform': form, 'ErrorMessage': "Formulaire invalid soumit.", 'profile_id': profile_id, 'segment': 'administration', 'taux': devises}
             return render(request, "accounts/edit-profile.html", context)
-
-
     return render(request, "accounts/edit-profile.html", context_empty)
 
 
@@ -316,7 +310,6 @@ def agencies_view(request):
     form = AgencyForm()
 
     return render(request, "accounts/agencies.html", {
-        
         'form': form,
         'agencies': agencies,
         'taux': devises,

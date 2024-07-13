@@ -17,7 +17,7 @@ from django.db.models import Count
 
 from apps.paiement.models import (Devise, Facture, Payer, Payment, Permit, Employee, Declaration,
                      DeclarationEmployee, JobCategory, Job)
-from apps.authentication.models import Profile, CustomUser
+from apps.authentication.models import Profile, CustomUser, ProfileType, UserType
 from .forms import (DeviseForm, FactureForm, PayerForm, PaymentForm, EmployeeForm,
                     EmployeeRenewForm, DeclarationForm)
 
@@ -27,13 +27,12 @@ devises = Devise.objects.all().order_by('id')
 
 @login_required(login_url="/login/")
 def payments_view(request):
-    if request.user.profile.type.uid == 1 or request.user.type.uid == 5:
+    if request.user.profile.type.code == ProfileType.ADMIN or request.user.type.code == UserType.TDSS:
         payments = Payment.objects.all().order_by('created_on')
-    elif request.user.type.uid == 2:
+    elif request.user.type.code == UserType.AGENT:
         payments = Payment.objects.filter(created_by=request.user).order_by('created_on')
     else:
         payments = Payment.objects.filter(created_by__profile=request.user.profile).order_by('created_on')
-    
     form = PaymentForm()
     payerform = PayerForm()
 
@@ -64,8 +63,8 @@ def generate_payment_view(request):
             default_devise = Devise.objects.first()
             initial_value = {'devise': default_devise}
             context_empty = {
-                'paymentform': PaymentForm(prefix= "payment", initial= initial_value), 
-                'payerform': PayerForm(prefix= "payer"),
+                'paymentform': PaymentForm(prefix="payment", initial=initial_value),
+                'payerform': PayerForm(prefix="payer"),
                 'facture': facture,
                 'taux': devises,
                 'segment': 'paiements'
@@ -77,35 +76,25 @@ def generate_payment_view(request):
         except Facture.DoesNotExist:
             messages.error(request, "Cette facture n'existe pas.")
             return redirect("paiement:payments")
-        
     elif request.method == "POST" and 'generate-form-submit' in request.POST:
-
         bill = request.POST.get('facture')
         facture = Facture.objects.get(reference=UUID(bill).hex)
         # print(facture.reference)
-        
-        paymentform = PaymentForm(request.POST, prefix= "payment")
-        payerform = PayerForm(request.POST, prefix= "payer")
-
+        paymentform = PaymentForm(request.POST, prefix="payment")
+        payerform = PayerForm(request.POST, prefix="payer")
         # paymentform.fields["type"].required = False
-        
         if paymentform.is_valid() and payerform.is_valid():
             # print("Valid forms submitted!")
-
             new_payer = payerform.save(commit=False)
             new_payer.employer = facture.client
-
             new_payer.save()
             # print("Payer created!")
-
             new_payment = paymentform.save(commit=False)
             new_payment.facture_ref = facture
             new_payment.payer = new_payer
             new_payment.created_by = request.user
-
             new_payment.save()
             # print("Payment created!")
-
             facture.status = 'paid'
             facture.save()
 
@@ -113,7 +102,7 @@ def generate_payment_view(request):
             return redirect("paiement:payments")
         else:
             context = {
-                'paymentform': paymentform, 
+                'paymentform': paymentform,
                 'payerform': payerform,
                 'facture': facture,
                 'ErrorMessage': "Formulaire invalid soumit",
@@ -131,7 +120,7 @@ def add_payment_view(request):
     default_devise = Devise.objects.first()
     initial_value = {'devise': default_devise}
     context_empty = {
-        'paymentform': PaymentForm(prefix= "payment", initial= initial_value), 
+        'paymentform': PaymentForm(prefix="payment", initial= initial_value), 
         'payerform': PayerForm(prefix= "payer"),
         'taux': devises,
         'segment': 'paiements'
@@ -291,22 +280,22 @@ def get_devise(request, devise_id):
 
 @login_required(login_url="/login/")
 def declarations_view(request):
-    if request.user.profile.type.uid == 1 or request.user.type.uid == 5:
+    if request.user.profile.type.code == ProfileType.ADMIN or request.user.type.code == UserType.TDSS:
         declarations = Declaration.objects.prefetch_related('employees').annotate(nb_employees=Count('declarationemployee')).all().order_by('created_on')
-    elif request.user.type.uid == 4:
+    elif request.user.type.code == UserType.AGUIPE:
         declarations = Declaration.objects.prefetch_related('employees').annotate(nb_employees=Count('declarationemployee')).filter(status='submitted').order_by('created_on')
-    elif request.user.type.uid == 2:
+    elif request.user.type.code == UserType.AGENT:
         declarations = Declaration.objects.prefetch_related('employees').annotate(nb_employees=Count('declarationemployee')).filter(created_by=request.user).order_by('created_on')
     else:
         declarations = Declaration.objects.prefetch_related('employees').annotate(nb_employees=Count('declarationemployee')).filter(created_by__profile=request.user.profile).order_by('created_on')
-    
     form = DeclarationForm()
-
     return render(request, "paiements/declarations.html", {
         'declarationform': form,
         'declarations': declarations,
         'taux': devises,
-        'segment': "facturation"
+        'segment': "facturation",
+        'can_add': [UserType.ADMIN, UserType.AGENT],
+        'can_export': [UserType.ADMIN, UserType.AGENT, UserType.MINISTRY, UserType.AGUIPE]
     })
 
 
@@ -591,9 +580,9 @@ def bill_declaration_view(request, declaration_id):
 
 @login_required(login_url="/login/")
 def factures_view(request):
-    if request.user.profile.type.uid == 1 or request.user.type.uid == 5:
+    if request.user.profile.type.code == ProfileType.ADMIN or request.user.type.code == UserType.TDSS:
         factures = Facture.objects.all().order_by('created_on')
-    elif request.user.type.uid == 2:
+    elif request.user.type.code == UserType.AGENT:
         factures = Facture.objects.filter(status='unpaid').order_by('created_on')
     else:
         factures = Facture.objects.filter(created_by__profile=request.user.profile).order_by('created_on')
@@ -616,26 +605,20 @@ def add_facture_view(request):
     default_devise = Devise.objects.first()
     initial_value = {'devise': default_devise}
     context_empty = {
-        'factureform': FactureForm(initial= initial_value),
+        'factureform': FactureForm(initial=initial_value),
         'permits': Permit.objects.all(),
         'taux': devises,
         'segment': 'facturation'
     }
 
     if request.method == "POST":
-
         factureform = FactureForm(request.POST)
-        
         if factureform.is_valid():
             # print("Valid forms submitted!")
-
             new_facture = factureform.save(commit=False)
-
             new_facture.created_by = request.user
-
             new_facture.save()
             # print("Facture created!")
-
             messages.success(request, "Nouvelle facture ajoutée.")
             return redirect("paiement:factures")
         else:

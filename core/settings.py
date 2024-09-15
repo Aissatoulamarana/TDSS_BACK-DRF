@@ -4,7 +4,7 @@ Copyright (c) 2022 - OD
 """
 
 import os
-from decouple import config
+import decouple
 from pathlib import Path
 
 from django.contrib.messages import constants as messages
@@ -14,13 +14,13 @@ BASE_DIR = Path(__file__).parent
 CORE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-#4$gu+*w)!tnyja2bb-#1=+gw=636m*4y73a31e1yoqx)jcq@o')
+SECRET_KEY = decouple.config('SECRET_KEY', default='django-insecure-#4$gu+*w)!tnyja2bb-#1=+gw=636m*4y73a31e1yoqx)jcq@o')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=True, cast=bool)
+DEBUG = decouple.config('DEBUG', default=True, cast=bool)
 
 # load production server from .env
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '18.133.204.125', '192.168.1.230', config('SERVER', default='127.0.0.1')]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '18.133.204.125', '192.168.1.230', decouple.config('SERVER', default='127.0.0.1')]
 
 # Application definition
 
@@ -77,17 +77,19 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 DATABASES = {
     # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
-    #     'NAME': 'paiements',
-    #     'USER': 'omatest',
-    #     'PASSWORD': 'oma@123',
-    #     'HOST': 'localhost',
-    #     'PORT': '5432',
+    #     'ENGINE': decouple.config('DB_ENGINE', default='django.db.backends.sqlite3'),
+    #     'NAME': decouple.config('DB_NAME', default=BASE_DIR / 'db.sqlite3'),
+    #     'USER': decouple.config('DB_USER', default=''),
+    #     'PASSWORD': decouple.config('DB_PASSWORD', default=''),
+    #     'HOST': decouple.config('DB_HOST', default=None),
+    #     'PORT': decouple.config('DB_PORT', default=None),
+    #     'CONN_MAX_AGE': 600,
     # }
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': 'mydatabase.sqlite',
     }
+
 }
 
 # Password validation
@@ -160,12 +162,13 @@ AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.AllowAllUsersModelBacke
 
 
 # Settings for email configuration
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'mail.tdss.com.gn'
-EMAIL_USE_TLS = True
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'noreply@tdss.com.gn'
-EMAIL_HOST_PASSWORD = 'TDSS@workp@2023$'
+
+# EMAIL_BACKEND = decouple.config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+# EMAIL_USE_TLS = decouple.config('EMAIL_USE_TLS', default=False, cast=bool)
+# EMAIL_HOST = decouple.config('EMAIL_HOST')
+# EMAIL_PORT = int(decouple.config('EMAIL_PORT', default=1025))
+# EMAIL_HOST_USER = decouple.config('EMAIL_HOST_USER', default='')
+# EMAIL_HOST_PASSWORD = decouple.config('EMAIL_HOST_PASSWORD', default='mypassword')
 
 #############################################################
 #############################################################

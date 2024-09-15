@@ -11,6 +11,8 @@ from reportlab.lib.utils import simpleSplit
 from reportlab.graphics.shapes import Drawing, Line, String
 from reportlab.lib.enums import TA_JUSTIFY, TA_CENTER,TA_LEFT,TA_RIGHT
 
+from num2words import num2words
+
 import qrcode
 
 from .models import Devise, Facture, Payer, Payment, Permit, Employee, Declaration, JobCategory, Job
@@ -371,6 +373,17 @@ def bill_receipt_view(request, bill_id):
         'Client': f"{client.name}",
         'Montant': f"{facture.amount} {facture.devise.sign}"
     }
+    pdf.setFont("Helvetica-Bold", 10)  #mettre en gras
+    amount = f"{num2words(facture.amount, False, 'fr')} francs guinéens"
+    pdf.drawString(
+        50, 425,
+        f"Arrêté la présente facture à la somme de: {amount.title()}")
+    pdf.line(50, 422, 245, 422)
+    
+    # pdf.drawString(
+    #     235, 425, f"{num2words(facture.amount, False, 'fr')} francs guinéens")
+    pdf.setFont("Helvetica", 12)  #  remettre sur font de depart
+
     qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L, border=4)
     qr.add_data(qr_data)
     qr.make(fit=True)

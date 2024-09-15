@@ -374,7 +374,7 @@ def bill_receipt_view(request, bill_id):
         'Montant': f"{facture.amount} {facture.devise.sign}"
     }
     pdf.setFont("Helvetica-Bold", 10)  #mettre en gras
-    amount = f"{num2words(facture.amount, False, 'fr')} francs guinéens"
+    amount = f"{num2words(facture.amount, False, 'fr')}  {facture.devise.name}"
     pdf.drawString(
         50, 425,
         f"Arrêté la présente facture à la somme de: {amount.title()}")

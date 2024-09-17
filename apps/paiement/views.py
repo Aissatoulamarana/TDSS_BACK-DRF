@@ -294,7 +294,7 @@ def declarations_view(request):
         'declarations': declarations,
         'taux': devises,
         'segment': "facturation",
-        'can_add': [UserType.ADMIN, UserType.AGENT],
+        'can_add': [UserType.ADMIN, UserType.AGENT, UserType.AGUIPE, UserType.TDSS],
         'can_export': [UserType.ADMIN, UserType.AGENT, UserType.MINISTRY, UserType.AGUIPE]
     })
 

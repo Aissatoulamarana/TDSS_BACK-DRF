@@ -348,12 +348,10 @@ def bill_receipt_view(request, bill_id):
             ('TEXTCOLOR', (0,0), (-1,0), colors.darkred),
             ('LINEABOVE', (0,0), (-1,-2), 0.1, colors.grey),
             ('LINEABOVE', (0,1), (-1,1), 1.5, colors.black),
-            
             ('LINEABOVE', (0,-1), (-1,-1), 0.1, colors.grey),
             ('BACKGROUND', (0,-1), (-1,-1), colors.Color(241/256, 234/256, 234/256)),
             ('FONTSIZE', (0,-1), (-1,-1), 14, colors.red),
             ('LINEBELOW', (0,-1), (-1,-1), 0.1, colors.grey),
-            
             ('ALIGN', (1,0), (-1,-1), 'CENTER'),
         ]
     )
@@ -376,9 +374,9 @@ def bill_receipt_view(request, bill_id):
     pdf.setFont("Helvetica-Bold", 10)  #mettre en gras
     amount = f"{num2words(facture.amount, False, 'fr')}  {facture.devise.name}"
     pdf.drawString(
-        50, 425,
-        f"Arrêté la présente facture à la somme de: {amount.title()}")
-    pdf.line(50, 422, 245, 422)
+        50, 415,
+        f"Arrêté la présente facture à la somme de: {amount.capitalize()}")
+    pdf.line(50, 412, 245, 412)
     
     # pdf.drawString(
     #     235, 425, f"{num2words(facture.amount, False, 'fr')} francs guinéens")
@@ -390,11 +388,11 @@ def bill_receipt_view(request, bill_id):
     img = qr.make_image()
     img.save('staticfiles/bill_qr.png')
     
-    pdf.drawImage('staticfiles/bill_qr.png', 60, 350, 70, 70, showBoundary=False)
+    pdf.drawImage('staticfiles/bill_qr.png', 60, 330, 70, 70, showBoundary=False)
 
     pdf.setFontSize(14, leading=None)
-    pdf.drawString(430, 400, f"La Direction")
-    pdf.line(430, 395, 505, 395)
+    pdf.drawString(430, 385, f"La Direction")
+    pdf.line(430, 380, 505, 380)
 
     pdf.showPage()
     pdf.save()

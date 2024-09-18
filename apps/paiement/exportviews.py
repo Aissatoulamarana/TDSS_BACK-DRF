@@ -251,7 +251,15 @@ def exportpdf_bills_view(request):
 @login_required(login_url="/login/")
 def exportpdf_declarations_view(request):
     name = "Déclarations"
-    declarations = Declaration.objects.all().order_by('id')
+    if request.user.profile.type.code == ProfileType.ADMIN or request.user.type.code == UserType.TDSS:
+        declarations = Declaration.objects.prefetch_related('employees').annotate(nb_employees=Count('declarationemployee')).all().order_by('created_on')
+    elif request.user.type.code == UserType.AGUIPE:
+        declarations = Declaration.objects.prefetch_related('employees').annotate(nb_employees=Count('declarationemployee')).filter(status='submitted').order_by('created_on')
+    elif request.user.type.code == UserType.AGENT:
+        declarations = Declaration.objects.prefetch_related('employees').annotate(nb_employees=Count('declarationemployee')).filter(created_by=request.user).order_by('created_on')
+    else:
+        declarations = Declaration.objects.prefetch_related('employees').annotate(nb_employees=Count('declarationemployee')).filter(created_by__profile=request.user.profile).order_by('created_on')
+    
     data = [
         ['N°', 'Référence', 'Entreprise', 'Titre', 'Total employés', 'Statut', 'Date'],
     ]

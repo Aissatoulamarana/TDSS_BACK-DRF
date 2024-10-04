@@ -38,3 +38,5 @@ media/*
 # manage.py
 # docker-compose.yml
 # requirements.txt
+/celerybeat-schedule
+/storage

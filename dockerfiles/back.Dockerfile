@@ -7,8 +7,6 @@ LABEL version="1.2"
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-COPY ./requirements.txt /tmp/requirements.txt
-COPY ./ /app
 
 WORKDIR /app
 EXPOSE 8000
@@ -16,11 +14,14 @@ EXPOSE 8000
 ARG DEV=false
 
 RUN apk update \
-    && apk add --no-cache gcc musl-dev linux-headers mariadb-dev libffi-dev 
+    && apk add --no-cache gcc musl-dev linux-headers mariadb-dev libffi-dev
+COPY ./requirements.txt /tmp/requirements.txt
+
+
 RUN pip install --no-cache-dir -r /tmp/requirements.txt && \
     adduser \
             --disabled-password \
             --no-create-home \
             django-user
-
+COPY ./ /app
 USER django-user

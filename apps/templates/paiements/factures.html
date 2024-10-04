@@ -106,7 +106,7 @@
                           {{facture.declaration_ref.title}}
                         </td>
                         <th scope="ref">
-                          {{ facture.declaration_ref.reference }}
+                          {{facture.declaration_ref|get_reference}}
                         </th>
                         <th scope="ref">
                           {{facture.client.name}}

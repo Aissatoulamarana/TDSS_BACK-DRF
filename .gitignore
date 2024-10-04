@@ -32,7 +32,7 @@ apps/static/assets/.temp
 media/*
 /data
 /*.sqlite*
-
+/storage
 # # Ignore files for docker prod
 # Dockerfile
 # manage.py

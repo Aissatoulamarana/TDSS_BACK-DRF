@@ -85,6 +85,7 @@
                       <th scope="col" class="sort" data-sort="n°">N°</th>
                       <th scope="col" class="sort" data-sort="ref">Référence</th>
                       <th scope="col" class="sort" data-sort="declaration">Titre déclaration</th>
+                      <th scope="col" class="sort" data-sort="n-declaration">N° déclaration</th>
                       <th scope="col" class="sort" data-sort="company">Entreprise</th>
                       <th scope="col" class="sort" data-sort="amount">Montant</th>
                       <th scope="col" class="sort" data-sort="status">Statut</th>
@@ -104,6 +105,9 @@
                         <td class="declaration" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px;">
                           {{facture.declaration_ref.title}}
                         </td>
+                        <th scope="ref">
+                          {{ facture.declaration_ref.reference }}
+                        </th>
                         <th scope="ref">
                           {{facture.client.name}}
                         </th>

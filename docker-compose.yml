@@ -18,9 +18,12 @@ services:
       - db
       - maildev
       - minio
+    networks:
+      - wp_shared_network
+      - internal-net
   
   db:
-    image: postgres:14.1-alpine
+    image: postgres:17.0-alpine3.20
     restart: unless-stopped
     container_name: workpermit-declaration-db
     env_file:
@@ -29,16 +32,21 @@ services:
       - '54320:5432'
     volumes: 
       - workpermit_declaration_db:/var/lib/postgresql/data
+    networks:
+      - internal-net
   
   maildev:
     image: maildev/maildev
     ports:
-      - "1080:1080"
-      - "1025:1025"
+      - "1081:1080"
+      - "1026:1025"
+    networks:
+      - wp_shared_network
+
   minio:
     hostname: minio
     image: quay.io/minio/minio
-    container_name: minio-trans
+    container_name: minio-workpermit
     command: server /data --console-address :9001
     environment:
         MINIO_ROOT_USER: minio
@@ -53,6 +61,15 @@ services:
     ports:
         - "9000:9000"
         - "9001:9001"
+    networks:
+      - wp_shared_network
 
 volumes:
   workpermit_declaration_db:
+
+
+networks:
+  internal-net:
+  wp_shared_network:
+    name: wp_shared_network
+    driver: bridge      

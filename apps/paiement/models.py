@@ -114,7 +114,7 @@ class Employee(models.Model):
     first = models.CharField(max_length=100, verbose_name="first_name")
     last = models.CharField(max_length=50, verbose_name="last_name")
     email = models.EmailField(max_length=100, blank=True, null=True)
-    phone = models.IntegerField()
+    phone = models.CharField(max_length=20)
     status = models.CharField(
         max_length=30, choices=status_choices, default="unenrolled"
     )
@@ -193,7 +193,7 @@ class Payer(models.Model):
     first = models.CharField(max_length=100, verbose_name="first name")
     last = models.CharField(max_length=50, verbose_name="last_name")
     email = models.EmailField(max_length=100, blank=True, null=True)
-    phone = models.IntegerField()
+    phone = models.CharField(max_length=20)
     country_origin = models.ForeignKey(
         Country,
         on_delete=models.PROTECT,

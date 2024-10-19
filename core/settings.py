@@ -157,15 +157,6 @@ AUTH_USER_MODEL = "authentication.CustomUser"
 AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.AllowAllUsersModelBackend"]
 
 # Settings for email configuration
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_USE_TLS = True
-# EMAIL_PORT = 587
-# EMAIL_HOST_USER = 'noreply.odiallo@gmail.com'
-# EMAIL_HOST_PASSWORD = 'zmwfjvpvokhxhlwc'
-
-
-# Settings for email configuration
 
 EMAIL_BACKEND = decouple.config(
     "EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend"
@@ -206,7 +197,7 @@ if decouple.config("USE_S3", default=False, cast=bool):
         "staticfiles": {
             "BACKEND": "storages.backends.s3.S3Storage",
             "OPTIONS": {
-                # 'location' : 'static',
+                'location': 'static',
                 "default_acl": "public-read",
                 "file_overwrite": False,
                 "custom_domain": AWS_S3_CUSTOM_DOMAIN,
@@ -226,7 +217,8 @@ if decouple.config("USE_S3", default=False, cast=bool):
     )
     AWS_S3_VERIFY = decouple.config("AWS_S3_VERIFY", default=True, cast=bool)
 
-    STATIC_URL = "/static/"
+    STATIC_URL = f'{AWS_S3_CUSTOM_DOMAIN}/static/'
+    MEDIA_URL = f'{AWS_S3_CUSTOM_DOMAIN}/mediafiles/'
 else:
     # Static files (CSS, JavaScript, Images)
     # https://docs.djangoproject.com/en/4.2/howto/static-files/
@@ -234,5 +226,5 @@ else:
     MEDIA_ROOT = os.path.join(BASE_DIR, "media")
     MEDIA_URL = "/media/"
 
-STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+    STATIC_URL = "/static/"
+    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")

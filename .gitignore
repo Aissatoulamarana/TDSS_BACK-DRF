@@ -40,3 +40,4 @@ media/*
 # requirements.txt
 /celerybeat-schedule
 /storage
+/*.code-workspace

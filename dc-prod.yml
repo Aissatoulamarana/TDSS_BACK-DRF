@@ -1,0 +1,31 @@
+services:
+  back:
+    build:
+      context: .
+      dockerfile: ./dockerfiles/back.Dockerfile
+      args:
+        - DEV=false
+    ports:
+      - 8004:8004
+    env_file:
+      - ./env/backend.test.env
+    command: >
+      sh -c "python manage.py migrate &&
+            gunicorn --bind 0.0.0.0:8004 core.wsgi:application --workers, 3"
+    depends_on:
+      - db
+  
+  db:
+    image: postgres:17.0-alpine3.20
+    restart: unless-stopped
+    container_name: workpermit-declaration-db
+    env_file:
+      - ./env/db.env
+    ports:
+      - '54320:5432'
+    volumes: 
+      - workpermit_declaration_db:/var/lib/postgresql/data
+  
+volumes:
+  workpermit_declaration_db:
+ 

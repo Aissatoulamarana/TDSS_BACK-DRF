@@ -27,6 +27,9 @@ ALLOWED_HOSTS = decouple.config(
     "ALLOWED_HOSTS", cast=decouple.Csv(), default="localhost"
 )
 
+CSRF_TRUSTED_ORIGINS = decouple.config("CSRF_TRUSTED_ORIGINS", cast=decouple.Csv(), default='http://localhost')
+
+
 # Application definition
 
 INSTALLED_APPS = [

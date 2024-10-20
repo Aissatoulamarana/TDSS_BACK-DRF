@@ -1,13 +1,4 @@
-<!--
-=========================================================
-* Argon Dashboard PRO - v1.2.0
-=========================================================
-* Product Page: https://www.creative-tim.com/product/argon-dashboard-pro
-* Copyright  Creative Tim (http://www.creative-tim.com)
-* Coded by www.creative-tim.com
-=========================================================
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
--->
+{% load static %}
 <!DOCTYPE html>
 <html>
 
@@ -18,22 +9,22 @@
   <meta name="author" content="Creative Tim">
 
   <title>
-    RTL Django Dashboard Argon PRO - {% block title %}{% endblock %} | AppSeed  
+    Tdds - {% block title %}{% endblock %} |   
   </title>
 
   <!-- Favicon -->
-  <link rel="icon" href="/static/assets/img/brand/logo.jpg" type="image/jpg">
+  <link rel="icon" href="{% static "assets/img/brand/logo.jpg" %}" type="image/jpg">
   <!-- Fonts -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700">
   <!-- Icons -->
-  <link rel="stylesheet" href="/static/assets/vendor/nucleo/css/nucleo.css" type="text/css">
-  <link rel="stylesheet" href="/static/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css" type="text/css">
+  <link rel="stylesheet" href="{% static "assets/vendor/nucleo/css/nucleo.css" %}" type="text/css">
+  <link rel="stylesheet" href="{% static "assets/vendor/@fortawesome/fontawesome-free/css/all.min.css" %}" type="text/css">
 
   <!-- Specific Page CSS goes HERE  -->  
   {% block stylesheets %}{% endblock stylesheets %}
 
   <!-- Argon CSS -->
-  <link rel="stylesheet" href="/static/assets/css/argon.css?v=1.2.0" type="text/css">
+  <link rel="stylesheet" href="{% static "assets/css/argon.css" %}" type="text/css">
 
 </head>
 <body class="rtl">
@@ -52,19 +43,19 @@
   
   <!-- Argon Scripts -->
   <!-- Core -->
-  <script src="/static/assets/vendor/jquery/dist/jquery.min.js"></script>
-  <script src="/static/assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="/static/assets/vendor/js-cookie/js.cookie.js"></script>
-  <script src="/static/assets/vendor/jquery.scrollbar/jquery.scrollbar.min.js"></script>
-  <script src="/static/assets/vendor/jquery-scroll-lock/dist/jquery-scrollLock.min.js"></script>
+  <script src="{% static "assets/vendor/jquery/dist/jquery.min.js" %}"></script>
+  <script src="{% static "assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js" %}"></script>
+  <script src="{% static "assets/vendor/js-cookie/js.cookie.js" %}"></script>
+  <script src="{% static "assets/vendor/jquery.scrollbar/jquery.scrollbar.min.js" %}"></script>
+  <script src="{% static "assets/vendor/jquery-scroll-lock/dist/jquery-scrollLock.min.js" %}"></script>
 
    <!-- Specific Page JS goes HERE  -->
    {% block javascripts %}{% endblock javascripts %}
   
   <!-- Argon JS -->
-  <script src="/static/assets/js/argon.js?v=1.2.0"></script>
+  <script src="{% static "assets/js/argon.js" %}"></script>
   <!-- Demo JS - remove this in your project -->
-  <script src="/static/assets/js/demo.min.js"></script>
+  <script src="{% static "assets/js/demo.min.js" %}"></script>
 
 </body>
 </html>

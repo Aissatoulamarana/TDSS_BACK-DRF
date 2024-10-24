@@ -17,7 +17,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }} 
      
           script: |
-            cd app 
+            cd workpermit/declaration/ 
             git pull origin dev
             docker compose -f dc-prod.yml down
             docker builder purne -f -a

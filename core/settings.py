@@ -206,6 +206,9 @@ if decouple.config("USE_S3", default=False, cast=bool):
                 "custom_domain": AWS_S3_CUSTOM_DOMAIN,
             },
         },
+        # "staticfiles": {
+        #     "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        # },
     }
     AWS_S3_SESSION_PROFILE = decouple.config("AWS_S3_SESSION_PROFILE", default=None)
     AWS_S3_ACCESS_KEY_ID = decouple.config("AWS_S3_ACCESS_KEY_ID", default=None)

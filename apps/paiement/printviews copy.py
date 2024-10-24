@@ -1,50 +1,36 @@
 import io
-from reportlab.pdfgen import canvas
-from reportlab.platypus import (
-    Table,
-    TableStyle,
-    Paragraph,
-    SimpleDocTemplate,
-    Image,
-    HRFlowable,
-)
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
+from io import BytesIO
+from reportlab.graphics.shapes import Drawing, Line, String
+from reportlab.lib.enums import TA_JUSTIFY, TA_CENTER,TA_LEFT,TA_RIGHT
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
-from reportlab.lib.units import inch
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.graphics.shapes import Drawing, String
-from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from reportlab.lib.units import inch
+from reportlab.lib.utils import simpleSplit, ImageReader
+from reportlab.pdfgen import canvas
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.platypus import Table, TableStyle, Paragraph, SimpleDocTemplate, Image, HRFlowable
+
+from PIL import Image as PilImage
 
 from num2words import num2words
 
 import qrcode
 
-from .models import (
-    Devise,
-    Facture,
-    Payer,
-    Payment,
-    Permit,
-    Employee,
-    Declaration,
-    JobCategory,
-    Job,
-)
+from .models import Devise, Facture, Payer, Payment, Permit, Employee, Declaration, JobCategory, Job
+from apps.authentication.models import Profile, CustomUser
 
 from django.contrib.auth.decorators import login_required
 from django.http import FileResponse
-from django.shortcuts import redirect
+from django.shortcuts import render, redirect
 from django.contrib import messages
 
 from django.utils.dateformat import DateFormat
 
-
 # Function to format number to amount
 def to_amount(number):
-    # return "{:0,.0f}".format(number).replace(','," ")
-    return number
+    return "{:0,.0f}".format(number).replace(','," ")
 
 
 @login_required(login_url="/login/")
@@ -58,182 +44,91 @@ def declaration_receipt_view(request, declaration_id):
 
     client = declaration.created_by.profile
     employees = Employee.objects.filter(declaration=declaration)
-
+    
     # Creating a buffer for the pdf
     buffer = io.BytesIO()
 
     # Creating the pdf document
-    pdf = SimpleDocTemplate(
-        buffer, title="Déclarations", pagesize=A4, topMargin=0.5 * inch
-    )
+    pdf = SimpleDocTemplate(buffer, title="Déclarations", pagesize=A4, topMargin=0.5*inch)
 
     elements = []
-    styles = getSampleStyleSheet()
-
+    styles=getSampleStyleSheet()
     # if client.picture:
     #     client_image = client.picture.url
     # else:
-    #     client_image = 'apps/static/assets/img/brand/logo.jpg'
-    client_image = "apps/static/assets/img/brand/logo.jpg"
+    client_image = 'apps/static/assets/img/brand/logo.jpg'
     elements.append(Image(client_image, width=100, height=80, hAlign="LEFT"))
 
     date = DateFormat(declaration.created_on)
 
     styleSheet = getSampleStyleSheet()
-    style_title = styleSheet["Heading1"]
+    style_title = styleSheet['Heading1']
     style_title.fontSize = 20
     # style_title.fontName = 'Helvetica-Bold'
-    style_title.alignment = TA_CENTER
+    style_title.alignment=TA_CENTER
 
-    style_data = styleSheet["Normal"]
-    style_data.fontSize = 11
+    style_data = styleSheet['Normal']
+    style_data.fontSize = 11 
     # style_data.fontName = 'Helvetica'
-    style_data.alignment = TA_LEFT
+    style_data.alignment=TA_LEFT
 
-    style_sign = styleSheet["Normal"]
-    style_sign.fontSize = 14
+    style_sign = styleSheet['Normal']
+    style_sign.fontSize = 14 
     # style_data.fontName = 'Helvetica'
-    style_sign.alignment = TA_LEFT
-
+    style_sign.alignment=TA_LEFT
+    
     d = Drawing(500, 50)
-    elements.append(
-        HRFlowable(width="100%", thickness=1, color=colors.black, hAlign="CENTER")
-    )
-    elements.append(
-        Paragraph(f"DECLARATION N° 00{declaration.id}/{date.format('Y')}", style_title)
-    )
-    elements.append(
-        HRFlowable(width="100%", thickness=1, color=colors.black, hAlign="CENTER")
-    )
+    elements.append(HRFlowable(width="100%", thickness=1, color=colors.black, hAlign='CENTER'))
+    elements.append(Paragraph(f"DECLARATION N° 00{declaration.id}/{date.format('Y')}", style_title))
+    elements.append(HRFlowable(width="100%", thickness=1, color=colors.black, hAlign='CENTER'))
 
     elements.append(Paragraph("<br/><br/>"))
-    d.add(
-        String(
-            10,
-            125,
-            f"Titre :  {declaration.title}",
-            fontSize=11,
-            fontName="Helvetica",
-            fillColor=colors.black,
-        )
-    )
-    d.add(
-        String(
-            350,
-            125,
-            f"Date : {date.format('d/m/Y')}",
-            fontSize=11,
-            fontName="Helvetica",
-            fillColor=colors.black,
-        )
-    )
+    d.add(String(10, 125, f"Titre :  {declaration.title}", fontSize=11, fontName='Helvetica', fillColor=colors.black))
+    d.add(String(350, 125, f"Date : {date.format('d/m/Y')}", fontSize=11, fontName='Helvetica', fillColor=colors.black))
 
-    d.add(
-        String(
-            10,
-            90,
-            f" {client.name}",
-            fontSize=11,
-            fontName="Helvetica",
-            fillColor=colors.black,
-        )
-    )
-    d.add(
-        String(
-            10,
-            75,
-            f" Tél : {to_amount(client.contact)}",
-            fontSize=11,
-            fontName="Helvetica",
-            fillColor=colors.black,
-        )
-    )
-    d.add(
-        String(
-            10,
-            60,
-            f" {client.adresse}",
-            fontSize=11,
-            fontName="Helvetica",
-            fillColor=colors.black,
-        )
-    )
+    d.add(String(10, 90, f" {client.name}", fontSize=11, fontName='Helvetica', fillColor=colors.black))
+    d.add(String(10, 75, f" Tél : {to_amount(client.contact)}", fontSize=11, fontName='Helvetica', fillColor=colors.black))
+    d.add(String(10, 60, f" {client.adresse}", fontSize=11, fontName='Helvetica', fillColor=colors.black))
     # elements.append(Paragraph(f" {client.name}"))
 
     # Creating the QR Code
     qr_data = {
-        "ID": declaration.id,
-        "REF": declaration.reference,
-        "Client": client.name,
-        "Total Employés": employees.count(),
+        'ID': declaration.id, 
+        'REF': declaration.reference, 
+        'Client': client.name, 
+        'Total Employés': employees.count()
     }
     qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L, border=4)
     qr.add_data(qr_data)
     qr.make(fit=True)
     img = qr.make_image()
-    img.save("staticfiles/declaration_qr.png")
+    img.save('staticfiles/declaration_qr.png')
+    
+    elements.append(Image('staticfiles/declaration_qr.png', width=70, height=70, hAlign="RIGHT"))
 
-    elements.append(
-        Image("staticfiles/declaration_qr.png", width=70, height=70, hAlign="RIGHT")
-    )
-
-    d.add(
-        String(
-            20,
-            10,
-            f"LISTE DES EMPLOYES",
-            fontSize=16,
-            fontName="Helvetica",
-            fillColor=colors.black,
-        )
-    )
-    d.add(
-        String(
-            380,
-            10,
-            f"Total : {employees.count()}",
-            fontSize=12,
-            fontName="Helvetica",
-            fillColor=colors.black,
-        )
-    )
+    d.add(String(20, 10, f"LISTE DES EMPLOYES", fontSize=16, fontName='Helvetica', fillColor=colors.black))
+    d.add(String(380, 10, f"Total : {employees.count()}", fontSize=12, fontName='Helvetica', fillColor=colors.black))
     # elements.append(Paragraph(f"LISTE DES EMPLOYES"))
     elements.append(d)
 
     data = [
-        [
-            "N°",
-            "N° de passeport",
-            "Prénoms & Nom",
-            "Catégorie",
-            "Fonction",
-            "Téléphone",
-        ],
+        ['N°','N° de passeport', 'Prénoms & Nom', 'Catégorie', 'Fonction', 'Téléphone'],
     ]
 
     counter = 1
     for employee in employees:
-        data.append(
-            [
-                f"{counter}",
-                employee.passport_number,
-                f"{employee.first} {employee.last}",
-                f"{employee.job_category}",
-                f"{employee.job}",
-                f"{to_amount(employee.phone)}",
-            ]
-        )
-        counter += 1
+        data.append([f"{counter}", employee.passport_number, f"{employee.first} {employee.last}", f"{employee.job_category}", f"{employee.job}", f"{employee.phone}"])
+        counter +=1
 
     LIST_STYLE = TableStyle(
         [
-            ("VALIGN", (0, 0), (-1, -1), "TOP"),
-            ("INNERGRID", (0, 0), (-1, -1), 0.50, colors.black),
+            ('VALIGN', (0,0), (-1,-1), 'TOP'),
+            ('INNERGRID', (0,0), (-1,-1), 0.50, colors.black),
             # ('LINEBEFORE', (0,0), (-1,0), 1, colors.black),
-            ("LINEABOVE", (0, 0), (-1, -1), 1, colors.black),
-            ("BOX", (0, 0), (-1, -1), 1.5, colors.black),
-            ("FONTSIZE", (0, 0), (-1, 0), 12, colors.black),
-            ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
+            ('LINEABOVE', (0,0), (-1,-1), 1, colors.black),
+            ('BOX', (0,0), (-1,-1), 1.5, colors.black),
+            ('FONTSIZE', (0,0), (-1,0), 12, colors.black),
+            ('BACKGROUND', (0,0), (-1,0), colors.lightgrey),
             # ('ALIGN', (1,1), (1,5), 'CENTER'),
         ]
     )
@@ -246,22 +141,14 @@ def declaration_receipt_view(request, declaration_id):
     data2 = [[Paragraph(cell, table_style) for cell in row] for row in data]
 
     # Manage table cols width. --default is 83
-    design_width = (
-        0.4 * inch,
-        1.2 * inch,
-        2.5 * inch,
-        1.2 * inch,
-        1.4 * inch,
-        0.9 * inch,
-    )
+    design_width = (0.4*inch, 1.2*inch, 2.5*inch, 1.2*inch, 1.4*inch, 0.9*inch)
 
-    table = Table(
-        data2, colWidths=design_width, repeatRows=1, splitByRow=1, style=LIST_STYLE
-    )
+    table = Table(data2, colWidths=design_width, repeatRows=1, splitByRow=1, style=LIST_STYLE)
 
     elements.append(table)
 
     elements.append(Paragraph("<br/><br/>" + f"L'employeur", style_sign))
+
 
     pdf.build(elements)
 
@@ -281,7 +168,7 @@ def declaration_receipt_view_real(request, declaration_id):
 
     client = declaration.created_by.profile
     employees = Employee.objects.filter(declaration=declaration)
-
+    
     # Creating a buffer for the pdf
     buffer = io.BytesIO()
 
@@ -291,15 +178,14 @@ def declaration_receipt_view_real(request, declaration_id):
     width, height = A4
     pdf.setTitle("Déclarations")
 
-    # if client.picture:
-    #     client_image = client.picture.url
-    # else:
-    #     client_image = 'apps/static/assets/img/brand/logo.jpg'
-    client_image = "apps/static/assets/img/brand/logo.jpg"
+    if client.picture:
+        client_image = (client.picture.url)[1:]
+    else:
+        client_image = 'apps/static/assets/img/brand/logo.jpg'
     pdf.drawImage(client_image, 60, 750, 100, 80, showBoundary=False)
 
     date = DateFormat(declaration.created_on)
-
+    
     pdf.line(50, 750, 550, 750)
     pdf.drawString(200, 730, f"DECLARATION N° 00{declaration.id}/{date.format('Y')}")
     pdf.line(50, 720, 550, 720)
@@ -320,39 +206,23 @@ def declaration_receipt_view_real(request, declaration_id):
     ouvriers = JobCategory.objects.get(pk=3)
 
     data = [
-        [
-            "N°",
-            "N° de passeport",
-            "Prénoms & Nom",
-            "Catégorie",
-            "Fonction",
-            "Téléphone",
-        ],
+        ['N°','N° de passeport', 'Prénoms & Nom', 'Catégorie', 'Fonction', 'Téléphone'],
     ]
 
     counter = 1
     for employee in employees:
-        data.append(
-            [
-                f"{counter}",
-                employee.passport_number,
-                f"{employee.first} {employee.last}",
-                f"{employee.job_category}",
-                f"{employee.job}",
-                f"{to_amount(employee.phone)}",
-            ]
-        )
-        counter += 1
+        data.append([f"{counter}", employee.passport_number, f"{employee.first} {employee.last}", f"{employee.job_category}", f"{employee.job}", f"{to_amount(employee.phone)}"])
+        counter +=1
 
     LIST_STYLE = TableStyle(
         [
-            ("VALIGN", (0, 0), (-1, -1), "TOP"),
-            ("INNERGRID", (0, 0), (-1, -1), 0.50, colors.black),
+            ('VALIGN', (0,0), (-1,-1), 'TOP'),
+            ('INNERGRID', (0,0), (-1,-1), 0.50, colors.black),
             # ('LINEBEFORE', (0,0), (-1,0), 1, colors.black),
-            ("LINEABOVE", (0, 0), (-1, -1), 1, colors.black),
-            ("BOX", (0, 0), (-1, -1), 1.5, colors.black),
-            ("FONTSIZE", (0, 0), (-1, 0), 12, colors.black),
-            ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
+            ('LINEABOVE', (0,0), (-1,-1), 1, colors.black),
+            ('BOX', (0,0), (-1,-1), 1.5, colors.black),
+            ('FONTSIZE', (0,0), (-1,0), 12, colors.black),
+            ('BACKGROUND', (0,0), (-1,0), colors.lightgrey),
             # ('ALIGN', (1,1), (1,5), 'CENTER'),
         ]
     )
@@ -365,18 +235,9 @@ def declaration_receipt_view_real(request, declaration_id):
     data2 = [[Paragraph(cell, table_style) for cell in row] for row in data]
 
     # Manage table cols width. --default is 83
-    design_width = (
-        0.4 * inch,
-        1.2 * inch,
-        2.5 * inch,
-        1.2 * inch,
-        1.4 * inch,
-        0.9 * inch,
-    )
+    design_width = (0.4*inch, 1.2*inch, 2.5*inch, 1.2*inch, 1.4*inch, 0.9*inch)
 
-    table = Table(
-        data2, colWidths=design_width, repeatRows=1, splitByRow=1, style=LIST_STYLE
-    )
+    table = Table(data2, colWidths=design_width, repeatRows=1, splitByRow=1, style=LIST_STYLE)
 
     # table = simpleSplit(table, 'Helvetica', 9, 83)
 
@@ -387,27 +248,28 @@ def declaration_receipt_view_real(request, declaration_id):
     pdf.setFontSize(8)
     table.wrapOn(pdf, 25, 500)
     # table.drawOn(pdf, 25, 580-table._height)
-    table.drawOn(pdf, 25, 50 - table._height)
+    table.drawOn(pdf, 25, 50-table._height)
 
     # Creating the QR Code
     qr_data = {
-        "ID": declaration.id,
-        "REF": declaration.reference,
-        "Client": client.name,
-        "Total Employés": employees.count(),
+        'ID': declaration.id, 
+        'REF': declaration.reference, 
+        'Client': client.name, 
+        'Total Employés': employees.count()
     }
     qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L, border=4)
     qr.add_data(qr_data)
     qr.make(fit=True)
     img = qr.make_image()
-    img.save("staticfiles/declaration_qr.png")
+    # img.save('staticfiles/declaration_qr.png')
+    img_io = BytesIO()
+    img.save(img_io, 'PNG')  # Save image in PNG format
+    img_io.seek(0)
 
-    pdf.drawImage(
-        "staticfiles/declaration_qr.png", 470, 615, 80, 80, showBoundary=False
-    )
+    pdf.drawImage(img_io, 470, 615, 80, 80, showBoundary=False)
 
     pdf.setFontSize(12, leading=None)
-    pdf.drawString(70, 550 - table._height, f"L'employeur")
+    pdf.drawString(70, 550-table._height, f"L'employeur")
 
     pdf.showPage()
     pdf.save()
@@ -415,6 +277,8 @@ def declaration_receipt_view_real(request, declaration_id):
     buffer.seek(0)
 
     return FileResponse(buffer, filename=f"recu_declaration_num{declaration.id}.pdf")
+
+
 
 
 @login_required(login_url="/login/")
@@ -425,9 +289,9 @@ def bill_receipt_view(request, bill_id):
     except Payment.DoesNotExist:
         messages.error(request, "Facture inexistante.")
         return redirect("paiement:factures")
-
+    
     client = facture.declaration_ref.created_by.profile
-
+    
     date = DateFormat(facture.created_on)
 
     # Creating a buffer for the pdf
@@ -439,30 +303,9 @@ def bill_receipt_view(request, bill_id):
     width, height = A4
     pdf.setTitle("Factures")
     # pdf.drawImage('apps/static/assets/img/brand/logo.jpg', 60, 750, 100, 80, showBoundary=False)
-    pdf.drawImage(
-        "apps/static/assets/img/bill/header_aguipee_tdss.png",
-        0,
-        730,
-        A4[0],
-        100,
-        showBoundary=False,
-    )
-    pdf.drawImage(
-        "apps/static/assets/img/bill/footer_aguipee_tdss.png",
-        0,
-        0,
-        A4[0],
-        75,
-        showBoundary=False,
-    )
-    pdf.drawImage(
-        "apps/static/assets/img/bill/conditions_banque.png",
-        95,
-        120,
-        400,
-        190,
-        showBoundary=False,
-    )
+    pdf.drawImage('apps/static/assets/img/bill/header_aguipee_tdss.png', 0, 730, A4[0], 100, showBoundary=False)
+    pdf.drawImage('apps/static/assets/img/bill/footer_aguipee_tdss.png', 0, 0, A4[0], 75, showBoundary=False)
+    pdf.drawImage('apps/static/assets/img/bill/conditions_banque.png', 95, 120, 400, 190, showBoundary=False)
     # pdf.line(50, 750, 550, 750)
     pdf.setFontSize(20, leading=None)
     pdf.drawString(220, 700, f"Facture N° 00{facture.id}/{date.format('Y')}")
@@ -481,106 +324,64 @@ def bill_receipt_view(request, bill_id):
     pdf.drawString(410, 619, f"Date déclaration : ")
     pdf.setFillColor(colors.black)
     pdf.drawString(495, 645, f"{date.format('d/m/Y')}")
-    pdf.drawString(
-        495,
-        632,
-        f"00{facture.declaration_ref.id}/{DateFormat(facture.declaration_ref.created_on).format('Y')}",
-    )
-    pdf.drawString(
-        495, 619, f"{DateFormat(facture.declaration_ref.created_on).format('d/m/Y')}"
-    )
+    pdf.drawString(495, 632, f"00{facture.declaration_ref.id}/{DateFormat(facture.declaration_ref.created_on).format('Y')}")
+    pdf.drawString(495, 619, f"{DateFormat(facture.declaration_ref.created_on).format('d/m/Y')}")
 
     cadres = JobCategory.objects.get(pk=1)
     agents = JobCategory.objects.get(pk=2)
     ouvriers = JobCategory.objects.get(pk=3)
 
     data = [
-        ["Catégorie de permis", "Quantité", "Prix Unitaire", "Total ligne"],
+        ['Catégorie de permis', 'Quantité', 'Prix Unitaire', 'Total ligne'],
     ]
 
     if facture.total_cadres > 0:
-        data.append(
-            [
-                f"{cadres.name} ({cadres.permit.name})",
-                facture.total_cadres,
-                to_amount(cadres.permit.price),
-                to_amount(facture.total_cadres * cadres.permit.price)
-                + f" {cadres.permit.devise.sign}",
-            ]
-        )
+        data.append([f"{cadres.name} ({cadres.permit.name})", facture.total_cadres, to_amount(cadres.permit.price), to_amount(facture.total_cadres * cadres.permit.price) + f" {cadres.permit.devise.sign}"])
     if facture.total_agents > 0:
-        data.append(
-            [
-                f"{agents.name} ({agents.permit.name})",
-                facture.total_agents,
-                to_amount(agents.permit.price),
-                to_amount(facture.total_agents * agents.permit.price)
-                + f" {agents.permit.devise.sign}",
-            ]
-        )
+        data.append([f"{agents.name} ({agents.permit.name})", facture.total_agents, to_amount(agents.permit.price), to_amount(facture.total_agents * agents.permit.price) + f" {agents.permit.devise.sign}"])
     if facture.total_ouvriers > 0:
-        data.append(
-            [
-                f"{ouvriers.name} ({ouvriers.permit.name})",
-                facture.total_ouvriers,
-                to_amount(ouvriers.permit.price),
-                to_amount(facture.total_ouvriers * ouvriers.permit.price)
-                + f" {ouvriers.permit.devise.sign}",
-            ]
-        )
+        data.append([f"{ouvriers.name} ({ouvriers.permit.name})", facture.total_ouvriers, to_amount(ouvriers.permit.price), to_amount(facture.total_ouvriers * ouvriers.permit.price) + f" {ouvriers.permit.devise.sign}"])
 
-    data.append(
-        [
-            " ",
-            " ",
-            "TOTAL GENERAL",
-            f"{to_amount(facture.amount)} {facture.devise.sign}",
-        ]
-    )
+    data.append([' ', ' ', 'TOTAL GENERAL', f"{to_amount(facture.amount)} {facture.devise.sign}"])
 
     LIST_STYLE = TableStyle(
         [
-            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
             # ('FONTNAME', (0,0), (-1,0), 'Courier-Bold'),
-            ("FONTSIZE", (0, 0), (-1, 0), 13, colors.red),
-            ("TEXTCOLOR", (0, 0), (-1, 0), colors.darkred),
-            ("LINEABOVE", (0, 0), (-1, -2), 0.1, colors.grey),
-            ("LINEABOVE", (0, 1), (-1, 1), 1.5, colors.black),
-            ("LINEABOVE", (0, -1), (-1, -1), 0.1, colors.grey),
-            (
-                "BACKGROUND",
-                (0, -1),
-                (-1, -1),
-                colors.Color(241 / 256, 234 / 256, 234 / 256),
-            ),
-            ("FONTSIZE", (0, -1), (-1, -1), 14, colors.red),
-            ("LINEBELOW", (0, -1), (-1, -1), 0.1, colors.grey),
-            ("ALIGN", (1, 0), (-1, -1), "CENTER"),
+            ('FONTSIZE', (0,0), (-1,0), 13, colors.red),
+            ('TEXTCOLOR', (0,0), (-1,0), colors.darkred),
+            ('LINEABOVE', (0,0), (-1,-2), 0.1, colors.grey),
+            ('LINEABOVE', (0,1), (-1,1), 1.5, colors.black),
+            ('LINEABOVE', (0,-1), (-1,-1), 0.1, colors.grey),
+            ('BACKGROUND', (0,-1), (-1,-1), colors.Color(241/256, 234/256, 234/256)),
+            ('FONTSIZE', (0,-1), (-1,-1), 14, colors.red),
+            ('LINEBELOW', (0,-1), (-1,-1), 0.1, colors.grey),
+            ('ALIGN', (1,0), (-1,-1), 'CENTER'),
         ]
     )
-
+    
     # Manage table cols width. --default is 123
-    design_width = (2.5 * inch, 1.0 * inch, 1.6 * inch, 1.8 * inch)
+    design_width = (2.5*inch, 1.0*inch, 1.6*inch, 1.8*inch)
 
-    table = Table(data, colWidths=design_width, rowHeights=0.4 * inch, style=LIST_STYLE)
+    table = Table(data, colWidths=design_width, rowHeights=0.4*inch, style=LIST_STYLE)
 
     table.wrapOn(pdf, 55, 550)
-    table.drawOn(pdf, 55, 580 - table._height)
+    table.drawOn(pdf, 55, 580-table._height)
 
     # Creating the QR Code
     qr_data = {
-        "ID": facture.id,
-        "REF": facture.reference,
-        "Client": f"{client.name}",
-        "Montant": f"{facture.amount} {facture.devise.sign}",
+        'ID': facture.id,
+        'REF': facture.reference,
+        'Client': f"{client.name}",
+        'Montant': f"{facture.amount} {facture.devise.sign}"
     }
-    pdf.setFont("Helvetica-Bold", 10)  # mettre en gras
+    pdf.setFont("Helvetica-Bold", 10)  #mettre en gras
     amount = f"{num2words(facture.amount, False, 'fr')}  {facture.devise.name}"
     pdf.drawString(
-        50, 415, f"Arrêté la présente facture à la somme de: {amount.capitalize()}"
-    )
+        50, 415,
+        f"Arrêté la présente facture à la somme de: {amount.capitalize()}")
     pdf.line(50, 412, 245, 412)
-
+    
     # pdf.drawString(
     #     235, 425, f"{num2words(facture.amount, False, 'fr')} francs guinéens")
     pdf.setFont("Helvetica", 12)  #  remettre sur font de depart
@@ -589,9 +390,11 @@ def bill_receipt_view(request, bill_id):
     qr.add_data(qr_data)
     qr.make(fit=True)
     img = qr.make_image()
-    img.save("staticfiles/bill_qr.png")
-
-    pdf.drawImage("staticfiles/bill_qr.png", 60, 330, 70, 70, showBoundary=False)
+    img_io = BytesIO()
+    img.save(img_io, 'PNG')  # Save image in PNG format
+    img_io.seek(0)
+    
+    pdf.drawImage(img_io, 60, 330, 70, 70, showBoundary=False)
 
     pdf.setFontSize(14, leading=None)
     pdf.drawString(430, 385, f"La Direction")
@@ -605,6 +408,7 @@ def bill_receipt_view(request, bill_id):
     return FileResponse(buffer, filename=f"recu_facture_num{facture.id}.pdf")
 
 
+
 @login_required(login_url="/login/")
 def payment_receipt_view(request, payment_id):
     # Getting the payment
@@ -613,15 +417,17 @@ def payment_receipt_view(request, payment_id):
     except Payment.DoesNotExist:
         messages.error(request, "Recu de paiement inexistant.")
         return redirect("paiement:payments")
-
+    
     # Getting job categories
     cadres = JobCategory.objects.get(pk=1)
     agents = JobCategory.objects.get(pk=2)
     ouvriers = JobCategory.objects.get(pk=3)
 
     client = payment.created_by.profile
+
     # Creating a buffer for the pdf
     buffer = io.BytesIO()
+
     pdf = canvas.Canvas(buffer)
 
     pdf.setPageSize(A4)
@@ -629,28 +435,22 @@ def payment_receipt_view(request, payment_id):
     pdf.setTitle("Paiements")
 
     if client.picture:
-        client_image = client.picture.url
+        client_image = (client.picture.url)[1:]
     else:
-        client_image = "apps/static/assets/img/brand/logo.jpg"
+        client_image = 'apps/static/assets/img/brand/logo.jpg'
     pdf.drawImage(client_image, 60, 750, 90, 70, showBoundary=False)
-    pdf.drawImage(
-        "apps/static/assets/img/brand/logo.jpg", 450, 750, 90, 70, showBoundary=False
-    )
+    pdf.drawImage('apps/static/assets/img/brand/logo.jpg', 450, 750, 90, 70, showBoundary=False)
 
     date = DateFormat(payment.created_on)
 
-    pdfmetrics.registerFont(TTFont("Vera", "Vera.ttf"))
-    pdf.setFont("Vera", 14)
-
+    pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
+    pdf.setFont('Vera', 14)
+    
     pdf.line(50, 750, 550, 750)
     pdf.drawString(200, 730, f"RECU DE PAIEMENT N° 00{payment.id}/{date.format('Y')}")
     pdf.line(50, 720, 550, 720)
     pdf.setFontSize(11, leading=None)
-    pdf.drawString(
-        55,
-        700,
-        f"Facture N° : 00{payment.facture_ref.id}/{DateFormat(payment.facture_ref.created_on).format('Y')}",
-    )
+    pdf.drawString(55, 700, f"Facture N° : 00{payment.facture_ref.id}/{DateFormat(payment.facture_ref.created_on).format('Y')}")
     pdf.drawString(450, 700, f"Date: {date.format('d/m/Y')}")
 
     pdf.setFontSize(10, leading=None)
@@ -659,7 +459,7 @@ def payment_receipt_view(request, payment_id):
     pdf.drawString(55, 675, f"CLIENT : {payment.facture_ref.client.name}")
     pdf.drawString(55, 662, f"Tél : {to_amount(payment.facture_ref.client.contact)}")
     pdf.drawString(55, 650, f"{payment.facture_ref.client.adresse}")
-
+    
     permit_types = ""
     if payment.facture_ref.total_cadres > 0:
         permit_types += f"{cadres.permit} ({payment.facture_ref.total_cadres})"
@@ -669,56 +469,54 @@ def payment_receipt_view(request, payment_id):
         permit_types += f"\n{ouvriers.permit} ({payment.facture_ref.total_ouvriers})"
 
     data = [
-        ["Description", "Types de permis", "Montant"],
+        ['Description', 'Types de permis', 'Montant'],
         # ['Frais d\'acquisition', f"{cadres.permit} ({payment.facture_ref.total_cadres})\n{agents.permit} ({payment.facture_ref.total_agents})\n{ouvriers.permit} ({payment.facture_ref.total_ouvriers})", to_amount(payment.amount) + f" {payment.devise.sign}"]
-        [
-            "Frais d'acquisition",
-            permit_types,
-            to_amount(payment.amount) + f" {payment.devise.sign}",
-        ],
+        ['Frais d\'acquisition', permit_types, to_amount(payment.amount) + f" {payment.devise.sign}"]
     ]
 
     LIST_STYLE = TableStyle(
         [
-            ("VALIGN", (0, 0), (-1, -1), "TOP"),
-            ("INNERGRID", (0, 0), (-1, -1), 0.50, colors.black),
+            ('VALIGN', (0,0), (-1,-1), 'TOP'),
+            ('INNERGRID', (0,0), (-1,-1), 0.50, colors.black),
             # ('LINEBEFORE', (0,0), (-1,0), 1, colors.black),
             # ('LINEABOVE', (0,0), (-1,-1), 1, colors.black),
-            ("BOX", (0, 0), (-1, -1), 1.5, colors.black),
-            ("FONTSIZE", (1, 0), (1, 4), 9, colors.black),
-            ("FONTSIZE", (0, 0), (0, 4), 11, colors.black),
-            ("BACKGROUND", (0, 0), (3, 0), colors.lightgrey),
-            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-            ("ALIGN", (1, 1), (1, 1), "CENTER"),
-            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ('BOX', (0,0), (-1,-1), 1.5, colors.black),
+            ('FONTSIZE', (1,0), (1,4), 9, colors.black),
+            ('FONTSIZE', (0,0), (0,4), 11, colors.black),
+            ('BACKGROUND', (0,0), (3,0), colors.lightgrey),
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('ALIGN', (1,1), (1,1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
         ]
     )
 
     # Manage table cols width. --default is 123
-    design_width = (2.5 * inch, 2.56 * inch, 1.9 * inch)
+    design_width = (2.5*inch, 2.56*inch, 1.9*inch)
 
     table = Table(data, colWidths=design_width, style=LIST_STYLE)
 
     table.wrapOn(pdf, 55, 560)
-    table.drawOn(pdf, 55, 620 - table._height)
+    table.drawOn(pdf, 55, 620-table._height)
 
     # Creating the QR Code
     qr_data = {
-        "ID": payment.id,
-        "REF": payment.reference,
-        "Payeur": f"{payment.payer.first} {payment.payer.last}",
-        "Montant": f"{payment.amount} {payment.devise.sign}",
+        'ID': payment.id, 
+        'REF': payment.reference, 
+        'Payeur': f"{payment.payer.first} {payment.payer.last}", 
+        'Montant': f"{payment.amount} {payment.devise.sign}"
     }
     qr = qrcode.QRCode(error_correction=qrcode.ERROR_CORRECT_L, border=4)
     qr.add_data(qr_data)
     qr.make(fit=True)
     img = qr.make_image()
-    img.save("staticfiles/payment_qr.png")
+    img_io = BytesIO()
+    img.save(img_io, 'PNG')  # Save image in PNG format
+    img_io.seek(0)
+    
+    pdf.drawImage(img_io, 60, 480, 70, 70, showBoundary=False)
 
-    pdf.drawImage("staticfiles/payment_qr.png", 60, 480, 70, 70, showBoundary=False)
-
-    pdfmetrics.registerFont(TTFont("Vera", "Vera.ttf"))
-    pdf.setFont("Vera", 12)
+    pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
+    pdf.setFont('Vera', 12)
     pdf.line(300, 535, 555, 535)
     pdf.drawString(320, 515, f"TOTAL TTC")
     pdf.line(420, 510, 420, 530)
@@ -743,20 +541,14 @@ def payment_receipt_view(request, payment_id):
 
     # ---------- Second part of the page ------------
     pdf.drawImage(client_image, 60, 320, 90, 70, showBoundary=False)
-    pdf.drawImage(
-        "apps/static/assets/img/brand/logo.jpg", 450, 320, 90, 70, showBoundary=False
-    )
+    pdf.drawImage('apps/static/assets/img/brand/logo.jpg', 450, 320, 90, 70, showBoundary=False)
 
     pdf.line(50, 320, 550, 320)
     pdf.setFontSize(14, leading=None)
     pdf.drawString(200, 300, f"RECU DE PAIEMENT N° 00{payment.id}/{date.format('Y')}")
     pdf.line(50, 290, 550, 290)
-    pdf.setFontSize(11, leading=None)  # f"Facture N° 00{facture.id}/{date.format('Y')}"
-    pdf.drawString(
-        55,
-        270,
-        f"Facture N° : 00{payment.facture_ref.id}/{DateFormat(payment.facture_ref.created_on).format('Y')}",
-    )
+    pdf.setFontSize(11, leading=None) #f"Facture N° 00{facture.id}/{date.format('Y')}"
+    pdf.drawString(55, 270, f"Facture N° : 00{payment.facture_ref.id}/{DateFormat(payment.facture_ref.created_on).format('Y')}")
     pdf.drawString(450, 270, f"Date: {date.format('d/m/Y')}")
 
     pdf.setFontSize(10, leading=None)
@@ -764,9 +556,9 @@ def payment_receipt_view(request, payment_id):
     pdf.drawString(55, 232, f"Tél : {to_amount(payment.facture_ref.client.contact)}")
     pdf.drawString(55, 220, f"{payment.facture_ref.client.adresse}")
 
-    table.drawOn(pdf, 55, 200 - table._height)
-    pdf.drawImage("staticfiles/payment_qr.png", 60, 60, 70, 70, showBoundary=False)
-    pdf.setFont("Vera", 12)
+    table.drawOn(pdf, 55, 200-table._height)
+    pdf.drawImage('staticfiles/payment_qr.png', 60, 60, 70, 70, showBoundary=False)
+    pdf.setFont('Vera', 12)
     pdf.line(300, 115, 555, 115)
     pdf.drawString(320, 95, f"TOTAL TTC")
     pdf.line(420, 90, 420, 110)

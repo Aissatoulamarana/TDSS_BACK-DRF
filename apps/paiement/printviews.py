@@ -628,10 +628,11 @@ def payment_receipt_view(request, payment_id):
     width, height = A4
     pdf.setTitle("Paiements")
 
-    if client.picture:
-        client_image = client.picture.url
-    else:
-        client_image = "apps/static/assets/img/brand/logo.jpg"
+    # if client.picture:
+    #     client_image = client.picture.url
+    # else:
+    #     client_image = "apps/static/assets/img/brand/logo.jpg"
+    client_image = "apps/static/assets/img/brand/logo.jpg"
     pdf.drawImage(client_image, 60, 750, 90, 70, showBoundary=False)
     pdf.drawImage(
         "apps/static/assets/img/brand/logo.jpg", 450, 750, 90, 70, showBoundary=False
@@ -674,7 +675,7 @@ def payment_receipt_view(request, payment_id):
         [
             "Frais d'acquisition",
             permit_types,
-            to_amount(payment.amount) + f" {payment.devise.sign}",
+            str(payment.amount) + f" {payment.devise.sign}",
         ],
     ]
 

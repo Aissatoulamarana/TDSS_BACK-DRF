@@ -24,5 +24,5 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt && \
             --no-create-home \
             django-user
 COPY ./ /app
-RUN /app/staticfiles
+RUN mkdir /app/staticfiles
 USER django-user

@@ -503,9 +503,8 @@ def bill_receipt_view(request, bill_id):
             [
                 f"{cadres.name} ({cadres.permit.name})",
                 facture.total_cadres,
-                to_amount(cadres.permit.price),
-                to_amount(facture.total_cadres * cadres.permit.price)
-                + f" {cadres.permit.devise.sign}",
+                cadres.permit.price,
+                f"{facture.total_cadres * cadres.permit.price} {cadres.permit.devise.sign}",
             ]
         )
     if facture.total_agents > 0:

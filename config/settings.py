@@ -39,6 +39,11 @@ ALLOWED_HOSTS = [
         'prod.tdss.com.gn',
         'workpermit.tdss.com.gn',
         'aguipee.tdss.com.gn',
+        'http://192.168.1.102:3033',
+        'http://localhost:3033',
+        'localhost:8000',
+        '127.0.0.1:8000',
+        '127.0.0.1',
         ]
 
 CORS_ORIGIN_WHITELIST = [
@@ -70,6 +75,9 @@ INSTALLED_APPS = [
     'apps.paiement', # Enable payment app
     'rest_framework',
     "rest_framework_api_key",
+    'rest_framework.authtoken',
+    'djoser',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 #MIDDLEWARE = [
@@ -201,6 +209,39 @@ AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.AllowAllUsersModelBacke
 # EMAIL_HOST_USER = 'noreply.odiallo@gmail.com'
 # EMAIL_HOST_PASSWORD = 'zmwfjvpvokhxhlwc'
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',  # Ajout de session auth
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
+SIMPLE_JWT = {
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'BLACKLIST_AFTER_ROTATION': True,  # Active la blacklist des refresh tokens après déconnexion
+}
+
+DJOSER = {
+    'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
+    "ACTIVATION_URL": "#/activate/{uid}/{token}",
+    'SEND_ACTIVATION_EMAIL': True,
+    'PASSWORD_RESET_CONFIRM_RETYPE': True,
+    'LOGIN_FIELD': "email",
+    'USERNAME_FIELD': "email",  # Désactive l'activation d'email (on le gère nous-mêmes)
+    'SERIALIZERS': {
+        'user_create': 'authentication.serializers.CustomUserSerializer',
+        'user': 'authentication.serializers.CustomUserSerializer',
+        'current_user': 'authentication.serializers.CustomUserSerializer',
+
+    },
+    'SITE_NAME': "Declaration web site",
+    'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True,
+}
+
 # New mail server for TDSS
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'mail.tdss.com.gn'
@@ -208,3 +249,4 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'noreply@tdss.com.gn'
 EMAIL_HOST_PASSWORD = 'TDSS@workp@2023$'
+EMAIL_DEBUG = True

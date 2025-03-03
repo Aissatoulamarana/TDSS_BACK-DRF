@@ -3,73 +3,36 @@
 Copyright (c) 2022 - OD
 """
 
-from django.urls import path
-from apps.paiement import views, printviews, apiviews, exportviews
+from django.urls import path, include
+from apps.paiement import views, printviews, apiviews, exportviews 
+
 
 from rest_framework.urlpatterns import format_suffix_patterns
 
 app_name = "paiement"
 
 urlpatterns = [
-    path("payments/", views.payments_view, name="payments"),
+   
     path("payments/add/", views.add_payment_view, name="add_payment"),
-    path("payments/generate/", views.generate_payment_view, name="generate_payment"),
-    path(
-        "payments/<int:payment_id>/edit", views.edit_payment_view, name="edit_payment"
-    ),
+   
     path(
         "payments/<int:payment_id>/print",
         printviews.payment_receipt_view,
         name="payment_receipt",
     ),
-    path("declarations/", views.declarations_view, name="declarations"),
-    path("declarations/add/", views.add_declaration_view, name="add_declaration"),
-    path(
-        "declarations/<int:declaration_id>/edit",
-        views.edit_declaration_view,
-        name="edit_declaration",
-    ),
+  
     path(
         "declarations/<int:declaration_id>/employee-renew",
         views.declaration_employee_renew,
         name="employee-renew",
     ),
-    path(
-        "declarations/<int:declaration_id>/submit",
-        views.submit_declaration_view,
-        name="submit_declaration",
-    ),
-    path(
-        "declarations/<int:declaration_id>/reject",
-        views.reject_declaration_view,
-        name="reject_declaration",
-    ),
-    path(
-        "declarations/<int:declaration_id>/validate",
-        views.validate_declaration_view,
-        name="validate_declaration",
-    ),
-    path(
-        "declarations/<int:declaration_id>/bill",
-        views.bill_declaration_view,
-        name="bill_declaration",
-    ),
+   
     path(
         "declarations/<int:declaration_id>/print",
         printviews.declaration_receipt_view,
         name="declaration_receipt",
     ),
-    path(
-        "declarations/<int:declaration_id>/<int:employee_id>/edit",
-        views.employee_edit,
-        name="employee_edit",
-    ),
-    path(
-        "declarations/<int:declaration_id>/<int:employee_id>/delete",
-        views.employee_delete,
-        name="employee_delete",
-    ),
-    path("factures/", views.factures_view, name="factures"),
+    
     path("factures/add/", views.add_facture_view, name="add_facture"),
     path(
         "factures/<int:bill_id>/print",
@@ -129,6 +92,20 @@ urlpatterns = [
         name="api_employee_detail",
     ),
     path("tdss-api/get-payments/", apiviews.payment_list, name="api_payments"),
+
+    path('api/job-categories/', views.job_category_list, name='job-category-list'),
+    path("jobs/", views.job_list, name="job-list"),  # GET et POST
+    path('api_dec/', views.declaration_list, name='declaration-list'),
+    path('create_dec/', views.declaration_create, name='declaration-create'),
+    path('api/check-passport/', views.check_passport, name='check-passport'),
+    path('details-declaration/<int:pk>/', views.declaration_detail, name='declaration-detail'),
+    path('update-status/<int:pk>/', views.declaration_status_update, name='declaration-update-status'),
+    path('facturer-dec/<int:declaration_id>/', views.facturer_declaration_api, name='bill-declaration-api'),
+    path('api_factures/', views.factures_view_api, name='factures_api'),
+    path('api/paid-facture/<int:facture_id>/', views.paid_facture, name='paid-facture-api'),
+    path('api/payments/', views.list_paiements, name='api_payments'),
+    path('api/jobs/<int:job_id>/', views.job_update, name='api_jobs'),
+   
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

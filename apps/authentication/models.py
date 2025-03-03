@@ -60,6 +60,7 @@ class Agency(models.Model):
     name = models.CharField(max_length=100)
     comment = models.TextField(max_length=255, blank=True, null=True)
     created_by = models.ForeignKey('CustomUser', on_delete=models.SET_NULL, blank=True, null=True, related_name="agency_users")
+    
 
     def __str__(self):
         return self.name
@@ -95,8 +96,8 @@ class Profile(models.Model):
 
 class CustomUser(AbstractUser):
     email = models.EmailField(verbose_name="email address", max_length=100, unique=True)
-    phone = models.IntegerField(unique=True)
-    type = models.ForeignKey(UserType, on_delete=models.PROTECT)
+    phone = models.IntegerField(unique=True , null=True, blank=True)
+    type = models.ForeignKey(UserType, on_delete=models.PROTECT, null=True , blank=True)
     profile = models.ForeignKey(Profile, on_delete=models.PROTECT, blank=True, null=True, related_name="user_profiles")
     job = models.TextField(max_length=50, blank=True, null=True, verbose_name="poste")
     location = models.ForeignKey(Region, on_delete=models.PROTECT, related_name="user_location", blank=True, null=True)
@@ -107,8 +108,10 @@ class CustomUser(AbstractUser):
     created_by = models.ForeignKey('self', on_delete=models.PROTECT, related_name="user_creator", blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
+    country = models.TextField(max_length=100, default='Guinea')
     
-    # USERNAME_FIELD = 'email'
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
 
     def __str__(self):
         return self.email

@@ -1,11 +1,13 @@
-# -*- encoding: utf-8 -*-
-"""
-Copyright (c) 2022 - OD
-"""
+# # -*- encoding: utf-8 -*-
+# """
+# Copyright (c) 2022 - OD
+# """
 
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
+
+from apps.authentication.serializers import AgencySerializer, PermissionSerializer, ProfileSerializer
 from .forms import LoginForm, SignUpForm, ProfileForm, CustomUserForm, ResetPwdForm, AgencyForm, PermissionForm
 from .models import CustomUser, ProfileType, Profile, Region, Agency, UserType, Menu, SubMenu, Action, Permission
 from apps.paiement.models import Devise
@@ -14,434 +16,241 @@ from django.db import IntegrityError
 from django.core.mail import send_mail
 from django.contrib import messages
 from django.forms import ValidationError
+from rest_framework.views import APIView
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
 # Create your views here.
 
-# Global devises for all views
-devises = Devise.objects.all().order_by('id')
 
-def login_view(request):
-    form = LoginForm(request.POST or None)
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
 
-    msg = None
+    def post(self, request):
+        try:
+            refresh_token = request.data.get("refresh")
+            if not refresh_token:
+                return Response({"error": "Refresh token is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-    if request.method == "POST":
+            token = RefreshToken(refresh_token)
+            token.blacklist()  # Blacklist le token
 
-        if form.is_valid():
-            username = form.cleaned_data.get("username")
-            password = form.cleaned_data.get("password")
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                login(request, user)
-                if user.reset_pwd == True:
-                    return redirect("authentication:reset_password")
-                elif user.is_active == False:
-                    msg = "Votre compte est désactivé. Contactez l'Admin"
-                else:
-                    return redirect("/")
-            else:
-                msg = "Email/Mot de passe incorrect."
-        else:
-            msg = "Formulaire invalid soumit."
+            return Response({"message": "Successfully logged out"}, status=status.HTTP_200_OK)
 
-    return render(request, "accounts/login.html", {"form": form, "msg": msg})
+        except TokenError:
+            return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-def reset_password_view(request):
-    msg = None
+# # Global devises for all views
+# devises = Devise.objects.all().order_by('id')
 
-    if request.method == "POST":
-        form = ResetPwdForm(request.POST)
-        
-        if form.is_valid():
-            oldpwd = form.cleaned_data.get("old_password")
-            newpwd = form.cleaned_data.get("new_password")
-            confpwd = form.cleaned_data.get("confirmation_pwd")
-            if newpwd != confpwd:
-                msg = "Les mots de passe sont différents."
-                
-            else:
-                user = authenticate(username=request.user.username, password=oldpwd)
-                if user is not None:
-                    user.set_password(newpwd)
-                    user.reset_pwd = False
-                    user.save()
-                    return redirect("/")
-                else:
-                    msg = "Ancien mot de passe incorrect."
+# def users_view(request):
+#     if request.user.profile.type.uid == 1:
+#         users = CustomUser.objects.all().order_by('-modified_on')
+#     elif request.user.type.uid == 2:
+#         users = CustomUser.objects.filter(created_by=request.user).order_by('-created_on')
+#     else:
+#         users = CustomUser.objects.filter(created_by__profile=request.user.profile)
 
-        else:
-            msg = "Formulaire invalid soumit."
-    else:
-        form = ResetPwdForm()
-    
-    return render(request, "accounts/reset-password.html", {"form": form, "msg": msg})
+#     return render(request, "accounts/users.html", {
+#         'users': users,
+#         'taux': devises,
+#         'segment': "administration"
+#     })
 
 
-def users_view(request):
-    if request.user.profile.type.uid == 1:
-        users = CustomUser.objects.all().order_by('-modified_on')
-    elif request.user.type.uid == 2:
-        users = CustomUser.objects.filter(created_by=request.user).order_by('-created_on')
-    else:
-        users = CustomUser.objects.filter(created_by__profile=request.user.profile)
-
-    return render(request, "accounts/users.html", {
-        'users': users,
-        'taux': devises,
-        'segment': "administration"
-    })
+class DeactivateUserView(APIView):
+    def post(self, request, user_id):
+        try:
+            user = CustomUser.objects.get(pk=user_id)
+            user.is_active = False
+            user.save()
+            return Response({"message": "Compte utilisateur désactivé."}, status=status.HTTP_200_OK)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "Utilisateur introuvable"}, status=status.HTTP_404_NOT_FOUND)
 
 
-# Resetting user's password via Admin
-def reinit_password_view(request, user_id):
-    user = CustomUser.objects.get(pk=user_id)
-    # print("Reinit password called!")
-    
-    new_password = ''.join((secrets.choice(string.ascii_letters + string.digits + string.punctuation) for i in range(8)))
-    user.set_password(new_password)
-    user.reset_pwd = True
-    user.save()
+class ProfileListView(APIView):
+    def get(self, request):
+        profiles = Profile.objects.all()
+        serializer = ProfileSerializer(profiles, many=True)
+        return Response(serializer.data)
 
-    send_mail(
-        "Réinitialisation de mot de passe",
-        f"Bonjour, \n \nVotre mot de passe vient d'être réinitialiser sur le portail de télédéclaration des employeés non-nationaux par l'Admin.  \nCi-dessous vos informations d'accès. \n \nEmail: {user.email}\nNouveau Mot de Passe: {new_password}\n \nAller sur: https://workpermit.tdss.com.gn pour vous connecter. \nCordialement",
-        "noreply@tdss.com.gn",
-        [user.email],
-        fail_silently=True
-    )
-    messages.success(request, "Mot de passe réinitialisé.")
-    return redirect("authentication:users")
+@api_view(['POST'])
+def add_profile_api(request):
+    # Check if the request is a POST request
+    if request.method == 'POST':
+        profileform = ProfileForm(request.data, request.FILES, prefix="profile")
+        userform = CustomUserForm(request.data, prefix="user")
 
-
-@login_required(login_url="/login/")
-def activate_user_view(request, user_id):
-    user = CustomUser.objects.get(pk=user_id)
-    
-    user.is_active = True
-    print(user.is_active)
-    user.save()
-    messages.success(request, "Compte utilisateur activé.")
-    return redirect("authentication:users")
-
-
-@login_required(login_url="/login/")
-def deactivate_user_view(request, user_id):
-    user = CustomUser.objects.get(pk=user_id)
-    user.is_active = False
-    user.save()
-    messages.success(request, "Compte utilisateur Bloqué.")
-    return redirect("authentication:users")
-
-
-@login_required(login_url="/login/")
-def profiles_view(request):
-    profiles = Profile.objects.all()
-    form = ProfileForm()
-    userform = CustomUserForm()
-    profile_types = ProfileType.objects.all()
-
-    return render(request, "accounts/profiles.html", {
-        #  To edit
-        'form': form,
-        'userform': userform,
-        'profiles': profiles,
-        'profile_types': profile_types,
-        'taux': devises,
-        'segment': "administration"
-    })
-
-
-@login_required(login_url="/login/")
-def add_profile_view(request):
-    default_region = Region.objects.first()
-    initial_value = {'location': default_region}
-    context_empty = {
-        'profileform': ProfileForm(prefix= "profile", initial= initial_value), 
-        'userform': CustomUserForm(prefix= "user"),
-        'taux': devises,
-        'segment': 'administration'
-    }
-
-    if request.method == "POST":
-
-        profileform = ProfileForm(request.POST, request.FILES, prefix= "profile")
-        userform = CustomUserForm(request.POST, prefix= "user")
-
+        # Make 'type' field optional in user form
         userform.fields["type"].required = False
+        
         if profileform.is_valid() and userform.is_valid():
-            print("Valid forms submitted!")
-
+            # Save the profile
             new_profile = profileform.save(commit=False)
-
             new_profile.save()
-            print("Profile created!")
-
-            new_user = userform.save(commit=False)
-            random_pwd = ''.join((secrets.choice(string.ascii_letters + string.digits + string.punctuation) for i in range(8)))
-            new_user.username = new_user.email
-            new_user.set_password(random_pwd)
-            new_user.created_by = request.user
-            new_user.type = UserType.objects.first()
-            new_user.profile = new_profile
-
-            new_user.save()
-            print("User created!")
-
-            send_mail(
-                "Creation de nouveau compte",
-                f"Bonjour {new_user.first_name} {new_user.last_name}, \n \nUn compte a été créer pour vous sur le portail de télédéclaration des employeés non-nationaux. \nCi-dessous vos informations d'accès. \n \nEmail: {new_user.email}\nMot de Passe: {random_pwd}\n \nAller sur: https://workpermit.tdss.com.gn pour vous connecter. \nCordialement",
-                "noreply@tdss.com.gn",
-                [new_user.email],
-                fail_silently=True
-            )
-            print("Mail sent!")
-
-            messages.success(request, "Nouveau profil ajouté. <br> Un compte utilisateur a été crée pour le responsable.")
-            return redirect("authentication:profiles")
-        else:
-            context = {
-                'profileform': profileform, 
-                'userform': userform, 
-                'ErrorMessage': "Formulaire invalid soumit",
-                'taux': devises,
-                'segment': 'administration'
-            }
-            return render(request, "accounts/add-profile.html", context)
-        
-    return render(request, "accounts/add-profile.html", context_empty)
-
-
-@login_required(login_url="/login/")
-def add_user_view(request):
-    default_region = Region.objects.first()
-    default_agency = Agency.objects.first()
-    initial_value = {'location': default_region, 'agency': default_agency}
-    context_empty = {'userform': CustomUserForm(initial=initial_value), 'segment': 'administration', 'taux': devises}
-    if request.method == "POST":
-        form = CustomUserForm(request.POST, request.FILES)
-        if form.is_valid():
-            random_pwd = ''.join((secrets.choice(string.ascii_letters + string.digits + string.punctuation) for i in range(8)))
-            new_user = form.save(commit=False)
-            new_user.username = new_user.email
-            new_user.set_password(random_pwd)
-            new_user.created_by = request.user
-            new_user.profile = request.user.profile
-            # print(random_pwd)
-
-            new_user.save()
-            print("user created!")
-
-            send_mail(
-                "Creation de nouveau compte",
-                f"Bonjour {new_user.first_name} {new_user.last_name}, \n \nUn compte a été créer pour vous sur le portail de télédéclaration des employeés non-nationaux. \nCi-dessous vos informations d'accès. \n \nEmail: {new_user.email}\nMot de Passe: {random_pwd}\n \nAller sur: https://workpermit.tdss.com.gn pour vous connecter. \nCordialement",
-                "noreply@tdss.com.gn",
-                [new_user.email],
-                fail_silently=True
-            )
-            print("mail sent!")
             
-            messages.success(request, "Nouveau compte utilisateur ajouté. <br> Une notification a été envoyé par mail.")
-            return redirect("authentication:users")
-        else:
-            context = {'userform': form, 'ErrorMessage': "Formulaire invalid soumit.", 'segment': 'administration', 'taux': devises,}
-            return render(request, "accounts/add-user.html", context)
+            # Create a random password for the user
+            random_pwd = ''.join(secrets.choice(string.ascii_letters + string.digits + string.punctuation) for i in range(8))
 
-    return render(request, "accounts/add-user.html", context_empty)
+            # Save the user
+            new_user = userform.save(commit=False)
+            new_user.username = new_user.email
+            new_user.set_password(random_pwd)
+            new_user.created_by = request.user  # assuming request.user is the current logged-in user
+            new_user.type = UserType.objects.first()  # make sure UserType is defined
+            new_user.profile = new_profile
+            new_user.save()
 
+            # Send confirmation email
+            send_mail(
+                "Creation de nouveau compte",
+                f"Bonjour {new_user.first_name} {new_user.last_name}, \n\nUn compte a été créé pour vous sur le portail de télédéclaration des employés non-nationaux. \nCi-dessous vos informations d'accès. \n\nEmail: {new_user.email}\nMot de Passe: {random_pwd}\n\nAller sur: https://workpermit.tdss.com.gn pour vous connecter. \nCordialement",
+                "noreply@tdss.com.gn",
+                [new_user.email],
+                fail_silently=True
+            )
 
-@login_required(login_url="/login/")
-def edit_user_view(request, user_id):
-    try:
-        user = CustomUser.objects.get(pk=user_id)
-    except CustomUser.DoesNotExist:
-        messages.error(request, "Utilisateur inexistant.")
-        return redirect("authentication:users")
-    context_empty = {'userform': CustomUserForm(instance=user), 'user_id': user_id, 'segment': 'administration', 'taux': devises}
-
-    if request.method == "POST":
+            # Return success response
+            return Response({"message": "Nouveau profil ajouté. Un compte utilisateur a été créé pour le responsable."}, status=status.HTTP_201_CREATED)
         
-        form = CustomUserForm(request.POST, request.FILES, instance=user)
-        if form.is_valid():
-            updated_user = form.save(commit=False)
-            updated_user.username = updated_user.email
-
-            updated_user.save()
-            print("User updated!")
-
-            messages.success(request, "Compte utilisateur modifié.")
-            return redirect("authentication:users")
-
-        else:
-            context = {'userform': form, 'ErrorMessage': "Formulaire invalid soumit.", 'user_id': user_id, 'segment': 'administration', 'taux': devises}
-            return render(request, "accounts/edit-user.html", context)
+        # If forms are invalid, return error response with the form errors
+        errors = {}
+        if not profileform.is_valid():
+            errors['profileform'] = profileform.errors
+        if not userform.is_valid():
+            errors['userform'] = userform.errors
+        
+        return Response({"errors": errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
-    return render(request, "accounts/edit-user.html", context_empty)
+class ProfileDetailView(APIView):
+    def get(self, request, profile_id):
+        try:
+            profile = Profile.objects.get(pk=profile_id)
+            serializer = ProfileSerializer(profile)
+            return Response(serializer.data)
+        except Profile.DoesNotExist:
+            return Response({"error": "Profil introuvable"}, status=status.HTTP_404_NOT_FOUND)
 
+    def put(self, request, profile_id):
+        try:
+            profile = Profile.objects.get(pk=profile_id)
+            serializer = ProfileSerializer(profile, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Profile.DoesNotExist:
+            return Response({"error": "Profil introuvable"}, status=status.HTTP_404_NOT_FOUND)
 
-@login_required(login_url="/login/")
-def edit_profile_view(request, profile_id):
-    try:
-        profile = Profile.objects.get(pk=profile_id)
-    except Profile.DoesNotExist:
-        messages.error(request, "Profil inexistant.")
-        return redirect("authentication:profiles")
-    context_empty = {'profileform': ProfileForm(instance=profile), 'profile_id': profile_id, 'segment': 'administration', 'taux': devises}
+    def delete(self, request, profile_id):
+        try:
+            profile = Profile.objects.get(pk=profile_id)
+            profile.delete()
+            return Response({"message": "Profil supprimé"}, status=status.HTTP_204_NO_CONTENT)
+        except Profile.DoesNotExist:
+            return Response({"error": "Profil introuvable"}, status=status.HTTP_404_NOT_FOUND)
 
-    if request.method == "POST":
-        form = ProfileForm(request.POST, request.FILES, instance=profile)
-        if form.is_valid():
-            form.save()
-            print("Profile updated!")
+class AgencyListView(APIView):
+    def get(self, request):
+        agencies = Agency.objects.all()
+        serializer = AgencySerializer(agencies, many=True)
+        return Response(serializer.data)
 
-            messages.success(request, "Profil modifié.")
-            return redirect("authentication:profiles")
-        else:
-            context = {'profileform': form, 'ErrorMessage': "Formulaire invalid soumit.", 'profile_id': profile_id, 'segment': 'administration', 'taux': devises}
-            return render(request, "accounts/edit-profile.html", context)
-    return render(request, "accounts/edit-profile.html", context_empty)
-
-
-
-@login_required(login_url="/login/")
-def agencies_view(request):
-    agencies = Agency.objects.all()
-    form = AgencyForm()
-
-    return render(request, "accounts/agencies.html", {
-        'form': form,
-        'agencies': agencies,
-        'taux': devises,
-        'segment': "administration"
-    })
-
-
-@login_required(login_url="/login/")
+@api_view(['POST'])
 def add_agency_view(request):
-    default_region = Region.objects.first()
-    initial_value = {'region': default_region}
-    context_empty = {'form': AgencyForm(initial= initial_value), 'segment': 'administration', 'taux': devises}
+    if not request.user.is_authenticated:
+        return Response({"detail": "Authentication credentials were not provided."}, status=status.HTTP_401_UNAUTHORIZED)
 
-    if request.method == "POST":
-        form = AgencyForm(request.POST)
-
-        if form.is_valid():
-            new_agency = form.save()
-            messages.success(request, "Nouvelle agence ajoutée.")
-            return redirect("authentication:agencies")
-        else:
-            context = {'form': form, 'ErrorMessage': "Formulaire invalid soumit.", 'segment': 'administration', 'taux': devises}
-            return render(request, "accounts/add-agency.html", context)
-
-    return render(request, "accounts/add-agency.html", context_empty)
+    # Serializer de l'agence
+    if request.method == 'POST':
+        serializer = AgencySerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Nouvelle agence ajoutée."}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@login_required(login_url="/login/")
-def edit_agency_view(request, agency_id):
-    try:
-        agency = Agency.objects.get(pk=agency_id)
-    except Agency.DoesNotExist:
-        messages.error(request, "Agence inexistante.")
-        return redirect("authentication:agencies")
-    context_empty = {'form': AgencyForm(instance=agency), 'agency_id': agency_id, 'segment': 'administration', 'taux': devises}
+class AgencyDetailView(APIView):
+    def get(self, request, agency_id):
+        try:
+            agency = Agency.objects.get(pk=agency_id)
+            serializer = AgencySerializer(agency)
+            return Response(serializer.data)
+        except Agency.DoesNotExist:
+            return Response({"error": "Agence introuvable"}, status=status.HTTP_404_NOT_FOUND)
 
-    if request.method == "POST":
-        
-        form = AgencyForm(request.POST, instance=agency)
-        if form.is_valid():
-            form.save()
-            print("Agency updated!")
+    def put(self, request, agency_id):
+        try:
+            agency = Agency.objects.get(pk=agency_id)
+            serializer = AgencySerializer(agency, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Agency.DoesNotExist:
+            return Response({"error": "Agence introuvable"}, status=status.HTTP_404_NOT_FOUND)
 
-            messages.success(request, "Agence modifiée.")
-            return redirect("authentication:agencies")
-
-        else:
-            context = {'form': form, 'ErrorMessage': "Formulaire invalid soumit.", 'agency_id': agency_id, 'segment': 'administration', 'taux': devises}
-            return render(request, "accounts/edit-agency.html", context)
-
-
-    return render(request, "accounts/edit-agency.html", context_empty)
-
-
-@login_required(login_url="/login/")
-def permissions_view(request):
-    permissions = Permission.objects.all()
-
-    return render(request, "accounts/permissions.html", {
-        
-        'permissions': permissions,
-        'taux': devises,
-        'segment': "administration"
-    })
+    def delete(self, request, agency_id):
+        try:
+            agency = Agency.objects.get(pk=agency_id)
+            agency.delete()
+            return Response({"message": "Agence supprimée"}, status=status.HTTP_204_NO_CONTENT)
+        except Agency.DoesNotExist:
+            return Response({"error": "Agence introuvable"}, status=status.HTTP_404_NOT_FOUND)
 
 
-@login_required(login_url="/login/")
+class PermissionListView(APIView):
+    def get(self, request):
+        permissions = Permission.objects.all()
+        serializer = PermissionSerializer(permissions, many=True)
+        return Response(serializer.data)
+
+
+@api_view(['POST'])
 def add_permission_view(request):
-    context_empty = {
-        'form': PermissionForm(),
-        'menus': Menu.objects.filter(status='ON'),
-        'taux': devises,
-        'segment': 'administration'
-    }
+    if not request.user.is_authenticated:
+        return Response({"detail": "Authentication credentials were not provided."}, status=status.HTTP_401_UNAUTHORIZED)
 
-    if request.method == "POST":
-        form = PermissionForm(request.POST)
-
-        if form.is_valid():
-            new_permission = form.save()
-            messages.success(request, "Nouvelle permission ajoutée.")
-            return redirect("authentication:permissions")
-        else:
-            context = {'form': form, 'menus': Menu.objects.filter(status='ON'), 'ErrorMessage': "Formulaire invalid soumit.", 'segment': 'administration', 'taux': devises}
-            return render(request, "accounts/add-permissions.html", context)
-
-    return render(request, "accounts/add-permissions.html", context_empty)
+    # Serializer de la permission
+    if request.method == 'POST':
+        serializer = PermissionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Nouvelle permission ajoutée."}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@login_required(login_url="/login/")
-def edit_permission_view(request, permission_id):
-    try:
-        permission = Permission.objects.get(pk=permission_id)
-    except Permission.DoesNotExist:
-        messages.error(request, "Permission inexistante.")
-        return redirect("authentication:permissions")
-    
-    context_empty = {
-        'form': PermissionForm(instance=permission), 
-        'menus': Menu.objects.filter(status='ON'),
-        'permission_id': permission_id,
-        'taux': devises,
-        'segment': 'administration'
-    }
 
-    if request.method == "POST":
-        
-        form = PermissionForm(request.POST, instance=permission)
-        if form.is_valid():
-            form.save()
-            print("Permission updated!")
+class PermissionDetailView(APIView):
+    def get(self, request, permission_id):
+        try:
+            permission = Permission.objects.get(pk=permission_id)
+            serializer = PermissionSerializer(permission)
+            return Response(serializer.data)
+        except Permission.DoesNotExist:
+            return Response({"error": "Permission introuvable"}, status=status.HTTP_404_NOT_FOUND)
 
-            messages.success(request, "Permission modifiée.")
-            return redirect("authentication:permissions")
+    def put(self, request, permission_id):
+        try:
+            permission = Permission.objects.get(pk=permission_id)
+            serializer = PermissionSerializer(permission, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Permission.DoesNotExist:
+            return Response({"error": "Permission introuvable"}, status=status.HTTP_404_NOT_FOUND)
 
-        else:
-            context = {'form': form, 'ErrorMessage': "Formulaire invalid soumit.", 'permission_id': permission_id, 'segment': 'administration', 'taux': devises}
-            return render(request, "accounts/edit-permission.html", context)
-
-
-    return render(request, "accounts/edit-permission.html", context_empty)
-
-
-@login_required(login_url="/login/")
-def delete_permission_view(request, permission_id):
-    
-    try:
-        permission = Permission.objects.get(pk=permission_id)
-        permission.delete()
-
-        messages.success(request, "Permission supprimée.")
-        return redirect("authentication:permissions")
-    except Permission.DoesNotExist:
-        messages.error(request, "Permission inexistante.")
-        return redirect("authentication:permissions")
+    def delete(self, request, permission_id):
+        try:
+            permission = Permission.objects.get(pk=permission_id)
+            permission.delete()
+            return Response({"message": "Permission supprimée"}, status=status.HTTP_204_NO_CONTENT)
+        except Permission.DoesNotExist:
+            return Response({"error": "Permission introuvable"}, status=status.HTTP_404_NOT_FOUND)

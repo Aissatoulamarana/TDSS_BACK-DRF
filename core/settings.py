@@ -6,6 +6,8 @@ Copyright (c) 2022 - OD
 import os
 import decouple
 from pathlib import Path
+from datetime import timedelta
+
 
 from django.contrib.messages import constants as messages
 
@@ -23,11 +25,13 @@ SECRET_KEY = decouple.config(
 DEBUG = decouple.config("DEBUG", default=True, cast=bool)
 
 # load production server from .env
-ALLOWED_HOSTS = decouple.config(
-    "ALLOWED_HOSTS", cast=decouple.Csv(), default="localhost"
-)
+ALLOWED_HOSTS = ['*']
 
-CSRF_TRUSTED_ORIGINS = decouple.config("CSRF_TRUSTED_ORIGINS", cast=decouple.Csv(), default='http://localhost')
+# ALLOWED_HOSTS = decouple.config(
+#     "ALLOWED_HOSTS", cast=decouple.Csv(), default="127.0.0.1"
+# )
+
+CSRF_TRUSTED_ORIGINS = decouple.config("CSRF_TRUSTED_ORIGINS", cast=decouple.Csv(), default='http://localhost:3033')
 
 
 # Application definition
@@ -40,10 +44,15 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "apps.authentication",  # Enable the authentication app
+    # "apps.administration",
     "apps.home",  # Enable the inner home (home)
     "apps.paiement",
+    "corsheaders",
     "rest_framework",
     "rest_framework_api_key",
+    'rest_framework.authtoken',
+    'djoser',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 MIDDLEWARE = [
@@ -55,6 +64,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -154,10 +165,59 @@ STATICFILES_DIRS = (
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Authentication purpose
-AUTH_USER_MODEL = "authentication.CustomUser"
+AUTH_USER_MODEL = 'authentication.CustomUser'
+
+
+#Allowed frontend
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3033",  # Adresse du frontend Next.js
+    "http://192.168.137.1:3033",
+    "http://127.0.0.1:3033",
+    
+]
+
 
 # Allowing non active users to try to log in.
 AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.AllowAllUsersModelBackend"]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        "rest_framework.authentication.SessionAuthentication",
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',  # Bloque les endpoints sans token
+    ),
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),  # Durée du token d'accès
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # Durée du refresh token
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'BLACKLIST_AFTER_ROTATION': True,  # Active la blacklist des refresh tokens après déconnexion
+}
+
+DJOSER = {
+    'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
+    "ACTIVATION_URL": "#/activate/{uid}/{token}",
+    'SEND_ACTIVATION_EMAIL': True,
+    'PASSWORD_RESET_CONFIRM_RETYPE': True,
+    'LOGIN_FIELD': "email",
+    'USERNAME_FIELD': "email",  # Désactive l'activation d'email (on le gère nous-mêmes)
+    'SERIALIZERS': {
+        'user_create': 'apps.authentication.serializers.CustomUserSerializer',
+        'user': 'apps.authentication.serializers.CustomUserSerializer',
+        'current_user': 'apps.authentication.serializers.CustomUserSerializer',
+
+    },
+    'SITE_NAME': "Declaration web site",
+    'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True,
+    'PERMISSIONS': {
+        'user_list': ['rest_framework.permissions.IsAuthenticated'],  # Tous les utilisateurs connectés peuvent voir la liste
+    }
+}
+
 
 # Settings for email configuration
 
@@ -165,7 +225,7 @@ EMAIL_BACKEND = decouple.config(
     "EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend"
 )
 EMAIL_USE_TLS = decouple.config("EMAIL_USE_TLS", default=False, cast=bool)
-EMAIL_HOST = decouple.config("EMAIL_HOST")
+EMAIL_HOST = decouple.config("EMAIL_HOST", default='mail.tdss.com.gn')
 EMAIL_PORT = int(decouple.config("EMAIL_PORT", default=1025))
 EMAIL_HOST_USER = decouple.config("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = decouple.config("EMAIL_HOST_PASSWORD", default="mypassword")

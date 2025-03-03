@@ -55,9 +55,17 @@ class Job(models.Model):
         max_length=30, choices=[("ON", "Actif"), ("OFF", "Inactif")], default="ON"
     )
     comment = models.TextField(max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
+    
+    def get_person_count(self):
+        """
+        Retourne le nombre de personnes associées à cette fonction.
+        """
+        return self.employee_jobs.count()  # Utilise le related_name défini dans Employee
+
 
 
 class Country(models.Model):
@@ -70,11 +78,11 @@ class Country(models.Model):
 
 
 class Declaration(models.Model):
-    UNSUBMITTED = "unsubmitted"
-    SUBMITTED = "submitted"
-    REJECTED = "rejected"
-    VALIDATED = "validated"
-    BILLED = "billed"
+    UNSUBMITTED = "non soumise"
+    SUBMITTED = "soumise"
+    REJECTED = "rejetée"
+    VALIDATED = "validée"
+    BILLED = "facturée"
     status_choices = [
         (UNSUBMITTED, "Non soumise"),
         (SUBMITTED, "Soumise"),

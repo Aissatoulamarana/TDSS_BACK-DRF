@@ -14,7 +14,14 @@ from django.template import loader
 from django.urls import reverse
 from django.db import transaction
 from django.db.models import Count
-
+from django.shortcuts import get_object_or_404
+from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework import generics
+from rest_framework import status
+from .serializers import DeclarationDetailSerializer, DeclarationEditSerializer, DeclarationSerializer, FactureSerializer, JobCategorySerializer, JobSerializer, PayerSerializer, PaymentSerializer
+from .permissions import IsAdminOrCanViewAll, IsClientOrAgent
 from apps.paiement.models import (
     Devise,
     Facture,
@@ -41,103 +48,329 @@ from .forms import (
 # Global devises for all views
 devises = Devise.objects.all().order_by("id")
 
+@api_view(['GET'])
+def job_category_list(request):
+    job_categories = JobCategory.objects.all()
+    serializer = JobCategorySerializer(job_categories, many=True)
+    return Response(serializer.data)
 
-@login_required(login_url="/login/")
-def payments_view(request):
-    if (
-        request.user.profile.type.code == ProfileType.ADMIN
-        or request.user.type.code == UserType.TDSS
-    ):
-        payments = Payment.objects.all().order_by("created_on")
-    elif request.user.type.code == UserType.AGENT:
-        payments = Payment.objects.filter(created_by=request.user).order_by(
-            "created_on"
+# api pour ajouter et recuperer la liste des fonctions
+@api_view(["GET", "POST"])
+def job_list(request):
+    """
+    - `GET` : Récupère toutes les fonctions avec le nombre de personnes.
+    - `POST` : Ajoute une nouvelle fonction.
+    """
+    if request.method == "GET":
+        jobs = Job.objects.all()
+        serializer = JobSerializer(jobs, many=True)
+        return Response(serializer.data)
+
+    elif request.method == "POST":
+        serializer = JobSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["PUT", "PATCH", "DELETE"])
+def job_update(request, job_id):
+    """
+    - `PUT` : Met à jour entièrement un job.
+    - `PATCH` : Met à jour partiellement un job.
+    - `DELETE` : Supprime un job.
+    """
+    try:
+        job = Job.objects.get(id=job_id)
+    except Job.DoesNotExist:
+        return Response({'error': 'Job non trouvé'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method in ["PUT", "PATCH"]:
+        serializer = JobSerializer(job, data=request.data, partial=(request.method == "PATCH"))
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == "DELETE":
+        job.delete()
+        return Response({"message": "Job supprimé avec succès"}, status=status.HTTP_204_NO_CONTENT)
+@api_view([ 'POST'])
+def declaration_create(request):
+    if request.method == 'POST':
+        serializer = DeclarationSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#api pour voir la liste des declarations 
+@api_view(['GET'])
+@permission_classes([ IsAdminOrCanViewAll])
+def declaration_list(request):
+    # Check user role
+    if request.user.is_superuser or request.user.profile.type.code == 'ADMIN' or request.user.type.code == 'TDSS':
+        declarations = (
+            Declaration.objects.prefetch_related("employees")
+            .annotate(nb_employees=Count("declarationemployee"))
+            .all()
+            .order_by("created_on")
+        )
+    elif request.user.type.code == 'AGUIPE':
+        declarations = (
+            Declaration.objects.prefetch_related("employees")
+            .annotate(nb_employees=Count("declarationemployee"))
+            .filter(status="submitted")
+            .order_by("created_on")
+        )
+    elif request.user.type.code == 'AGENT':
+        declarations = (
+            Declaration.objects.prefetch_related("employees")
+            .annotate(nb_employees=Count("declarationemployee"))
+            .filter(created_by=request.user)
+            .order_by("created_on")
         )
     else:
-        payments = Payment.objects.filter(
-            created_by__profile=request.user.profile
-        ).order_by("created_on")
-    form = PaymentForm()
-    payerform = PayerForm()
+        declarations = (
+            Declaration.objects.prefetch_related("employees")
+            .annotate(nb_employees=Count("declarationemployee"))
+            .filter(created_by__profile=request.user.profile)
+            .order_by("created_on")
+        )
+    
+    # Serialize the querysets
+    serializer = DeclarationSerializer(declarations, many=True)
 
-    return render(
-        request,
-        "paiements/payments.html",
-        {
-            #  To edit
-            "form": form,
-            "payerform": payerform,
-            "payments": payments,
-            "taux": devises,
-            "segment": "paiements",
-        },
+    # Return serialized data as JSON response
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+#api pour modifier les informations d'une declaration 
+@api_view(["PUT"])
+def edit_declaration_api(request, declaration_id):
+    try:
+        #  Récupérer la déclaration existante
+        declaration = get_object_or_404(Declaration, pk=declaration_id)
+
+        #  Envoyer les données au serializer pour mise à jour
+        serializer = DeclarationEditSerializer(declaration, data=request.data, partial=True, context={'request': request})
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+#api pour voir si le numero de passeport existe 
+@api_view(['GET'])
+def check_passport(request):
+    """
+    Vérifie si un numéro de passeport existe.
+    Exemples d'URL :
+      - /api/check-passport/?numero=A123456
+    """
+    passport = request.query_params.get('numero')
+    if not passport:
+        return Response(
+            {"detail": "Le paramètre 'passport' est requis."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    exists = Employee.objects.filter(passport_number=passport).exists()
+    return Response({"exists": exists}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])  # Désactive temporairement l'authentification
+def declaration_detail(request, pk):
+    print("Utilisateur authentifié :", request.user)  # Voir si ça s'affiche maintenant
+    try:
+        declaration = Declaration.objects.get(pk=pk)
+    except Declaration.DoesNotExist:
+        return Response({"error": "Declaration not found."}, status=404)
+
+    serializer = DeclarationDetailSerializer(declaration)
+    return Response(serializer.data)
+
+@api_view(['POST'])
+def declaration_status_update(request, pk):
+    """
+    Vue pour valider ou rejeter une déclaration.
+    """
+    declaration = get_object_or_404(Declaration, pk=pk)
+    action = request.data.get("action")
+
+    if action == "validate":
+        declaration.status = Declaration.VALIDATED
+        declaration.reject_reason = ""  # Effacer le motif de rejet si présent
+    elif action == "reject":
+        reject_reason = request.data.get("reject_reason")
+        if not reject_reason:
+            return Response(
+                {"error": "Le motif de rejet est requis pour rejeter une déclaration."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        declaration.status = Declaration.REJECTED
+        declaration.reject_reason = reject_reason
+    else:
+        return Response(
+            {"error": "Action invalide. Utilisez 'validate' ou 'reject'."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    declaration.save()
+    serializer = DeclarationDetailSerializer(declaration)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def facturer_declaration_api(request, declaration_id):
+    # Récupérer la déclaration ou renvoyer une 404
+    declaration = get_object_or_404(Declaration, pk=declaration_id)
+    
+    # Récupérer les catégories de métiers
+    cadres = get_object_or_404(JobCategory, pk=1)
+    agents = get_object_or_404(JobCategory, pk=2)
+    ouvriers = get_object_or_404(JobCategory, pk=3)
+    
+    # Pour le test : si le profil du client est null, utiliser request.user.profile ou un profil de secours
+    client_profile = getattr(declaration.created_by, 'profile', None)
+    if client_profile is None:
+        client_profile = getattr(request.user, 'profile', None)
+        if client_profile is None:
+            # Optionnel : récupère le premier profil disponible dans la base (à ne pas utiliser en prod)
+            client_profile = Profile.objects.first()
+    
+    # Création d'une instance de facture
+    facture = Facture(
+        declaration_ref=declaration,
+        client=client_profile,
+        total_cadres=declaration.employees.filter(job_category=cadres).count(),
+        total_agents=declaration.employees.filter(job_category=agents).count(),
+        total_ouvriers=declaration.employees.filter(job_category=ouvriers).count(),
+        amount=0,  # Valeur temporaire
+        devise=cadres.permit.devise,
+        created_by=request.user
     )
+    
+    # Calcul du montant total
+    facture.amount = (
+        (facture.total_cadres * cadres.permit.price) +
+        (facture.total_agents * agents.permit.price) +
+        (facture.total_ouvriers * ouvriers.permit.price)
+    )
+    
+    facture.save()
+    
+    declaration.status = "Facturée"
+    declaration.save()
+    
+    serializer = FactureSerializer(facture)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+@api_view(['GET'])
+@permission_classes([ IsAdminOrCanViewAll])
+def factures_view_api(request):
+    if (
+        request.user.is_superuser  # Vérification si l'utilisateur est un super utilisateur
+        or request.user.profile.type.code == 'ADMIN'
+        or request.user.type.code == 'TDSS'
+    ):
+        factures = Facture.objects.select_related("client", "declaration_ref").all().order_by("created_on")
+    elif request.user.type.code == 'AGENT':
+        factures = Facture.objects.select_related("client", "declaration_ref").filter(status="unpaid").order_by("created_on")
+    else:
+        factures = Facture.objects.select_related("client", "declaration_ref").filter(created_by__profile=request.user.profile).order_by("created_on")
+    
+    serializer = FactureSerializer(factures, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def facture_detail(request, pk):
+    try:
+        facture = Facture.objects.get(pk=pk)
+    except Facture.DoesNotExist:
+        return Response({"error": "Facture not found."}, status=404)
+
+    serializer = FactureSerializer(facture)
+    return Response(serializer.data)
 
 
-@login_required(login_url="/login/")
-def generate_payment_view(request):
-    context_empty = {"taux": devises, "segment": "paiements"}
+@api_view(['GET'])
+@permission_classes([ IsAdminOrCanViewAll])
+def list_paiements(self, request):
+        """Récupère la liste des paiements en fonction du rôle de l'utilisateur."""
+        user = request.user
 
-    if request.method == "POST" and "facture_ref" in request.POST:
-        facture_ref = request.POST["facture_ref"]
-        # print(facture_ref)
+        # Filtrage des paiements selon le rôle
+        if (
+        request.user.is_superuser  # Vérification si l'utilisateur est un super utilisateur
+        or request.user.profile.type.code == 'ADMIN'
+        or request.user.type.code == 'TDSS'
+    ):
+            payments = Payment.objects.all().order_by("created_on")
+        elif user.type.code == UserType.AGENT:
+            payments = Payment.objects.filter(created_by=user).order_by("created_on")
+        else:
+            payments = Payment.objects.filter(created_by__profile=user.profile).order_by("created_on")
 
-        try:
-            facture = Facture.objects.get(reference=UUID(facture_ref).hex)
+        # Sérialiser les données et les retourner
+        serializer = PaymentSerializer(payments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-            default_devise = Devise.objects.first()
-            initial_value = {"devise": default_devise}
-            context_empty = {
-                "paymentform": PaymentForm(prefix="payment", initial=initial_value),
-                "payerform": PayerForm(prefix="payer"),
-                "facture": facture,
-                "taux": devises,
-                "segment": "paiements",
-            }
-            return render(request, "paiements/generate-payment.html", context_empty)
-        except ValueError:
-            messages.error(request, "Cette référence n'est pas valide.")
-            return redirect("paiement:payments")
-        except Facture.DoesNotExist:
-            messages.error(request, "Cette facture n'existe pas.")
-            return redirect("paiement:payments")
-    elif request.method == "POST" and "generate-form-submit" in request.POST:
-        bill = request.POST.get("facture")
-        facture = Facture.objects.get(reference=UUID(bill).hex)
-        # print(facture.reference)
-        paymentform = PaymentForm(request.POST, prefix="payment")
-        payerform = PayerForm(request.POST, prefix="payer")
-        # paymentform.fields["type"].required = False
-        if paymentform.is_valid() and payerform.is_valid():
-            # print("Valid forms submitted!")
-            new_payer = payerform.save(commit=False)
-            new_payer.employer = facture.client
-            new_payer.save()
-            # print("Payer created!")
-            new_payment = paymentform.save(commit=False)
-            new_payment.facture_ref = facture
-            new_payment.payer = new_payer
-            new_payment.created_by = request.user
-            new_payment.save()
-            # print("Payment created!")
+@api_view(['POST'])
+def paid_facture(request, facture_id):
+    """
+    API pour marquer une facture comme payée.
+    """
+    try:
+        # Récupérer la facture à partir de l'ID
+        facture = get_object_or_404(Facture, id=facture_id)
+
+        # Vérifier que la facture n'est pas déjà payée
+        if facture.status == "paid":
+            return Response({
+                "error": "Cette facture a déjà été payée."
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Formulaire de paiement et de payeur
+        payment_data = request.data.get('payment', {})
+        payer_data = request.data.get('payer', {})
+
+        # Sérialisation des données
+        payer_serializer = PayerSerializer(data=payer_data)
+        payment_serializer = PaymentSerializer(data=payment_data)
+
+        if payer_serializer.is_valid() and payment_serializer.is_valid():
+            # Sauvegarder les données payeur et paiement
+            new_payer = payer_serializer.save(employer=facture.client)
+            new_payment = payment_serializer.save(
+                facture_ref=facture, 
+                payer=new_payer,
+                created_by=request.user
+            )
+
+            # Mise à jour du statut de la facture
             facture.status = "paid"
             facture.save()
 
-            messages.success(request, "Nouveau paiement ajouté.")
-            return redirect("paiement:payments")
-        else:
-            context = {
-                "paymentform": paymentform,
-                "payerform": payerform,
-                "facture": facture,
-                "ErrorMessage": "Formulaire invalid soumit",
-                "taux": devises,
-                "segment": "paiements",
-            }
-            return render(request, "paiements/generate-payment.html", context)
+            return Response({
+                "message": "Paiement généré avec succès.",
+                "payment": payment_serializer.data,
+                "payer": payer_serializer.data,
+            }, status=status.HTTP_201_CREATED)
 
-    # return redirect("paiement:payments")
+        return Response({
+            "error": "Les formulaires sont invalides.",
+            "payment_errors": payment_serializer.errors,
+            "payer_errors": payer_serializer.errors,
+        }, status=status.HTTP_400_BAD_REQUEST)
 
+    except Facture.DoesNotExist:
+        return Response({
+            "error": "Facture non trouvée."
+        }, status=status.HTTP_404_NOT_FOUND)
 
 @login_required(login_url="/login/")
 def add_payment_view(request):
@@ -184,45 +417,6 @@ def add_payment_view(request):
     return render(request, "paiements/add-payment.html", context_empty)
 
 
-@login_required(login_url="/login/")
-def edit_payment_view(request, payment_id):
-    payment = Payment.objects.get(pk=payment_id)
-    payer = Payer.objects.get(pk=payment.payer.id)
-    context_empty = {
-        "paymentform": PaymentForm(instance=payment, prefix="payment"),
-        "payerform": PayerForm(instance=payer, prefix="payer"),
-        "payment_id": payment_id,
-        "taux": devises,
-        "segment": "paiements",
-    }
-
-    if request.method == "POST":
-
-        paymentform = PaymentForm(request.POST, instance=payment, prefix="payment")
-        payerform = PayerForm(request.POST, instance=payer, prefix="payer")
-        if paymentform.is_valid() and payerform.is_valid():
-
-            # print("Update form submited !")
-            payer_updated = payerform.save()
-            payer_updated.save()
-            payment_updated = paymentform.save(commit=False)
-            payment_updated.payer = payer_updated
-            payment_updated.save()
-
-            messages.success(request, "Payment modifié avec succès.")
-            return redirect("paiement:payments")
-        else:
-            context = {
-                "paymentform": PaymentForm(instance=payment, prefix="payment"),
-                "payerform": PayerForm(instance=payer, prefix="payer"),
-                "ErrorMessage": "Formulaire invalid soumit.",
-                "payment_id": payment_id,
-                "taux": devises,
-                "segment": "paiements",
-            }
-            return render(request, "paiements/edit-payment.html", context)
-
-    return render(request, "paiements/edit-payment.html", context_empty)
 
 
 @login_required(login_url="/login/")
@@ -311,247 +505,6 @@ def get_devise(request, devise_id):
         return JsonResponse({"error": "Erreur requête. Contactez l'admin."})
 
 
-@login_required(login_url="/login/")
-def declarations_view(request):
-    if (
-        request.user.profile.type.code == ProfileType.ADMIN
-        or request.user.type.code == UserType.TDSS
-    ):
-        declarations = (
-            Declaration.objects.prefetch_related("employees")
-            .annotate(nb_employees=Count("declarationemployee"))
-            .all()
-            .order_by("created_on")
-        )
-    elif request.user.type.code == UserType.AGUIPE:
-        declarations = (
-            Declaration.objects.prefetch_related("employees")
-            .annotate(nb_employees=Count("declarationemployee"))
-            .filter(status="submitted")
-            .order_by("created_on")
-        )
-    elif request.user.type.code == UserType.AGENT:
-        declarations = (
-            Declaration.objects.prefetch_related("employees")
-            .annotate(nb_employees=Count("declarationemployee"))
-            .filter(created_by=request.user)
-            .order_by("created_on")
-        )
-    else:
-        declarations = (
-            Declaration.objects.prefetch_related("employees")
-            .annotate(nb_employees=Count("declarationemployee"))
-            .filter(created_by__profile=request.user.profile)
-            .order_by("created_on")
-        )
-    form = DeclarationForm()
-    return render(
-        request,
-        "paiements/declarations.html",
-        {
-            "declarationform": form,
-            "declarations": declarations,
-            "taux": devises,
-            "segment": "facturation",
-            "can_add": [UserType.ADMIN, UserType.AGENT, UserType.AGUIPE, UserType.TDSS],
-            "can_export": [
-                UserType.ADMIN,
-                UserType.AGENT,
-                UserType.MINISTRY,
-                UserType.AGUIPE,
-            ],
-        },
-    )
-
-
-@login_required(login_url="/login/")
-def add_declaration_view(request):
-    context_empty = {
-        "declarationform": DeclarationForm(),
-        "declarations": Declaration.objects.all(),
-        "taux": devises,
-        "segment": "facturation",
-    }
-
-    if request.method == "POST":
-
-        declarationform = DeclarationForm(request.POST)
-
-        if declarationform.is_valid():
-            # print("Valid forms submitted!")
-
-            new_declaration = declarationform.save(commit=False)
-
-            new_declaration.created_by = request.user
-
-            new_declaration.save()
-
-            messages.success(request, "Nouvelle déclaration ajoutée.")
-            return redirect("paiement:declarations")
-        else:
-            context = {
-                "declarationform": declarationform,
-                "ErrorMessage": "Formulaire invalid soumit",
-                "taux": devises,
-                "segment": "Facturation",
-            }
-            return render(request, "paiements/declarations.html", context)
-
-    return render(request, "paiements/declarations.html", context_empty)
-
-
-@login_required(login_url="/login/")
-def edit_declaration_view(request, declaration_id):
-    try:
-        declaration = Declaration.objects.get(
-            pk=declaration_id, created_by=request.user
-        )
-    except Declaration.DoesNotExist:
-        messages.error(request, "Déclaration inexistante.")
-        return redirect("paiement:declarations")
-    employees = Employee.objects.filter(declarationemployee__declaration=declaration)
-    list_edit_forms = []
-    for employee in employees:
-        t = (employee, EmployeeForm(instance=employee))
-        list_edit_forms.append(t)
-    context_empty = {
-        "declarationform": DeclarationForm(instance=declaration, prefix="declaration"),
-        "employeeform": EmployeeForm(prefix="employee"),
-        "declaration_id": declaration_id,
-        "employees": employees,
-        "employees_edit_forms": list_edit_forms,
-        "taux": devises,
-        "segment": "facturation",
-        "employeerenew": EmployeeRenewForm(),
-    }
-
-    if request.method == "POST" and "declaration-form-submit" in request.POST:
-        declarationform = DeclarationForm(
-            request.POST, instance=declaration, prefix="declaration"
-        )
-        if declarationform.is_valid():
-            # print("Update form submited !")
-            declaration_updated = declarationform.save()
-            declaration_updated.save()
-            messages.success(request, "Déclaration modifiée.")
-            return redirect("paiement:declarations")
-        else:
-            context = {
-                "declarationform": declarationform,
-                "employeeform": EmployeeForm(prefix="employee"),
-                "declaration_id": declaration_id,
-                "employees": employees,
-                "segment": "facturation",
-                "taux": devises,
-                "ErrorMessage": "Formulaire invalid soumit.",
-            }
-            return render(request, "paiements/edit-declaration.html", context)
-
-    elif request.method == "POST" and "employee-form-submit" in request.POST:
-        # print("add employee form submitted")
-        employeeform = EmployeeForm(request.POST, prefix="employee")
-        if employeeform.is_valid():
-            new_employee = employeeform.save(commit=False)
-            new_employee.declaration = declaration
-
-            with transaction.atomic():
-
-                new_employee.save()
-                DeclarationEmployee.objects.create(
-                    declaration=declaration, employee=new_employee
-                )
-            messages.success(request, "Employé ajouté.")
-            return redirect("paiement:edit_declaration", declaration_id)
-        else:
-            print("Invalid form submitted")
-            context_empty["employeeform"] = employeeform
-            context_empty["ErrorMessage"] = "Formulaire invalid soumit."
-    elif request.method == "POST" and "delete-employee-form-submit" in request.POST:
-        employee_id = request.POST["employee-id"]
-        # print(f"Employee with id:{employee_id} is submitted for delete")
-        try:
-            employee = Employee.objects.get(pk=employee_id)
-            employee.delete()
-            messages.success(request, "Employé supprimé.")
-        except Employee.DoesNotExist:
-            messages.error(request, "Employé inexistant.")
-    return render(request, "paiements/edit-declaration.html", context_empty)
-
-
-@login_required(login_url="/login/")
-def employee_edit(request, declaration_id, employee_id):
-    try:
-        declaration = Declaration.objects.get(
-            pk=declaration_id, created_by=request.user
-        )
-        employee = Employee.objects.get(
-            pk=employee_id, declarationemployee__declaration=declaration
-        )
-        declarationEmployees_count = DeclarationEmployee.objects.filter(
-            employee=employee
-        ).count()
-        print(declarationEmployees_count)
-    except Declaration.DoesNotExist:
-        messages.error(request, "Déclaration inexistante.")
-        return redirect("paiement:declarations")
-    except Employee.DoesNotExist:
-        messages.error(request, "Employé inexistante.")
-        return redirect("paiement:edit_declaration", declaration.id)
-    if request.method == "POST":
-        employee_copy = copy.copy(
-            employee
-        )  # pour garder une copie non modifiée par le formulaire
-        form = EmployeeForm(instance=employee, data=request.POST)
-        if form.is_valid():
-            if (
-                declarationEmployees_count == 1
-            ):  # pour eviter que le nom d'un employé soit modifié lors d'un renouvelement
-                form.save()
-            else:
-                # les autres champs ont ete inserer par le modelform automatiquement
-                employee.first = employee_copy.first
-                employee.last = employee_copy.last
-                employee.passport_number = employee_copy.passport_number
-                employee.save()
-
-            messages.success(
-                request,
-                f"L'employé {form.cleaned_data.get('passport_number')} a été modifié avec succès",
-            )
-        else:
-            messages.error(request, "Une erreur est survenue veuillez réessayer")
-    return redirect("paiement:edit_declaration", declaration_id)
-
-
-@login_required(login_url="/login/")
-def employee_delete(request, declaration_id, employee_id):
-    try:
-        declaration = Declaration.objects.get(
-            pk=declaration_id, created_by=request.user
-        )
-        employee = Employee.objects.get(
-            pk=employee_id, declarationemployee__declaration=declaration
-        )
-        declarationEmployees = DeclarationEmployee.objects.filter(
-            employee=employee
-        ).order_by("-created_on")
-    except Declaration.DoesNotExist:
-        messages.error(request, "Déclaration inexistante.")
-        return redirect("paiement:declarations")
-    except Employee.DoesNotExist:
-        messages.error(request, "Employé inexistante.")
-        return redirect("paiement:edit_declaration", declaration.id)
-    if request.method == "POST":
-        de = declarationEmployees.filter(declaration=declaration).first()
-        if de is not None:
-            de.delete()
-        if (
-            declarationEmployees.count() == 0
-        ):  # si c'etait la premiere declaration apres le delete le count vaudra 0
-            employee.delete()
-        messages.success(request, "employé(e) supprimé(e) avec succès")
-        return redirect("paiement:edit_declaration", declaration_id)
-    # return HttpResponse('ok')
 
 
 @login_required(login_url="/login/")
@@ -587,137 +540,8 @@ def declaration_employee_renew(request, declaration_id):
     return redirect("paiement:edit_declaration", declaration_id)
 
 
-@login_required(login_url="/login/")
-def submit_declaration_view(request, declaration_id):
-
-    try:
-        declaration = Declaration.objects.get(pk=declaration_id)
-        declaration.status = "submitted"
-        declaration.save()
-        messages.success(request, "Déclaration soumise.")
-    except Declaration.DoesNotExist:
-        messages.error(request, "Déclaration inexistante.")
-
-    return redirect("paiement:declarations")
 
 
-@login_required(login_url="/login/")
-def reject_declaration_view(request, declaration_id):
-    reject_reason = request.POST["reject_reason"]
-    if not reject_reason:
-        messages.error(request, "Le motif de rejet est obligatoire.")
-    else:
-        # print(reject_reason)
-
-        try:
-            declaration = Declaration.objects.get(pk=declaration_id)
-            declaration.status = "rejected"
-            declaration.reject_reason = reject_reason
-            declaration.save()
-            messages.success(request, "Déclaration rejetée.")
-        except Declaration.DoesNotExist:
-            messages.error(request, "Déclaration inexistante.")
-
-    return redirect("paiement:declarations")
-
-
-@login_required(login_url="/login/")
-def validate_declaration_view(request, declaration_id):
-
-    try:
-        declaration = Declaration.objects.get(pk=declaration_id)
-        declaration.status = "validated"
-        declaration.save()
-        messages.success(request, "Déclaration validée.")
-    except Declaration.DoesNotExist:
-        messages.error(request, "Déclaration inexistante.")
-
-    return redirect("paiement:declarations")
-
-
-@login_required(login_url="/login/")
-def bill_declaration_view(request, declaration_id):
-    try:
-        declaration = Declaration.objects.get(pk=declaration_id)
-        # Getting job categories
-        cadres = JobCategory.objects.get(pk=1)
-        agents = JobCategory.objects.get(pk=2)
-        ouvriers = JobCategory.objects.get(pk=3)
-
-        new_bill = Facture()
-        new_bill.declaration_ref = declaration
-        new_bill.client = declaration.created_by.profile
-        new_bill.total_cadres = declaration.employees.filter(
-            job_category=cadres
-        ).count()
-        new_bill.total_agents = declaration.employees.filter(
-            job_category=agents
-        ).count()
-        new_bill.total_ouvriers = declaration.employees.filter(
-            job_category=ouvriers
-        ).count()
-
-        new_bill.amount = (
-            (new_bill.total_cadres * cadres.permit.price)
-            + (new_bill.total_agents * agents.permit.price)
-            + (new_bill.total_ouvriers * ouvriers.permit.price)
-        )
-
-        new_bill.devise = cadres.permit.devise
-        new_bill.created_by = request.user
-        # print(new_bill.client.name, new_bill.amount, new_bill.devise)
-
-        new_bill.save()
-
-        declaration.status = "billed"
-        declaration.save()
-
-        messages.success(request, "Déclaration facturée.")
-    except Declaration.DoesNotExist:
-        messages.error(request, "Déclaration inexistante.")
-
-    return redirect("paiement:declarations")
-
-
-@login_required(login_url="/login/")
-def factures_view(request):
-    if (
-        request.user.profile.type.code == ProfileType.ADMIN
-        or request.user.type.code == UserType.TDSS
-    ):
-        factures = (
-            Facture.objects.select_related("client", "declaration_ref")
-            .all()
-            .order_by("created_on")
-        )
-    elif request.user.type.code == UserType.AGENT:
-        factures = (
-            Facture.objects.select_related("client", "declaration_ref")
-            .filter(status="unpaid")
-            .order_by("created_on")
-        )
-    else:
-        factures = (
-            Facture.objects.select_related("client", "declaration_ref")
-            .filter(created_by__profile=request.user.profile)
-            .order_by("created_on")
-        )
-
-    job_categories = JobCategory.objects.all().order_by("id")
-    form = FactureForm()
-
-    return render(
-        request,
-        "paiements/factures.html",
-        {
-            #  To edit
-            "form": form,
-            "factures": factures,
-            "job_categories": job_categories,
-            "taux": devises,
-            "segment": "facturation",
-        },
-    )
 
 
 @login_required(login_url="/login/")

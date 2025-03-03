@@ -23,7 +23,7 @@ DEBUG = False
 SECURE_SSL_REDIRECT = False
 
 # load production server from .env
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '18.133.204.125', config('SERVER', default='127.0.0.1')]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '18.133.204.125', '127.0.0.1:8000', 'localhost:8000', config('SERVER', default='127.0.0.1')]
 
 # Application definition
 

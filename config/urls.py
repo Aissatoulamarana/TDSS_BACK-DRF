@@ -45,5 +45,6 @@ urlpatterns += [
     path("", include("apps.authentication.urls")), # Auth routes - login / register
     path("", include("apps.paiement.urls")),
     path("", include("apps.home.urls")),             # UI Kits Html files
-    path("api-auth/", include('rest_framework.urls')), # For API calls
+    # path("api-auth/", include('rest_framework.urls')), # For API calls
+    path('api/', include("paiement.api_urls")),
 ]

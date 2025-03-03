@@ -3,30 +3,43 @@
 Copyright (c) 2022 - OD
 """
 
-from django.urls import path
-from . import views
-from django.contrib.auth.views import LogoutView
+from django.urls import path, include
+from .views import (
+    AgencyDetailView, 
+    AgencyListView, 
+    add_agency_view,
+    
+    PermissionDetailView, 
+    PermissionListView, 
+    add_permission_view,
+    
+    ProfileDetailView, 
+    ProfileListView, 
+    add_profile_api,
+    
+    DeactivateUserView, 
+    LogoutView
+)
+
+
 
 app_name = 'authentication'
 
 urlpatterns = [
-    path('login/', views.login_view, name="login"),
-    path('reset_password/', views.reset_password_view, name="reset_password"),
-    path("logout/", LogoutView.as_view(), name="logout"),
-    path("users/", views.users_view, name="users"),
-    path("users/add/", views.add_user_view, name="add_user"),
-    path("users/<int:user_id>/edit", views.edit_user_view, name="edit_user"),
-    path("users/<int:user_id>/activate", views.activate_user_view, name="activate_user"),
-    path("users/<int:user_id>/deactivate", views.deactivate_user_view, name="deactivate_user"),
-    path('users/<int:user_id>/reinit_password', views.reinit_password_view, name="reinit_password"),
-    path("profiles/", views.profiles_view, name="profiles"),
-    path("profiles/add/", views.add_profile_view, name="add_profile"),
-    path("profiles/<uuid:profile_id>/edit", views.edit_profile_view, name="edit_profile"),
-    path("agencies/", views.agencies_view, name="agencies"),
-    path("agencies/add/", views.add_agency_view, name="add_agency"),
-    path("agencies/<int:agency_id>/edit", views.edit_agency_view, name="edit_agency"),
-    path("permissions/", views.permissions_view, name="permissions"),
-    path("permissions/add/", views.add_permission_view, name="add_permissions"),
-    path("permissions/<int:permission_id>/edit", views.edit_permission_view, name="edit_permission"),
-    path("permissions/<int:permission_id>/delete", views.delete_permission_view, name="delete_permission"),
+    path('auth/', include('djoser.urls')),
+    path('auth/', include('djoser.urls.jwt')),  # JWT Token endpoints
+    path("auth/jwt/logout/", LogoutView.as_view(), name="jwt-logout"),
+    path('api/deactivate_user/<int:user_id>/', DeactivateUserView.as_view(), name='deactivate_user'),
+
+    path('add-permission/', add_permission_view, name='add_permission'),
+    path('api/permissions/', PermissionListView.as_view(), name='permission_list'),
+    path('api/permissions/<int:permission_id>/', PermissionDetailView.as_view(), name='permission_detail'),
+
+    path('add-agency/', add_agency_view, name='add_agency'),
+    path('api/agencies/', AgencyListView.as_view(), name='agency_list'),
+    path('api/agencies/<int:agency_id>/', AgencyDetailView.as_view(), name='agency_detail'),
+
+    path('add-profile/', add_profile_api, name='add_profile_api'),
+    path('api/profiles/', ProfileListView.as_view(), name='profile_list'),
+    path('api/profiles/<int:profile_id>/', ProfileDetailView.as_view(), name='profile_detail'),
 ]

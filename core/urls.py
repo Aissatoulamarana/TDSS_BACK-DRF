@@ -16,17 +16,19 @@ from rest_framework import routers
 
 # define the router
 # router = routers.DefaultRouter()
-router = routers.SimpleRouter()
+#router = routers.SimpleRouter()
 
 # define the router path and viewset to be used
-router.register(r'tdss-api/get-declarations', apiviews.DeclarationViewSet)
+#router.register(r'tdss-api/get-declarations', apiviews.DeclarationViewSet)
+def home(request):
+    return HttpResponse("Hello, Django is running!")
 
 urlpatterns = [
     path('admin/', admin.site.urls),          # Django admin route
     path("", include("apps.authentication.urls")), # Auth routes - login / register
     path("", include("apps.paiement.urls")),
     path("", include("apps.home.urls")),             # UI Kits Html files
-    path("api-auth/", include('rest_framework.urls')), # For API calls
+   # path("api-auth/", include('rest_framework.urls')), # For API calls
 ] + router.urls
 
 if settings.DEBUG:
